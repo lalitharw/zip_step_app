@@ -13,7 +13,7 @@ type AuthContextType = {
     user: User | null;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<void>
-    register: (email: string, password: string) => Promise<void>
+    register: (email: string, password: string,name:string) => Promise<void>
     logout: () => Promise<void>
 }
 
@@ -31,17 +31,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
     async function login(email: string, password: string) {
-        const { data } = await api.post("/auth/login", { email, password })
-        await SecureStore.setItemAsync("auth_token", data.token)
-        setUser(data.user)
+        try {
+            
+            const { data } = await api.post("/auth/login", { email, password })
+            console.log(data)
+            await SecureStore.setItemAsync("auth_token", data.data.token)
+            setUser(data.data.user)
+        }
+        catch (err) {
+            console.log(err)
+        }
     }
 
-    async function register(email: string, password: string) {
+    async function register(email: string, password: string, name: string) {
         const { data } = await api.post("/auth/register", {
-            email, password, password_confirmation: password
+            email, password, password_confirmation: password, name
         })
-        await SecureStore.setItemAsync("auth_token", data.token)
-        setUser(data.user)
+        await SecureStore.setItemAsync("auth_token", data.data.token)
+        setUser(data.data.user)
     }
 
     async function logout() {

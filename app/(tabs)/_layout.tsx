@@ -1,11 +1,13 @@
+import { useAuth } from "@/context/AuthContext"
 import { Redirect, Tabs } from "expo-router"
-import { useState } from "react"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 
 export default function TabLayout() {
-    const [user, setUser] = useState(false)
+    const { user, isLoading } = useAuth()
 
-    if (user) {
+    if (isLoading) return null
+
+    if (!user) {
         return <Redirect href={"/(auth)/login"} />
     }
     return (
@@ -14,7 +16,10 @@ export default function TabLayout() {
                 <Tabs.Screen name="index" options={{
                     title: "Home"
                 }} />
-                <Tabs.Screen name="profile" />
+                <Tabs.Screen name="history" />
+                <Tabs.Screen name="profile" options={{
+                    title:"You"
+                }} />
             </Tabs>
         </SafeAreaProvider>
     )

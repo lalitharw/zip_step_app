@@ -1,6 +1,10 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "types": [
+      "@hugeicons/core-free-icons",
+      "@hugeicons/react-native"
+    ],
     "strict": true,
     "paths": {
       "@/*": [
