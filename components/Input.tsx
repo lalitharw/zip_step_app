@@ -1,4 +1,4 @@
-import { Input, Label } from "tamagui";
+import { Input, Label, View } from "tamagui";
 
 type Props = {
     name?: string;
@@ -10,9 +10,9 @@ type Props = {
 
 export default function InputComponent({ name, placeholder, value, setValue, extraOptions }: Props) {
     return (
-        <>
+        <View>
             {name && <Label color={"#edede9"}>{name}</Label>}
             <Input value={value} color={"#edede967"} onChangeText={setValue} width={"100%"} backgroundColor={"transparent"} placeholderTextColor="#edede967" placeholder={placeholder} size={"$4"} borderWidth={0.10} {...extraOptions} />
-        </>
+        </View>
     )
 }

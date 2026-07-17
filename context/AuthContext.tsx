@@ -13,8 +13,9 @@ type AuthContextType = {
     user: User | null;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<void>
-    register: (email: string, password: string,name:string) => Promise<void>
-    logout: () => Promise<void>
+    register: (email: string, password: string, name: string) => Promise<void>
+    logout: () => Promise<void>,
+    updateProfile: (name: string) => Promise<void>
 }
 
 
@@ -32,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function login(email: string, password: string) {
         try {
-            
+
             const { data } = await api.post("/auth/login", { email, password })
             console.log(data)
             await SecureStore.setItemAsync("auth_token", data.data.token)
@@ -62,6 +63,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
+    async function updateProfile(name: string) {
+        const { data } = await api.post("/users", {
+            name
+        })
+
+        if (data && data.data.user) {
+            setUser(data.data.user)
+        }
+
+    }
+
     async function getUserData() {
         try {
             const token = await SecureStore.getItemAsync("auth_token")
@@ -81,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
     return (
-        <AuthContext.Provider value={{ user, isLoading, register, login, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, register, login, logout, updateProfile }}>
             {children}
         </AuthContext.Provider>
     )

@@ -48,7 +48,7 @@ export default function Profile() {
                             <Avatar.Fallback bg="$blue10" />
                         </Avatar>
                         <Text fontSize={20} fontWeight={500} color={"white"}>{user?.name}</Text>
-                        <Button  borderRadius={"$10"} paddingHorizontal={30}><HugeiconsIcon icon={Edit04Icon} />Edit Profile</Button>
+                        <Button onPress={() => router.push("/editProfile")} borderRadius={"$10"} paddingHorizontal={30}><HugeiconsIcon icon={Edit04Icon} />Edit Profile</Button>
                         <Separator my={14} borderColor={'#22221ffd'} width={"100%"} borderWidth={.5} />
                         <Button onPress={handleLogout} borderRadius={"$10"} width={"100%"} paddingHorizontal={30}><HugeiconsIcon icon={Logout01Icon} />
                             {isLoading ? <Spinner size="small" color="$green10" /> : "Sign Out"}

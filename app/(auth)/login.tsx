@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { router } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
-import { Button, H4, Spinner, Text, View, XStack, YStack } from "tamagui";
+import { Button, H4, Spinner, Text, XStack, YStack } from "tamagui";
 
 export default function Login() {
     const { login } = useAuth();
@@ -53,29 +53,25 @@ export default function Login() {
                         </YStack>
 
                         <YStack gap="$2">
-                            <View>
-                                <InputComponent
-                                    name="Email Address*"
-                                    value={email}
-                                    setValue={setEmail}
-                                    placeholder="example@gmail.com"
-                                    extraOptions={{
-                                        keyboardType: "email-address",
-                                    }}
-                                />
-                            </View>
+                            <InputComponent
+                                name="Email Address*"
+                                value={email}
+                                setValue={setEmail}
+                                placeholder="example@gmail.com"
+                                extraOptions={{
+                                    keyboardType: "email-address",
+                                }}
+                            />
 
-                            <View>
-                                <InputComponent
-                                    name="Password*"
-                                    value={password}
-                                    setValue={setPassword}
-                                    placeholder="••••••••"
-                                    extraOptions={{
-                                        secureTextEntry: true,
-                                    }}
-                                />
-                            </View>
+                            <InputComponent
+                                name="Password*"
+                                value={password}
+                                setValue={setPassword}
+                                placeholder="••••••••"
+                                extraOptions={{
+                                    secureTextEntry: true,
+                                }}
+                            />
                         </YStack>
 
                         <XStack justifyContent="flex-end" width="100%">
