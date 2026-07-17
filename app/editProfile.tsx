@@ -1,8 +1,8 @@
+import { AlertDialog } from "@/components/AlertDialog";
 import GradientBackground from "@/components/GradientBackground";
 import InputComponent from "@/components/Input";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
-import { Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Avatar, Button, Spinner, XStack, YStack } from "tamagui";
 
@@ -14,15 +14,24 @@ export default function editProfile() {
 
     const handleProfileUpdate = async () => {
         if (!username) {
-            Alert.alert("Empty Field", "Name field cannot be empty!")
+            AlertDialog({ title: "Error", description: "Name Field is required", type: "error" })
             return
         }
         try {
             setIsLoading(true)
             await updateProfile(username)
+            AlertDialog({
+                title: "Success",
+                description: "Profile Updated Successfully",
+                type: "success"
+            })
         }
         catch (error) {
-            console.log(error)
+            AlertDialog({
+                title: "Something went wrong",
+                description: "Please try again later!",
+                type: "error"
+            })
         }
         finally {
             setIsLoading(false)

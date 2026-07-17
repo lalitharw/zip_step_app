@@ -3,7 +3,9 @@ import tamaguiConfig from "@/tamagui.config";
 import '@tamagui/native/setup-expo-linear-gradient';
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toast from 'react-native-toast-message';
 import { TamaguiProvider } from "tamagui";
+
 
 export default function RootLayout() {
   return (
@@ -15,6 +17,7 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="(tabs)" />
           </Stack>
+          <Toast />
         </AuthProvider>
       </TamaguiProvider>
     </SafeAreaProvider>
