@@ -18,7 +18,7 @@ export default function Profile() {
             setIsLoading(true)
         }
         catch (err) {
-
+            
         }
         finally {
             setIsLoading(false)
