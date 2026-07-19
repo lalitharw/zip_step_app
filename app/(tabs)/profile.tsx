@@ -10,6 +10,7 @@ import { Avatar, Button, Separator, Spinner, Text, YStack } from "tamagui";
 
 export default function Profile() {
     const { user, logout } = useAuth();
+    
     const [isLoading, setIsLoading] = useState(false)
 
     const handleLogout = async () => {
@@ -18,7 +19,7 @@ export default function Profile() {
             setIsLoading(true)
         }
         catch (err) {
-            
+
         }
         finally {
             setIsLoading(false)
