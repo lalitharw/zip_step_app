@@ -20,8 +20,6 @@ import ResumeModal from "./modals/resumeModal";
 
 export default function MapBox() {
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
-
-
     const isRecording = useLocationStore(
         (state) => state.isRecording
     );
