@@ -1,3 +1,4 @@
+import { startActivity, stopActivity } from "@/services/api/LocationApi";
 import { requestLocationPermission, startLocationTracking, stopLocationTracking } from "@/services/location";
 import { useState } from "react";
 import { Button, View } from "tamagui";
@@ -10,12 +11,18 @@ export default function MapBox() {
     const handleStartTracking = async () => {
         try {
             await requestLocationPermission()
+            const activityStarted = await startActivity()
+            if (!activityStarted) {
+                console.log("Activity Not Started")
+                return
+            }
 
             const start = await startLocationTracking();
 
             if (start) {
                 setIsRecording(true)
                 console.log("Recording started")
+
             }
         }
         catch (error) {
@@ -26,16 +33,21 @@ export default function MapBox() {
     const handleStopTracking = async () => {
         try {
             const stop = await stopLocationTracking()
+            const stoppedActivity = await stopActivity()
+            if (!stoppedActivity) {
+                return
+            }
             if (stop) {
                 setIsRecording(false)
                 console.log("Recording Stopped")
-
             }
         }
         catch (error) {
             console.error(error)
         }
     }
+
+
 
 
 
