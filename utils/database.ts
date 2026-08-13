@@ -31,20 +31,29 @@ export async function saveLocationPoints(point: {
     timestamp: string
 }) {
     const ActivityId = await SecureStore.getItemAsync("activty_id")
-    await db.runAsync(
-        `
+    try {
+        if (!ActivityId) {
+            throw new Error("Activity ID not set")
+        }
+        await db.runAsync(
+            `
         INSERT INTO location_points
         (activity_id,latitude,longitude,accuracy,altitude,speed,timestamp) 
         VALUES (?,?,?,?,?,?,?)
         `,
-        ActivityId,
-        point.latitude,
-        point.longitude,
-        point.accuracy ?? null,
-        point.altitude ?? null,
-        point.speed ?? null,
-        point.timestamp
-    )
+            ActivityId,
+            point.latitude,
+            point.longitude,
+            point.accuracy ?? null,
+            point.altitude ?? null,
+            point.speed ?? null,
+            point.timestamp
+        )
+    }
+    catch (error) {
+        console.error(error.response.data.message)
+    }
+
 }
 
 
