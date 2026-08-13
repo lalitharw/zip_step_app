@@ -1,9 +1,10 @@
 import * as SecureStore from "expo-secure-store"
 import * as SQLite from "expo-sqlite"
 
-const db = await SQLite.openDatabaseAsync("stride.db")
+export const db = SQLite.openDatabaseSync("stride.db")
 
 export async function initDatabase() {
+
     await db.execAsync(
         `
         CREATE TABLE IF NOT EXISTS location_points (
@@ -30,7 +31,7 @@ export async function saveLocationPoints(point: {
     speed?: number | null,
     timestamp: string
 }) {
-    const ActivityId = await SecureStore.getItemAsync("activty_id")
+    const ActivityId = await SecureStore.getItemAsync("activity_id")
     try {
         if (!ActivityId) {
             throw new Error("Activity ID not set")
@@ -51,11 +52,15 @@ export async function saveLocationPoints(point: {
         )
     }
     catch (error) {
-        console.error(error.response.data.message)
+        // console.error(error.response.data.message)
     }
 
 }
 
+export async function getLocationPoints() {
+    const data = await db.getAllAsync(`SELECT * FROM location_points ORDER BY id DESC`)
+    console.log(data)
+}
 
-export { db }
+
 

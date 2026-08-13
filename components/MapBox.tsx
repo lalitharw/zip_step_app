@@ -1,5 +1,6 @@
 import { startActivity, stopActivity } from "@/services/api/LocationApi";
 import { requestLocationPermission, startLocationTracking, stopLocationTracking } from "@/services/location";
+import { getLocationPoints } from "@/utils/database";
 import { useState } from "react";
 import { Button, View } from "tamagui";
 
@@ -23,6 +24,7 @@ export default function MapBox() {
                 setIsRecording(true)
                 console.log("Recording started")
 
+
             }
         }
         catch (error) {
@@ -40,6 +42,9 @@ export default function MapBox() {
             if (stop) {
                 setIsRecording(false)
                 console.log("Recording Stopped")
+                console.log("All Data")
+                await getLocationPoints()
+
             }
         }
         catch (error) {

@@ -12,7 +12,7 @@ import { TamaguiProvider } from "tamagui";
 export default function RootLayout() {
 
   useEffect(() => {
-    initDatabase()
+    initDatabase().catch(console.error)
   }, [])
 
   return (
