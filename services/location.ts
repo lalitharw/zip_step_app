@@ -3,6 +3,11 @@ import * as Location from "expo-location"
 
 
 export async function requestLocationPermission() {
+
+    const gpsActivated = await Location.hasServicesEnabledAsync()
+    if (!gpsActivated) {
+        throw new Error("Please enabled GPS to continue")
+    }
     const foreground = await Location.requestForegroundPermissionsAsync()
     if (foreground.status !== "granted") {
         throw new Error("Foreground location permission denied")

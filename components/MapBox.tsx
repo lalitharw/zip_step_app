@@ -1,97 +1,177 @@
 import { startActivity, stopActivity } from "@/services/api/LocationApi";
-import { requestLocationPermission, startLocationTracking, stopLocationTracking } from "@/services/location";
+import {
+    requestLocationPermission,
+    startLocationTracking,
+    stopLocationTracking
+} from "@/services/location";
 import { getLocationPoints } from "@/utils/database";
 import { useState } from "react";
-import { Button, View } from "tamagui";
+import {
+    Button,
+    Spinner,
+    Text,
+    View
+} from "tamagui";
+
+import { Modal } from "react-native";
 
 export default function MapBox() {
-    const [errorMsg, setErrorMsg] = useState<string | null>();
-    const [location, setLocation] = useState<Object | null>();
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [location, setLocation] = useState<Object | null>(null);
+    const [isLoading, setLoading] = useState<boolean>(false);
     const [isRecording, setIsRecording] = useState<boolean>(false);
 
     const handleStartTracking = async () => {
         try {
-            await requestLocationPermission()
-            const activityStarted = await startActivity()
+            setLoading(true);
+
+            await requestLocationPermission();
+
+            const activityStarted = await startActivity();
+
             if (!activityStarted) {
-                console.log("Activity Not Started")
-                return
+                console.log("Activity Not Started");
+                return;
             }
 
             const start = await startLocationTracking();
 
             if (start) {
-                setIsRecording(true)
-                console.log("Recording started")
-
-
+                setIsRecording(true);
+                console.log("Recording started");
             }
+
+        } catch (error) {
+            console.error(error);
+
+            if (error instanceof Error) {
+                setErrorMsg(error.message);
+            } else {
+                setErrorMsg("Something went wrong");
+            }
+
+        } finally {
+            setLoading(false);
         }
-        catch (error) {
-            console.error(error)
-        }
-    }
+    };
 
     const handleStopTracking = async () => {
         try {
-            const stop = await stopLocationTracking()
-            const stoppedActivity = await stopActivity()
+            setLoading(true);
+
+            const stop = await stopLocationTracking();
+
+            const stoppedActivity = await stopActivity();
+
             if (!stoppedActivity) {
-                return
+                return;
             }
+
             if (stop) {
-                setIsRecording(false)
-                console.log("Recording Stopped")
-                console.log("All Data")
-                await getLocationPoints()
+                setIsRecording(false);
 
+                console.log("Recording Stopped");
+
+                const points = await getLocationPoints();
+
+                console.log("All Data:", points);
             }
+
+        } catch (error) {
+            console.error(error);
+
+            if (error instanceof Error) {
+                setErrorMsg(error.message);
+            } else {
+                setErrorMsg("Something went wrong");
+            }
+
+        } finally {
+            setLoading(false);
         }
-        catch (error) {
-            console.error(error)
-        }
-    }
-
-
-
-
-
+    };
 
     return (
-        <View>
-            {
-                isRecording ?
-                    <Button onPress={handleStopTracking}>Stop Tracking</Button> :
-                    <Button onPress={handleStartTracking}>Start Tracking</Button>
-            }
-        </View>
-        // <View>
-        //     <MapView
-        //         style={{ flex: 1 }}
-        //         mapStyle={`https://api.maptiler.com/maps/streets-v2/style.json?key=xvEVbRhauAEaNQ1Ucv4L`}
-        //         logoEnabled={false}
-        //         attributionPosition={{
-        //             bottom: 8,
-        //             right: 8,
-        //         }}
-        //     >
-        //         {
-        //             location ? <Camera
-        //                 centerCoordinate={[
-        //                     location.coords.longitude, location.coords.latitude
-        //                 ]}
-        //                 zoomLevel={10}
-        //                 animationDuration={1000}
-        //                 animationMode="easeTo"
-        //             /> : <Camera
-        //                 centerCoordinate={[72.8777, 19.0760]}
-        //                 zoomLevel={10}
-        //                 animationDuration={1000}
-        //                 animationMode="easeTo"
-        //             />
-        //         }
+        <View flex={1}>
 
-        //     </MapView>
-        // </View>
-    )
+            {/* Start / Stop button */}
+            <View
+                padding={20}
+                position="absolute"
+                bottom={0}
+                width="100%"
+            >
+                {isRecording ? (
+                    <Button
+                        borderRadius="$10"
+                        onPress={handleStopTracking}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <Spinner
+                                size="small"
+                                color="$green10"
+                            />
+                        ) : (
+                            "Stop"
+                        )}
+                    </Button>
+                ) : (
+                    <Button
+                        borderRadius="$10"
+                        onPress={handleStartTracking}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <Spinner
+                                size="small"
+                                color="$green10"
+                            />
+                        ) : (
+                            "Start"
+                        )}
+                    </Button>
+                )}
+            </View>
+
+            {/* Error Dialog */}
+            <Modal
+                visible={errorMsg !== null}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setErrorMsg(null)}
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                    }}
+                >
+                    <View
+                        style={{
+                            width: "85%",
+                            padding: 20,
+                            borderRadius: 15,
+                            backgroundColor: "black",
+                        }}
+                    >
+                        <Text style={{ fontSize: 20, color: "white", fontWeight: "bold" }}>
+                            Location Required
+                        </Text>
+
+                        <Text style={{ color: "white", marginTop: 10, textAlign: "center" }}>
+                            {errorMsg}
+                        </Text>
+
+                        <Button borderRadius={"$10"} onPress={() => setErrorMsg(null)} width={"100%"} paddingHorizontal={30}>
+                            {isLoading ? <Spinner size="small" color="$green10" /> : "Sign Out"}
+                        </Button>
+                    </View>
+                </View>
+            </Modal>
+
+        </View>
+    );
 }
