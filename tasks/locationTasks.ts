@@ -1,3 +1,4 @@
+import { saveLocationPoints } from "@/utils/database";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 
@@ -29,13 +30,25 @@ TaskManager.defineTask(
                 heading,
             } = location.coords;
 
-            console.log("Latitude:", latitude);
-            console.log("Longitude:", longitude);
-            console.log("Altitude:", altitude);
-            console.log("Accuracy:", accuracy);
-            console.log("Speed:", speed);
-            console.log("Heading:", heading);
-            console.log("Timestamp:", location.timestamp);
+
+            await saveLocationPoints({
+                latitude,
+                longitude,
+                altitude,
+                accuracy,
+                speed,
+                timestamp: new Date(location.timestamp).toISOString()
+            })
+
+            // console.log("Latitude:", latitude);
+            //     console.log("Longitude:", longitude);
+            //     console.log("Altitude:", altitude);
+            //     console.log("Accuracy:", accuracy);
+            //     console.log("Speed:", speed);
+            //     console.log("Heading:", heading);
+            //     console.log("Timestamp:", location.timestamp);
         }
+
+
     }
 );

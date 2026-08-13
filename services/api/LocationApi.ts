@@ -21,10 +21,11 @@ export async function stopActivity() {
             return false
         }
         const data = await api.patch(`activities/stop-activity/${activity_id}`)
+        await SecureStore.deleteItemAsync("activity_id")
         return true
     }
     catch (error) {
-        console.log(error.response.data.message || error)
+        console.error(error.response.data.message || error)
     }
     return false
 }

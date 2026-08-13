@@ -1,13 +1,20 @@
 import { AuthProvider } from "@/context/AuthContext";
 import tamaguiConfig from "@/tamagui.config";
+import { initDatabase } from "@/utils/database";
 import '@tamagui/native/setup-expo-linear-gradient';
 import { Stack } from "expo-router";
+import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 import { TamaguiProvider } from "tamagui";
 
 
 export default function RootLayout() {
+
+  useEffect(() => {
+    initDatabase()
+  }, [])
+
   return (
 
     <SafeAreaProvider>
