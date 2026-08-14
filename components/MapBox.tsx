@@ -9,17 +9,21 @@ import { useState } from "react";
 import {
     Button,
     Spinner,
-    Text,
     View
 } from "tamagui";
 
-import { Modal } from "react-native";
+import { useLocationStore } from "@/store/locationStore";
+import { Camera, Map, UserLocation } from "@maplibre/maplibre-react-native";
 
 export default function MapBox() {
+    const isRecording = useLocationStore((state) => state.isRecording)
+    const currentLocation = useLocationStore((state) => state.currentLocation)
+    const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [location, setLocation] = useState<Object | null>(null);
     const [isLoading, setLoading] = useState<boolean>(false);
-    const [isRecording, setIsRecording] = useState<boolean>(false);
+
+
+
 
     const handleStartTracking = async () => {
         try {
@@ -37,7 +41,7 @@ export default function MapBox() {
             const start = await startLocationTracking();
 
             if (start) {
-                setIsRecording(true);
+                useLocationStore.getState().setIsRecording(true)
                 console.log("Recording started");
             }
 
@@ -68,7 +72,7 @@ export default function MapBox() {
             }
 
             if (stop) {
-                setIsRecording(false);
+                useLocationStore.getState().setIsRecording(false)
 
                 console.log("Recording Stopped");
 
@@ -93,8 +97,27 @@ export default function MapBox() {
 
     return (
         <View flex={1}>
+            <View height={"100%"} width={"100%"}>
+                <Map
+                    flex={1}
+                    mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${MAPTILER_API_KEY}`}
 
-            {/* Start / Stop button */}
+                    logoEnabled={true}
+                    attributionPosition={{ bottom: 8, right: 8 }}>
+                    {
+                        currentLocation && (
+                            <Camera center={[
+                                currentLocation.longitude,
+                                currentLocation.latitude
+                            ]}
+                                zoom={18}
+
+                            />
+                        )
+                    }
+                    <UserLocation visible />
+                </Map>
+            </View>
             <View
                 padding={20}
                 position="absolute"
@@ -134,8 +157,7 @@ export default function MapBox() {
                 )}
             </View>
 
-            {/* Error Dialog */}
-            <Modal
+            {/* <Modal
                 visible={errorMsg !== null}
                 transparent
                 animationType="fade"
@@ -170,7 +192,7 @@ export default function MapBox() {
                         </Button>
                     </View>
                 </View>
-            </Modal>
+            </Modal> */}
 
         </View>
     );

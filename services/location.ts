@@ -1,9 +1,11 @@
+import { useLocationStore } from "@/store/locationStore"
 import { LOCATION_TASK_NAME } from "@/tasks/locationTasks"
 import * as Location from "expo-location"
 
 
-export async function requestLocationPermission() {
 
+
+export async function requestLocationPermission() {
     const gpsActivated = await Location.hasServicesEnabledAsync()
     if (!gpsActivated) {
         throw new Error("Please enabled GPS to continue")
@@ -20,14 +22,32 @@ export async function requestLocationPermission() {
 }
 
 export async function getCurrentLocation() {
-    const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High
-    })
-
-    return {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude
+    const serviceEnabled = await Location.hasServicesEnabledAsync()
+    if (!serviceEnabled) {
+        throw new Error("Please enable GPS to continue")
     }
+
+    const permission = await Location.getForegroundPermissionsAsync()
+    if (permission.status !== "granted") {
+        const requested = await Location.requestForegroundPermissionsAsync()
+        if (requested.status !== "granted") {
+            throw new Error("Location Permisson Denied")
+        }
+    }
+    const location = await Location.watchPositionAsync({
+        accuracy: Location.Accuracy.High,
+        timeInterval: 5
+    },
+        (location) => {
+            useLocationStore.getState().setCurrentLocation({
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude
+            })
+        }
+    )
+
+    return true
+
 }
 
 export async function startLocationTracking() {
