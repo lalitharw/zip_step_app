@@ -1,11 +1,11 @@
 import { startActivity, stopActivity } from "@/services/api/LocationApi";
-import {getCurrentLocation,requestLocationPermission,startLocationTracking,stopLocationTracking,stopWatchingLocation,} from "@/services/location";
+import { getCurrentLocation, requestLocationPermission, startLocationTracking, stopLocationTracking, stopWatchingLocation, } from "@/services/location";
 import { useLocationStore } from "@/store/locationStore";
-import {Camera,GeoJSONSource,Layer,Map,Marker,UserLocation, type CameraRef} from "@maplibre/maplibre-react-native";
+import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
 import { Modal } from "react-native";
-import {Button,Spinner,Text,View,} from "tamagui";
+import { Button, Spinner, Text, View, } from "tamagui";
 
 export default function MapBox() {
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
@@ -31,18 +31,12 @@ export default function MapBox() {
         (state) => state.clearRoute
     );
 
-    const addRouteCoordinate = useLocationStore(
-        (state) => state.addRouteCoordinate
-    );
-
-    
-
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [isLoading, setLoading] = useState(false);
 
     const cameraRef = useRef<CameraRef>(null);
 
-    
+
 
     const startPoint =
         routeCoordinates.length > 0
@@ -54,7 +48,7 @@ export default function MapBox() {
             ? routeCoordinates[routeCoordinates.length - 1]
             : null;
 
-    
+
 
     const routeGeoJSON = {
         type: "Feature" as const,
@@ -68,7 +62,7 @@ export default function MapBox() {
         },
     };
 
-    
+
     useEffect(() => {
         const startLocationWatcher = async () => {
             try {
@@ -103,13 +97,13 @@ export default function MapBox() {
         if (!currentLocation) {
             return;
         }
-
+        ``
         console.log(
             "Current Location:",
             currentLocation
         );
 
-       
+
         cameraRef.current?.easeTo({
             center: [
                 currentLocation.longitude,
@@ -118,13 +112,13 @@ export default function MapBox() {
             duration: 200,
         });
 
-      
-        
+
+
     }, [
         currentLocation
     ]);
 
-   
+
 
     useEffect(() => {
         if (!isRecording) {
@@ -154,7 +148,7 @@ export default function MapBox() {
         };
     }, [isRecording]);
 
-    
+
 
     useEffect(() => {
         console.log(
@@ -163,7 +157,7 @@ export default function MapBox() {
         );
     }, [routeCoordinates]);
 
-    
+
 
     const handleStartTracking = async () => {
         try {
@@ -220,7 +214,7 @@ export default function MapBox() {
         }
     };
 
-    
+
 
     const handleStopTracking = async () => {
         try {
@@ -276,7 +270,7 @@ export default function MapBox() {
         }
     };
 
-    
+
 
     return (
         <View flex={1}>

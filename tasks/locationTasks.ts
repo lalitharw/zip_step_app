@@ -53,7 +53,8 @@ TaskManager.defineTask(
                     })
                     useLocationStore.getState().addRouteCoordinate({
                         longitude: longitude,
-                        latitude: latitude
+                        latitude: latitude,
+                        accuracy: accuracy
                     })
                 }
 
@@ -92,7 +93,8 @@ TaskManager.defineTask(
             })
             useLocationStore.getState().addRouteCoordinate({
                 longitude: longitude,
-                latitude: latitude
+                latitude: latitude,
+                accuracy: accuracy
             })
         }
     }

@@ -42,7 +42,8 @@ export async function getCurrentLocation() {
         (location) => {
             useLocationStore.getState().setCurrentLocation({
                 latitude: location.coords.latitude,
-                longitude: location.coords.longitude
+                longitude: location.coords.longitude,
+                accuracy: location.coords.accuracy
             })
         }
     )
