@@ -1,3 +1,4 @@
+import { AlertDialog } from "@/components/AlertDialog";
 import api from "@/utils/api";
 import * as SecureStore from "expo-secure-store";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
@@ -33,14 +34,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function login(email: string, password: string) {
         try {
-
             const { data } = await api.post("/auth/login", { email, password })
-            console.log(data)
             await SecureStore.setItemAsync("auth_token", data.data.token)
             setUser(data.data.user)
         }
         catch (err) {
-            console.log(err)
+            console.error(err.response.data.message)
+            AlertDialog({
+                title: "Error",
+                description: err.response.data.message || "Something went wrong! Please try again Later",
+                type: "error"
+            })
         }
     }
 

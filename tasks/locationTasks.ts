@@ -1,13 +1,15 @@
+import { useLocationStore } from "@/store/locationStore";
 import { saveLocationPoints } from "@/utils/database";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
-import * as SecureStore from "expo-secure-store"
 
 export const LOCATION_TASK_NAME = "stride_flow_location_task";
 
 TaskManager.defineTask(
     LOCATION_TASK_NAME,
     async ({ data, error }) => {
+        const locationStore = useLocationStore.getState()
+
         if (error) {
             console.error("Location task error:", error);
             return;
@@ -31,6 +33,8 @@ TaskManager.defineTask(
                 heading,
             } = location.coords;
 
+            console.log("Latitude: ", latitude)
+            console.log("Longitude: ", longitude)
 
             await saveLocationPoints({
                 latitude,
@@ -40,17 +44,10 @@ TaskManager.defineTask(
                 speed,
                 timestamp: new Date(location.timestamp).toISOString()
             })
-
-            console.log("Latitude:", latitude);
-            console.log("Longitude:", longitude);
-            console.log("Altitude:", altitude);
-            console.log("Accuracy:", accuracy);
-            console.log("Speed:", speed);
-            console.log("Heading:", heading);
-            console.log("Timestamp:", location.timestamp);
-            console.log("Activity_id: ", await SecureStore.getItemAsync("activity_id"))
+            locationStore.addRouteCoordinate({
+                longitude: longitude,
+                latitude: latitude
+            })
         }
-
-
     }
 );

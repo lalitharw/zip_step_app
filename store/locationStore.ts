@@ -5,12 +5,18 @@ type Coordinates = {
     latitude: number
 }
 
+
 type LocationState = {
     currentLocation: Coordinates | null
     setCurrentLocation: (location: Coordinates) => void
 
     isRecording: boolean
     setIsRecording: (recording: boolean) => void
+
+    routeCoordinates: Coordinates[]
+    addRouteCoordinate: (coordinate: Coordinates) => void
+
+    clearRoute: () => void
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
@@ -23,6 +29,22 @@ export const useLocationStore = create<LocationState>((set) => ({
     setIsRecording: (recording) => {
         set({
             isRecording: recording
+        })
+    },
+
+    routeCoordinates: [],
+    addRouteCoordinate(coordinate) {
+        set((state) => ({
+            routeCoordinates: [
+                ...state.routeCoordinates,
+                coordinate
+            ]
+        }))
+    },
+
+    clearRoute: () => {
+        set({
+            routeCoordinates: []
         })
     }
 }))

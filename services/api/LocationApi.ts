@@ -16,7 +16,6 @@ export async function startActivity() {
 export async function stopActivity() {
     try {
         const activity_id = await SecureStore.getItemAsync("activity_id")
-        console.log(activity_id)
         if (!activity_id) {
             return false
         }

@@ -59,7 +59,7 @@ export async function saveLocationPoints(point: {
 
 export async function getLocationPoints() {
     const data = await db.getAllAsync(`SELECT * FROM location_points ORDER BY id DESC`)
-    console.log(data)
+    return data
 }
 
 

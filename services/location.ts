@@ -3,7 +3,7 @@ import { LOCATION_TASK_NAME } from "@/tasks/locationTasks"
 import * as Location from "expo-location"
 
 
-
+let locationSubscription: Location.LocationSubscription | null = null
 
 export async function requestLocationPermission() {
     const gpsActivated = await Location.hasServicesEnabledAsync()
@@ -34,9 +34,10 @@ export async function getCurrentLocation() {
             throw new Error("Location Permisson Denied")
         }
     }
-    const location = await Location.watchPositionAsync({
+    locationSubscription = await Location.watchPositionAsync({
         accuracy: Location.Accuracy.High,
-        timeInterval: 5
+        timeInterval: 5000,
+        distanceInterval: 5
     },
         (location) => {
             useLocationStore.getState().setCurrentLocation({
@@ -48,6 +49,12 @@ export async function getCurrentLocation() {
 
     return true
 
+}
+
+
+export function stopWatchingLocation() {
+    locationSubscription?.remove()
+    locationSubscription = null
 }
 
 export async function startLocationTracking() {
