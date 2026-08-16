@@ -51,18 +51,13 @@ TaskManager.defineTask(
                         speed,
                         timestamp: new Date(location.timestamp).toISOString()
                     })
-                    useLocationStore.getState().addRouteCoordinate({
-                        longitude: longitude,
-                        latitude: latitude,
-                        accuracy: accuracy
-                    })
+                   
                 }
 
                 continue
             }
 
             // if already some points available
-
             if (accuracy == null || accuracy > 30) {
                 console.log("Rejected: Poor Accuracy")
                 continue
@@ -91,11 +86,7 @@ TaskManager.defineTask(
                 speed,
                 timestamp: new Date(location.timestamp).toISOString()
             })
-            useLocationStore.getState().addRouteCoordinate({
-                longitude: longitude,
-                latitude: latitude,
-                accuracy: accuracy
-            })
+            
         }
     }
 );

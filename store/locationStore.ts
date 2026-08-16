@@ -18,6 +18,8 @@ type LocationState = {
     addRouteCoordinate: (coordinate: Coordinates) => void
 
     clearRoute: () => void
+
+    setRouteCoordinate: (coordinates: Coordinates[]) => void
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
@@ -47,5 +49,12 @@ export const useLocationStore = create<LocationState>((set) => ({
         set({
             routeCoordinates: []
         })
-    }
+    },
+
+
+    setRouteCoordinate(coordinates) {
+        set({
+            routeCoordinates: coordinates
+        })
+    },
 }))

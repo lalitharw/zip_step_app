@@ -63,4 +63,15 @@ export async function getLocationPoints() {
 }
 
 
+export async function getLocationPointsById(activity_id: number | null) {
+    const data = await db.getAllAsync<{
+        latitude: number
+        longitude: number,
+        accuracy: number | null,
+        speed: number | null
+    }>("SELECT latitude,longitude,accuracy,speed FROM location_points WHERE activity_id = ? ORDER BY timestamp ASC", activity_id)
+    return data
+}
+
+
 

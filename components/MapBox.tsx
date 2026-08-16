@@ -1,8 +1,10 @@
 import { startActivity, stopActivity } from "@/services/api/LocationApi";
 import { getCurrentLocation, requestLocationPermission, startLocationTracking, stopLocationTracking, stopWatchingLocation, } from "@/services/location";
 import { useLocationStore } from "@/store/locationStore";
+import { getLocationPointsById } from "@/utils/database";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useRef, useState } from "react";
 import { Modal } from "react-native";
 import { Button, Spinner, Text, View, } from "tamagui";
@@ -14,6 +16,10 @@ export default function MapBox() {
     const isRecording = useLocationStore(
         (state) => state.isRecording
     );
+
+    const setCoordinate = useLocationStore(
+        (state) => state.setRouteCoordinate
+    )
 
     const currentLocation = useLocationStore(
         (state) => state.currentLocation
@@ -143,8 +149,25 @@ export default function MapBox() {
             }
         }, 3000);
 
+        const loadRouteInterval = setInterval(async () => {
+            try {
+                const activity_id = await SecureStore.getItemAsync("activity_id")
+
+                if (!activity_id) {
+                    console.log("No activity ID Found")
+                    return
+                }
+                const points = await getLocationPointsById(Number(activity_id))
+                setCoordinate(points)
+            }
+            catch (error) {
+                console.error("Failed to refresh route ", error)
+            }
+        }, 2000)
+
         return () => {
             clearInterval(interval);
+            clearInterval(loadRouteInterval)
         };
     }, [isRecording]);
 
