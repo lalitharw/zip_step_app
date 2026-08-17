@@ -103,7 +103,6 @@ export default function MapBox() {
         if (!currentLocation) {
             return;
         }
-        ``
         console.log(
             "Current Location:",
             currentLocation
@@ -297,8 +296,6 @@ export default function MapBox() {
 
     return (
         <View flex={1}>
-
-
             <View
                 height="100%"
                 width="100%"
