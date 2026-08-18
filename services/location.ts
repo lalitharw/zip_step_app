@@ -63,12 +63,14 @@ export function stopWatchingLocation() {
 }
 
 export async function startLocationTracking() {
+
+    console.log("Task Registered: ", await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME))
     const alreadyRunning = await Location.hasStartedLocationUpdatesAsync(
         LOCATION_TASK_NAME
     )
 
     if (alreadyRunning) {
-        return
+        return true
     }
 
     await Location.startLocationUpdatesAsync(
@@ -77,7 +79,6 @@ export async function startLocationTracking() {
 
             accuracy: Location.Accuracy.High,
             timeInterval: 5000,
-            distanceInterval: 5,
             foregroundService: {
                 notificationTitle: "StrideFlow is recording",
                 notificationBody: "Your workout is being Recorded"
@@ -85,6 +86,8 @@ export async function startLocationTracking() {
             showsBackgroundLocationIndicator: true
         },
     )
+
+    console.log("Task Registered: ", await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME))
 
     return true
 

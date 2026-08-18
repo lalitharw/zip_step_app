@@ -87,5 +87,31 @@ export async function getLastLocationPoint(activity_id: number | null) {
     return data
 }
 
+export async function getNewLocationPointsById(activity_id: number | null, lastId: number | null) {
+    if (lastId === null) {
+        return await db.getAllAsync<{
+            id: number,
+            latitude: number,
+            longitude: number,
+            accuracy: number | null,
+            speed: number | null
+        }>(`
+          SELECT id, latitude, longitude, accuracy, speed FROM location_points
+          WHERE activity_id = ? ORDER BY id ASC        
+            `, activity_id)
+    }
+
+    return await db.getAllAsync<{
+        id: number,
+        latitude: number,
+        longitude: number,
+        accuracy: number | null,
+        speed: number | null
+    }>(`
+        SELECT id, latitude, longitude, accuracy, speed FROM location_points
+          WHERE activity_id = ? AND id > ? ORDER BY id ASC        
+            `, activity_id, lastId)
+}
+
 
 

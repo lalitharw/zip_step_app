@@ -1,7 +1,7 @@
 import { startActivity, stopActivity } from "@/services/api/LocationApi";
 import { getCurrentLocation, requestLocationPermission, startLocationTracking, stopLocationTracking, stopWatchingLocation, } from "@/services/location";
 import { useLocationStore } from "@/store/locationStore";
-import { getLocationPointsById } from "@/utils/database";
+import { getNewLocationPointsById } from "@/utils/database";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import * as SecureStore from "expo-secure-store";
@@ -19,6 +19,10 @@ export default function MapBox() {
 
     const setCoordinate = useLocationStore(
         (state) => state.setRouteCoordinate
+    )
+
+    const addCoordinate = useLocationStore(
+        (state) => state.addRouteCoordinate
     )
 
     const currentLocation = useLocationStore(
@@ -49,6 +53,7 @@ export default function MapBox() {
     const [isLoading, setLoading] = useState(false);
 
     const cameraRef = useRef<CameraRef>(null);
+    const lastLoadedId = useRef<number | null>(null)
 
 
 
@@ -154,14 +159,29 @@ export default function MapBox() {
 
         const loadRoute = async () => {
             try {
+                console.log("Load Route")
                 const activity_id = await SecureStore.getItemAsync("activity_id")
                 if (activity_id === null) {
                     console.log("No Activity ID Found")
                     return
                 }
 
-                const points = await getLocationPointsById(Number(activity_id))
-                setCoordinate(points)
+                const newPoints = await getNewLocationPointsById(Number(activity_id), lastLoadedId.current)
+                console.log("New Points: ", newPoints)
+
+                if (newPoints.length === 0) {
+                    return
+                }
+
+                // setCoordinate((current) => [
+                //     ...current,
+                //     ...newPoints
+                // ])
+
+                addCoordinate(newPoints)
+
+                lastLoadedId.current = newPoints[newPoints.length - 1].id
+
             }
             catch (error) {
                 console.error("Failed to refresh route: ", error)
@@ -170,8 +190,8 @@ export default function MapBox() {
 
         checkGps()
         loadRoute()
-        const gpsInterval = setInterval(checkGps,3000)
-        const routeInterval = setInterval(loadRoute,2000)
+        const gpsInterval = setInterval(checkGps, 3000)
+        const routeInterval = setInterval(loadRoute, 2000)
         return () => {
             clearInterval(gpsInterval);
             clearInterval(routeInterval)
@@ -192,6 +212,7 @@ export default function MapBox() {
     const handleStartTracking = async () => {
         try {
             setLoading(true);
+            lastLoadedId.current = null
 
             await requestLocationPermission();
 

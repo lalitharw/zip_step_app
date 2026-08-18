@@ -9,7 +9,7 @@ export const LOCATION_TASK_NAME = "stride_flow_location_task";
 TaskManager.defineTask(
     LOCATION_TASK_NAME,
     async ({ data, error }) => {
-
+        console.log("🔥 LOCATION TASK FIRED");
 
         if (error) {
             console.error("Location task error:", error);
@@ -112,6 +112,7 @@ TaskManager.defineTask(
                 continue
             }
 
+            console.log("Adding Points")
             await saveLocationPoints({
                 latitude,
                 longitude,
