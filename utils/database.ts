@@ -73,5 +73,19 @@ export async function getLocationPointsById(activity_id: number | null) {
     return data
 }
 
+export async function getLastLocationPoint(activity_id: number | null) {
+    const data = await db.getFirstAsync<{
+        latitude: number,
+        longitude: number,
+        timestamp: string,
+        accuracy: number | null
+    }>(`
+            SELECT latitude, longitude, timestamp,accuracy FROM location_points WHERE activity_id = ?
+            ORDER BY timestamp DESC
+            LIMIT 1
+        `, activity_id)
+    return data
+}
+
 
 

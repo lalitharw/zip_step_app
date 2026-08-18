@@ -37,6 +37,14 @@ export default function MapBox() {
         (state) => state.clearRoute
     );
 
+    const isGpsOff = useLocationStore(
+        (state) => state.isGpsOff
+    )
+
+    const setIsGpsOff = useLocationStore(
+        (state) => state.setIsGpsOff
+    )
+
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [isLoading, setLoading] = useState(false);
 
@@ -117,8 +125,6 @@ export default function MapBox() {
             duration: 200,
         });
 
-
-
     }, [
         currentLocation
     ]);
@@ -130,43 +136,45 @@ export default function MapBox() {
             return;
         }
 
-        const interval = setInterval(async () => {
+        const checkGps = async () => {
             try {
-                const gpsEnabled =
-                    await Location.hasServicesEnabledAsync();
-
+                const gpsEnabled = await Location.hasServicesEnabledAsync()
                 if (!gpsEnabled) {
-                    setErrorMsg(
-                        "GPS is turned off. Please enable GPS to continue."
-                    );
+                    setIsGpsOff(true)
+                    setErrorMsg("GPS is turned off. Please enable GPS to continue")
                 }
-            } catch (error) {
-                console.error(
-                    "GPS status check error:",
-                    error
-                );
+                else {
+                    setIsGpsOff(false)
+                }
             }
-        }, 3000);
+            catch (error) {
+                console.error("GPS status check error: ", error)
+            }
+        }
 
-        const loadRouteInterval = setInterval(async () => {
+        const loadRoute = async () => {
             try {
                 const activity_id = await SecureStore.getItemAsync("activity_id")
-
-                if (!activity_id) {
-                    console.log("No activity ID Found")
+                if (activity_id === null) {
+                    console.log("No Activity ID Found")
                     return
                 }
+
                 const points = await getLocationPointsById(Number(activity_id))
                 setCoordinate(points)
             }
             catch (error) {
-                console.error("Failed to refresh route ", error)
+                console.error("Failed to refresh route: ", error)
             }
-        }, 2000)
+        }
 
+        checkGps()
+        loadRoute()
+        const gpsInterval = setInterval(checkGps,3000)
+        const routeInterval = setInterval(loadRoute,2000)
         return () => {
-            clearInterval(interval);
-            clearInterval(loadRouteInterval)
+            clearInterval(gpsInterval);
+            clearInterval(routeInterval)
         };
     }, [isRecording]);
 
@@ -445,13 +453,13 @@ export default function MapBox() {
 
             <Modal
                 visible={
-                    errorMsg !== null
+                    isGpsOff
                 }
                 transparent
                 animationType="fade"
-                onRequestClose={() =>
-                    setErrorMsg(null)
-                }
+            // onRequestClose={() =>
+            //     isGpsOff
+            // }
             >
                 <View
                     style={{

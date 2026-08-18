@@ -1,7 +1,7 @@
-import { useLocationStore } from "@/store/locationStore";
 import { coordinateDistance } from "@/utils/coordinateDistance";
-import { saveLocationPoints } from "@/utils/database";
+import { getLastLocationPoint, saveLocationPoints } from "@/utils/database";
 import * as Location from "expo-location";
+import * as SecureStore from "expo-secure-store";
 import * as TaskManager from "expo-task-manager";
 
 export const LOCATION_TASK_NAME = "stride_flow_location_task";
@@ -23,9 +23,14 @@ TaskManager.defineTask(
         const { locations } = data as {
             locations: Location.LocationObject[];
         };
-        const routeCoordinates = useLocationStore.getState().routeCoordinates
+
+        const activity_id = await SecureStore.getItemAsync("activity_id")
+
+        if (activity_id === null) {
+            console.log("No activity ID Found")
+            return
+        }
         for (const location of locations) {
-            const previous_coordinates = useLocationStore.getState().routeCoordinates[routeCoordinates.length - 1]
             const {
                 latitude,
                 longitude,
@@ -35,9 +40,7 @@ TaskManager.defineTask(
                 heading,
             } = location.coords;
 
-            console.log("Latitude: ", latitude)
-            console.log("Longitude: ", longitude)
-            console.log("Accuracy:", accuracy)
+            const previous_coordinates = await getLastLocationPoint(Number(activity_id))
 
             // first point
             if (!previous_coordinates) {
@@ -51,13 +54,12 @@ TaskManager.defineTask(
                         speed,
                         timestamp: new Date(location.timestamp).toISOString()
                     })
-                   
                 }
-
                 continue
             }
 
             // if already some points available
+            //Accuracy Check
             if (accuracy == null || accuracy > 30) {
                 console.log("Rejected: Poor Accuracy")
                 continue
@@ -73,6 +75,38 @@ TaskManager.defineTask(
 
             console.log("Distance: ", distance)
 
+            // check if timestamp is valid
+            const previousTimestamp = new Date(previous_coordinates.timestamp).getTime()
+            let timeDifference: number | null = null
+            const currentTimestamp = location.timestamp
+            if (previousTimestamp !== null) {
+                timeDifference = (currentTimestamp - previousTimestamp) / 1000
+
+                if (timeDifference <= 0) {
+                    console.log("Rejected: Invalid Timestamp")
+                    continue
+                }
+
+                const now = Date.now()
+
+                const timeStampDifference = Math.abs(now - currentTimestamp) / 1000
+
+                if (timeStampDifference > 60) {
+                    console.log("Rejected: Timestamp too far from current time")
+                    continue
+                }
+            }
+
+            // check if speed is valid
+            if (timeDifference !== null) {
+                const calCulateSpeed = distance / timeDifference
+                if (calCulateSpeed > 12) {
+                    console.log("Rejected: Unrealistic Speed")
+                    continue
+                }
+            }
+
+            // check if distance is valid
             if (distance > 100) {
                 console.log("Rejected: Distance is more than 100m")
                 continue
@@ -86,7 +120,6 @@ TaskManager.defineTask(
                 speed,
                 timestamp: new Date(location.timestamp).toISOString()
             })
-            
         }
     }
 );

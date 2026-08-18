@@ -22,6 +22,10 @@ export async function requestLocationPermission() {
 }
 
 export async function getCurrentLocation() {
+    if (locationSubscription) {
+        return true
+    }
+
     const serviceEnabled = await Location.hasServicesEnabledAsync()
     if (!serviceEnabled) {
         throw new Error("Please enable GPS to continue")
