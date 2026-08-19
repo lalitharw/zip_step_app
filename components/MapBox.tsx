@@ -6,8 +6,9 @@ import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef
 import * as Location from "expo-location";
 import * as SecureStore from "expo-secure-store";
 import { useEffect, useRef, useState } from "react";
-import { Modal } from "react-native";
-import { Button, Spinner, Text, View, } from "tamagui";
+import { Button, Spinner, View } from "tamagui";
+import GpsOffModal from "./modals/GpsOffModal";
+import ResumeModal from "./modals/resumeModal";
 
 export default function MapBox() {
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
@@ -16,6 +17,10 @@ export default function MapBox() {
     const isRecording = useLocationStore(
         (state) => state.isRecording
     );
+
+    const showResumeModal = useLocationStore(
+        (state) => state.showResumeModal
+    )
 
     const setCoordinate = useLocationStore(
         (state) => state.setRouteCoordinate
@@ -478,7 +483,7 @@ export default function MapBox() {
             </View>
 
 
-            <Modal
+            {/* <Modal
                 visible={
                     isGpsOff
                 }
@@ -546,7 +551,11 @@ export default function MapBox() {
                         </Button>
                     </View>
                 </View>
-            </Modal>
+            </Modal> */}
+
+
+            <ResumeModal isVisible={showResumeModal} />
+            <GpsOffModal isVisible={isGpsOff} />
 
         </View>
     );
