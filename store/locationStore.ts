@@ -23,6 +23,9 @@ type LocationState = {
 
     isGpsOff: boolean
     setIsGpsOff: (value: boolean) => void
+
+    showResumeModal: boolean
+    setShowResumeModal: (value: boolean) => void
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
@@ -67,4 +70,11 @@ export const useLocationStore = create<LocationState>((set) => ({
             isGpsOff: value
         })
     },
+
+    showResumeModal: false,
+    setShowResumeModal: (value) => {
+        set({
+            showResumeModal: value
+        })
+    }
 }))

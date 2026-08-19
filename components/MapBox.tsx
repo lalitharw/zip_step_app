@@ -1,4 +1,4 @@
-import { startActivity, stopActivity } from "@/services/api/LocationApi";
+import { checkIfActivityIsActive, startActivity, stopActivity } from "@/services/api/LocationApi";
 import { getCurrentLocation, requestLocationPermission, startLocationTracking, stopLocationTracking, stopWatchingLocation, } from "@/services/location";
 import { useLocationStore } from "@/store/locationStore";
 import { getNewLocationPointsById } from "@/utils/database";
@@ -102,7 +102,13 @@ export default function MapBox() {
             }
         };
 
+        const checkIfActive = async () => {
+            await checkIfActivityIsActive()
+        }
+
         startLocationWatcher();
+        checkIfActive()
+
 
         return () => {
             console.log("Current location watcher stopped");
