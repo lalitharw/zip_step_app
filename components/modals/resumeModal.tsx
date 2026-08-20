@@ -1,13 +1,37 @@
 import { colors } from "@/constants/theme";
-import { stopActivity } from "@/services/api/LocationApi";
+import { stopActivityService } from "@/services/activityServices";
 import { useLocationStore } from "@/store/locationStore";
 import { PlayIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
+import { useState } from "react";
 import { Modal } from "react-native";
-import { Button, Text, View, XGroup } from "tamagui";
+import { Button, Spinner, Text, View, XGroup } from "tamagui";
 
 export default function ResumeModal({ isVisible }: { isVisible: boolean }) {
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const setShowResumeModal = useLocationStore((state) => state.setShowResumeModal)
+
+    const handleDiscardActivity = async () => {
+        try {
+            setIsLoading(true)
+            await stopActivityService()
+            setShowResumeModal(false)
+        }
+        catch (error) {
+            console.log(error)
+            // if (error instanceof Error) {
+            //         setErrorMsg(error.message);
+            //     } else {
+            //         setErrorMsg(
+            //             "Unable to get your location"
+            //         );
+            //     }
+        }
+        finally {
+            setIsLoading(false)
+        }
+    }
+
     return (
         <Modal
             visible={
@@ -51,17 +75,24 @@ export default function ResumeModal({ isVisible }: { isVisible: boolean }) {
                     <XGroup width={"100%"} gap={"$3"} marginTop={"$6"}>
                         <Button
                             flex={1}
+                            disabled={isLoading}
                             borderRadius="$4"
                             backgroundColor="transparent"
                             borderWidth={1}
                             borderColor="$borderColor"
                             onPress={() => {
-                                stopActivity()
-                                setShowResumeModal(false)
+                                handleDiscardActivity()
                             }}
                         >
                             <Text color={colors.primaryWhite}>
-                                Discard
+                                {isLoading ? (
+                                    <Spinner
+                                        size="small"
+                                        color="$green10"
+                                    />
+                                ) : (
+                                    "Discard"
+                                )}
                             </Text>
                         </Button>
 

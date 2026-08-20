@@ -1,5 +1,6 @@
-import { checkIfActivityIsActive, startActivity, stopActivity } from "@/services/api/LocationApi";
-import { getCurrentLocation, requestLocationPermission, startLocationTracking, stopLocationTracking, stopWatchingLocation, } from "@/services/location";
+import { startActivityService, stopActivityService } from "@/services/activityServices";
+import { checkIfActivityIsActive } from "@/services/api/LocationApi";
+import { getCurrentLocation, stopWatchingLocation } from "@/services/location";
 import { useLocationStore } from "@/store/locationStore";
 import { getNewLocationPointsById } from "@/utils/database";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
@@ -225,35 +226,7 @@ export default function MapBox() {
             setLoading(true);
             lastLoadedId.current = null
 
-            await requestLocationPermission();
-
-            clearRoute();
-
-            console.log("Route cleared");
-
-            const activityStarted =
-                await startActivity();
-
-            if (!activityStarted) {
-                console.log(
-                    "Activity Not Started"
-                );
-
-                return;
-            }
-
-            const trackingStarted =
-                await startLocationTracking();
-
-            if (!trackingStarted) {
-                console.log(
-                    "Location tracking did not start"
-                );
-
-                return;
-            }
-
-            setIsRecording(true);
+            await startActivityService()
 
             console.log(
                 "Recording started"
@@ -281,26 +254,10 @@ export default function MapBox() {
     const handleStopTracking = async () => {
         try {
             setLoading(true);
-
-            await stopLocationTracking();
-
+            await stopActivityService()
             console.log(
                 "Location tracking stopped"
             );
-
-            const stoppedActivity =
-                await stopActivity();
-
-            if (!stoppedActivity) {
-                console.log(
-                    "Activity did not stop"
-                );
-
-                return;
-            }
-
-            setIsRecording(false);
-
             const finalRoute =
                 useLocationStore.getState()
                     .routeCoordinates;
@@ -309,7 +266,6 @@ export default function MapBox() {
                 "Final Route:",
                 finalRoute
             );
-
             console.log(
                 "Total points:",
                 finalRoute.length
