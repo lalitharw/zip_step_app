@@ -2,11 +2,8 @@ import { useLocationStore } from "@/store/locationStore"
 import { startActivity, stopActivity } from "./api/LocationApi"
 import { requestLocationPermission, startLocationTracking, stopLocationTracking } from "./location"
 
-const setIsRecording = useLocationStore((state) => state.setIsRecording)
-const clearRoute = useLocationStore((state) => state.clearRoute)
 export const stopActivityService = async () => {
-
-
+    const setIsRecording = useLocationStore((state) => state.setIsRecording)
     try {
         await stopLocationTracking()
         const stoppedActivity = await stopActivity()
@@ -23,6 +20,8 @@ export const stopActivityService = async () => {
 
 
 export const startActivityService = async () => {
+    const setIsRecording = useLocationStore((state) => state.setIsRecording)
+    const clearRoute = useLocationStore((state) => state.clearRoute)
     try {
         await requestLocationPermission()
         clearRoute()
