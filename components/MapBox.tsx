@@ -1,4 +1,4 @@
-import { startActivityService, stopActivityService } from "@/services/activityServices";
+import { checkActivityInactivityService, startActivityService, stopActivityService } from "@/services/activityServices";
 import { checkIfActivityIsActive } from "@/services/api/LocationApi";
 import { getCurrentLocation, stopWatchingLocation } from "@/services/location";
 import { useLocationStore } from "@/store/locationStore";
@@ -185,11 +185,6 @@ export default function MapBox() {
                     return
                 }
 
-                // setCoordinate((current) => [
-                //     ...current,
-                //     ...newPoints
-                // ])
-
                 addCoordinate(newPoints)
 
                 lastLoadedId.current = newPoints[newPoints.length - 1].id
@@ -200,12 +195,26 @@ export default function MapBox() {
             }
         }
 
+        const inActivity = async () => {
+            try {
+                const inActive = await checkActivityInactivityService()
+                if (inActive) {
+                    console.log("In Active for 15 Minutes")
+                }
+            }
+            catch (error) {
+                console.log("Something went wrong ", error)
+            }
+        }
+
         checkGps()
         loadRoute()
         const gpsInterval = setInterval(checkGps, 3000)
         const routeInterval = setInterval(loadRoute, 2000)
+        const inActivityInterval = setInterval(inActivity, 60_000)
         return () => {
             clearInterval(gpsInterval);
+            clearInterval(inActivityInterval)
             clearInterval(routeInterval)
         };
     }, [isRecording]);
