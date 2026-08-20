@@ -58,7 +58,7 @@ export const checkActivityInactivityService = async () => {
         }
         const lastPointTime = new Date(lastPoint.timestamp).getTime()
         const minuteSinceLastTime = (Date.now() - lastPointTime) / 1000 / 60
-        return minuteSinceLastTime >= 15
+        return minuteSinceLastTime >= 0
     }
     catch (error) {
         console.error("Something went wrong ", error)

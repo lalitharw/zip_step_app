@@ -16,6 +16,7 @@ export async function initDatabase() {
             altitude REAL,
             speed REAL,
             timestamp TEXT NOT NULL,
+            inactivity_notification_sent BOOLEAN NOT NULL DEFAULT 0
             synced INTEGER DEFAULT 0
         )
         `
@@ -78,9 +79,10 @@ export async function getLastLocationPoint(activity_id: number | null) {
         latitude: number,
         longitude: number,
         timestamp: string,
-        accuracy: number | null
+        accuracy: number | null,
+        inactivity_notification_sent: boolean
     }>(`
-            SELECT latitude, longitude, timestamp,accuracy FROM location_points WHERE activity_id = ?
+            SELECT latitude, longitude, timestamp,accuracy, inactivity_notification_sent FROM location_points WHERE activity_id = ?
             ORDER BY timestamp DESC
             LIMIT 1
         `, activity_id)

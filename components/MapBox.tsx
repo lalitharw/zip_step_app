@@ -1,6 +1,7 @@
 import { checkActivityInactivityService, startActivityService, stopActivityService } from "@/services/activityServices";
 import { checkIfActivityIsActive } from "@/services/api/LocationApi";
 import { getCurrentLocation, stopWatchingLocation } from "@/services/location";
+import { notifyActivityInactive } from "@/services/notificationService";
 import { useLocationStore } from "@/store/locationStore";
 import { getNewLocationPointsById } from "@/utils/database";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
@@ -60,6 +61,7 @@ export default function MapBox() {
 
     const cameraRef = useRef<CameraRef>(null);
     const lastLoadedId = useRef<number | null>(null)
+    const inactiveNotificationSent = useRef<boolean>(false)
 
 
 
@@ -199,6 +201,9 @@ export default function MapBox() {
             try {
                 const inActive = await checkActivityInactivityService()
                 if (inActive) {
+
+                    await notifyActivityInactive()
+                    inactiveNotificationSent.current = true
                     console.log("In Active for 15 Minutes")
                 }
             }
@@ -211,7 +216,7 @@ export default function MapBox() {
         loadRoute()
         const gpsInterval = setInterval(checkGps, 3000)
         const routeInterval = setInterval(loadRoute, 2000)
-        const inActivityInterval = setInterval(inActivity, 60_000)
+        const inActivityInterval = setInterval(inActivity, 1000)
         return () => {
             clearInterval(gpsInterval);
             clearInterval(inActivityInterval)

@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/context/AuthContext";
+import { setUpNotificationChannel } from "@/services/notificationService";
 import tamaguiConfig from "@/tamagui.config";
 import { initDatabase } from "@/utils/database";
 import '@tamagui/native/setup-expo-linear-gradient';
@@ -12,7 +13,11 @@ import { TamaguiProvider } from "tamagui";
 export default function RootLayout() {
 
   useEffect(() => {
+
+
+
     initDatabase().catch(console.error)
+    setUpNotificationChannel()
   }, [])
 
   return (

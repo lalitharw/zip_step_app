@@ -1,3 +1,5 @@
+import { checkActivityInactivityService } from "@/services/activityServices";
+import { notifyActivityInactive } from "@/services/notificationService";
 import { coordinateDistance } from "@/utils/coordinateDistance";
 import { getLastLocationPoint, saveLocationPoints } from "@/utils/database";
 import * as Location from "expo-location";
@@ -31,6 +33,11 @@ TaskManager.defineTask(
             return
         }
         for (const location of locations) {
+
+            // const inactiveActivity = await checkActivityInactivityService()
+            // if (inactiveActivity) {
+            //     await notifyActivityInactive()
+            // }
             const {
                 latitude,
                 longitude,
