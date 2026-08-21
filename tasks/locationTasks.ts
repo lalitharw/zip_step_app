@@ -1,7 +1,6 @@
-import { checkActivityInactivityService } from "@/services/activityServices";
-import { notifyActivityInactive } from "@/services/notificationService";
+import { checkAndNotifyActivityInactivity } from "@/services/activityServices";
 import { coordinateDistance } from "@/utils/coordinateDistance";
-import { getLastLocationPoint, saveLocationPoints } from "@/utils/database";
+import { getLastLocationPoint, saveLocationPoints, updateIsActiveNotificationSent } from "@/utils/database";
 import * as Location from "expo-location";
 import * as SecureStore from "expo-secure-store";
 import * as TaskManager from "expo-task-manager";
@@ -32,12 +31,12 @@ TaskManager.defineTask(
             console.log("No activity ID Found")
             return
         }
+
+        await checkAndNotifyActivityInactivity()
+
         for (const location of locations) {
 
-            // const inactiveActivity = await checkActivityInactivityService()
-            // if (inactiveActivity) {
-            //     await notifyActivityInactive()
-            // }
+
             const {
                 latitude,
                 longitude,
@@ -48,6 +47,7 @@ TaskManager.defineTask(
             } = location.coords;
 
             const previous_coordinates = await getLastLocationPoint(Number(activity_id))
+
 
             // first point
             if (!previous_coordinates) {
@@ -61,6 +61,8 @@ TaskManager.defineTask(
                         speed,
                         timestamp: new Date(location.timestamp).toISOString()
                     })
+
+                    await updateIsActiveNotificationSent(false)
                 }
                 continue
             }
@@ -128,6 +130,8 @@ TaskManager.defineTask(
                 speed,
                 timestamp: new Date(location.timestamp).toISOString()
             })
+            await updateIsActiveNotificationSent(false)
+
         }
     }
 );

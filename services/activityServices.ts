@@ -1,8 +1,10 @@
 import { useLocationStore } from "@/store/locationStore"
-import { getLastLocationPoint } from "@/utils/database"
+import { getLastLocationPoint, getLocationPoints, updateIsActiveNotificationSent } from "@/utils/database"
 import * as SecureStore from "expo-secure-store"
 import { startActivity, stopActivity } from "./api/LocationApi"
 import { requestLocationPermission, startLocationTracking, stopLocationTracking } from "./location"
+import { notifyActivityInactive } from "./notificationService"
+
 
 
 export const stopActivityService = async () => {
@@ -25,6 +27,7 @@ export const stopActivityService = async () => {
 export const startActivityService = async () => {
     try {
         await requestLocationPermission()
+        console.log(await getLocationPoints())
         useLocationStore.getState().clearRoute()
         const activityStarted = await startActivity()
         if (!activityStarted) {
@@ -54,14 +57,39 @@ export const checkActivityInactivityService = async () => {
         const lastPoint = await getLastLocationPoint(Number(activityId))
 
         if (!lastPoint) {
-            return false
+            return {
+                "isInactive": false,
+                "isNotificationSent": null
+            }
         }
         const lastPointTime = new Date(lastPoint.timestamp).getTime()
         const minuteSinceLastTime = (Date.now() - lastPointTime) / 1000 / 60
-        return minuteSinceLastTime >= 0
+        return {
+            "isInactive": minuteSinceLastTime >= 0,
+            "isNotificationSent": lastPoint.inactivity_notification_sent
+        }
     }
     catch (error) {
         console.error("Something went wrong ", error)
         throw error
+    }
+}
+
+
+
+
+export const checkAndNotifyActivityInactivity = async () => {
+    try {
+        const inActive = await checkActivityInactivityService()
+
+        if (inActive.isInactive && !inActive.isNotificationSent) {
+            await notifyActivityInactive()
+            await updateIsActiveNotificationSent(true)
+        }
+
+        await updateIsActiveNotificationSent(false)
+    }
+    catch (error) {
+        console.error("Inactivity notification check failed: ", error)
     }
 }

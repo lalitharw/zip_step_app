@@ -16,7 +16,7 @@ export async function initDatabase() {
             altitude REAL,
             speed REAL,
             timestamp TEXT NOT NULL,
-            inactivity_notification_sent BOOLEAN NOT NULL DEFAULT 0
+            inactivity_notification_sent BOOLEAN NOT NULL DEFAULT 0,
             synced INTEGER DEFAULT 0
         )
         `
@@ -113,6 +113,19 @@ export async function getNewLocationPointsById(activity_id: number | null, lastI
         SELECT id, latitude, longitude, accuracy, speed FROM location_points
           WHERE activity_id = ? AND id > ? ORDER BY id ASC        
             `, activity_id, lastId)
+}
+
+
+export async function updateIsActiveNotificationSent(value: boolean) {
+    const activityId = await SecureStore.getItemAsync("activity_id")
+
+    if (!activityId) {
+        throw new Error("Activiy ID not found")
+    }
+
+    await db.runAsync(`
+        UPDATE location_points SET inactivity_notification_sent = ? WHERE activity_id = ?
+        `, value, activityId)
 }
 
 
