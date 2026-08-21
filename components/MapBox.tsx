@@ -196,28 +196,12 @@ export default function MapBox() {
             }
         }
 
-        // const inActivity = async () => {
-        //     try {
-        //         const inActive = await checkActivityInactivityService()
-        //         if (inActive.isInactive && !inActive.isNotificationSent) {
-        //             await notifyActivityInactive()
-        //             await updateIsActiveNotificationSent(true)
-        //             console.log("In Active for 15 Minutes")
-        //         }
-        //     }
-        //     catch (error) {
-        //         console.log("Something went wrong ", error)
-        //     }
-        // }
-
         checkGps()
         loadRoute()
         const gpsInterval = setInterval(checkGps, 3000)
         const routeInterval = setInterval(loadRoute, 2000)
-        // const inActivityInterval = setInterval(inActivity, 1000) 
         return () => {
             clearInterval(gpsInterval);
-            // clearInterval(inActivityInterval)
             clearInterval(routeInterval)
         };
     }, [isRecording]);
