@@ -46,7 +46,7 @@ export async function checkIfActivityIsActive() {
         if (response && response.data.data.activity) {
             if (response.data.data.activity.status === "active") {
                 console.log("Do you want to resume activity")
-                useLocationStore.getState().setIsRecording(true)
+                useLocationStore.getState().setShowResumeModal(true)
             }
         }
     }
