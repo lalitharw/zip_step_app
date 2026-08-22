@@ -1,5 +1,5 @@
 import { colors } from "@/constants/theme";
-import { stopActivityService } from "@/services/activityServices";
+import { stopActivityService } from "@/services/activityService";
 import { useLocationStore } from "@/store/locationStore";
 import { PlayIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';

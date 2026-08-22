@@ -1,7 +1,15 @@
-import * as SecureStore from "expo-secure-store"
 import * as SQLite from "expo-sqlite"
 
 export const db = SQLite.openDatabaseSync("stride.db")
+
+type point = {
+    latitude: number,
+    longitude: number,
+    altitude?: number | null,
+    accuracy?: number | null,
+    speed?: number | null,
+    timestamp: string
+}
 
 export async function initDatabase() {
 
@@ -24,37 +32,23 @@ export async function initDatabase() {
 }
 
 
-export async function saveLocationPoints(point: {
-    latitude: number,
-    longitude: number,
-    altitude?: number | null,
-    accuracy?: number | null,
-    speed?: number | null,
-    timestamp: string
+export async function saveLocationPoints({ point, activity_id }: {
+    point: point, activity_id: number
 }) {
-    const ActivityId = await SecureStore.getItemAsync("activity_id")
-    try {
-        if (!ActivityId) {
-            throw new Error("Activity ID not set")
-        }
-        await db.runAsync(
-            `
+    await db.runAsync(
+        `
         INSERT INTO location_points
         (activity_id,latitude,longitude,accuracy,altitude,speed,timestamp) 
         VALUES (?,?,?,?,?,?,?)
         `,
-            ActivityId,
-            point.latitude,
-            point.longitude,
-            point.accuracy ?? null,
-            point.altitude ?? null,
-            point.speed ?? null,
-            point.timestamp
-        )
-    }
-    catch (error) {
-        // console.error(error.response.data.message)
-    }
+        activity_id,
+        point.latitude,
+        point.longitude,
+        point.accuracy ?? null,
+        point.altitude ?? null,
+        point.speed ?? null,
+        point.timestamp
+    )
 
 }
 
@@ -64,7 +58,7 @@ export async function getLocationPoints() {
 }
 
 
-export async function getLocationPointsById(activity_id: number | null) {
+export async function getLocationPointsById(activity_id: number) {
     const data = await db.getAllAsync<{
         latitude: number
         longitude: number,
@@ -74,7 +68,7 @@ export async function getLocationPointsById(activity_id: number | null) {
     return data
 }
 
-export async function getLastLocationPoint(activity_id: number | null) {
+export async function getLastLocationPoint(activity_id: number) {
     const data = await db.getFirstAsync<{
         latitude: number,
         longitude: number,
@@ -116,13 +110,7 @@ export async function getNewLocationPointsById(activity_id: number | null, lastI
 }
 
 
-export async function updateIsActiveNotificationSent(value: boolean) {
-    const activityId = await SecureStore.getItemAsync("activity_id")
-
-    if (!activityId) {
-        throw new Error("Activiy ID not found")
-    }
-
+export async function updateIsActiveNotificationSent({ value, activityId }: { value: boolean, activityId: number }) {
     await db.runAsync(`
         UPDATE location_points SET inactivity_notification_sent = ? WHERE activity_id = ?
         `, value, activityId)

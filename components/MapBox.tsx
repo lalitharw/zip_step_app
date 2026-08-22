@@ -1,6 +1,6 @@
-import { startActivityService, stopActivityService } from "@/services/activityServices";
+import { startActivityService, stopActivityService } from "@/services/activityService";
 import { checkIfActivityIsActive } from "@/services/api/LocationApi";
-import { getCurrentLocation, stopWatchingLocation } from "@/services/location";
+import { getCurrentLocation, stopWatchingLocation } from "@/services/locationService";
 import { useLocationStore } from "@/store/locationStore";
 import { getNewLocationPointsById } from "@/utils/database";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
@@ -60,7 +60,6 @@ export default function MapBox() {
 
     const cameraRef = useRef<CameraRef>(null);
     const lastLoadedId = useRef<number | null>(null)
-    const inactiveNotificationSent = useRef<boolean>(false)
 
 
 
@@ -114,6 +113,8 @@ export default function MapBox() {
         }
 
         startLocationWatcher();
+
+        
         checkIfActive()
 
 
