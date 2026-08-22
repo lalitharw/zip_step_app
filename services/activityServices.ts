@@ -65,7 +65,7 @@ export const checkActivityInactivityService = async () => {
         const lastPointTime = new Date(lastPoint.timestamp).getTime()
         const minuteSinceLastTime = (Date.now() - lastPointTime) / 1000 / 60
         return {
-            "isInactive": minuteSinceLastTime >= 0,
+            "isInactive": minuteSinceLastTime >= 15,
             "isNotificationSent": lastPoint.inactivity_notification_sent
         }
     }
