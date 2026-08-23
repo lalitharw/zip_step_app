@@ -30,6 +30,7 @@ export async function stopActivity() {
         console.error(error?.response?.data?.message || error)
     }
     return false
+    
 }
 
 export async function checkIfActivityIsActive() {
