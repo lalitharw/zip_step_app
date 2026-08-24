@@ -1,3 +1,4 @@
+import { createActivity } from "@/database/activities";
 import { useLocationStore } from "@/store/locationStore";
 import { deleteCurrentActivityId, getCurrentActivityId, setCurrentActivityId } from "@/utils/activity";
 import api from "@/utils/api";
@@ -8,6 +9,7 @@ export async function startActivity() {
     try {
         const response = await api.post("/activities")
         await setCurrentActivityId(response.data.data.activity.id)
+        await createActivity()
         return true
     }
     catch (error) {

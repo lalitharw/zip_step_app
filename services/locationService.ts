@@ -19,6 +19,8 @@ export async function requestLocationPermission() {
     if (background.status !== "granted") {
         throw new Error("Background location Permission Denied")
     }
+
+    return true
 }
 
 export async function getCurrentLocation() {

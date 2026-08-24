@@ -1,11 +1,15 @@
+import { getActivity, updateInactivityNotificationStatus } from "@/database/activities"
+import { getLastLocationPoint } from "@/database/locationPoints"
 import { getCurrentActivityId } from "@/utils/activity"
-import { getLastLocationPoint, updateIsActiveNotificationSent } from "@/utils/database"
 import { notifyActivityInactive } from "./notificationService"
 
 export const checkActivityInactivity = async () => {
     try {
 
         const activityId = await getCurrentActivityId()
+        if (!activityId) {
+            throw new Error("Activity Id not found")
+        }
         const lastPoint = await getLastLocationPoint(activityId)
 
         if (!lastPoint) {
@@ -17,9 +21,10 @@ export const checkActivityInactivity = async () => {
 
         const lastPointTime = new Date(lastPoint.timestamp).getTime()
         const caclulateTimeDifference = (Date.now() - lastPointTime) / 1000 / 60
+        const activity = await getActivity(activityId)
         return {
             "isInActive": caclulateTimeDifference >= 15,
-            "isNotificationSent": lastPoint.inactivity_notification_sent
+            "isNotificationSent": activity?.inactivityNotificationSent
         }
     }
     catch (error) {
@@ -33,9 +38,9 @@ export const checkAndNotifyActivityInactivity = async () => {
     try {
         const activityId = await getCurrentActivityId()
         const result = await checkActivityInactivity()
-        if (result.isInActive && !result.isNotificationSent) {
+        if (result.isInActive && !result.isNotificationSent && activityId) {
             await notifyActivityInactive()
-            await updateIsActiveNotificationSent({ value: true, activityId: activityId })
+            await updateInactivityNotificationStatus(activityId, true)
         }
     }
     catch (error) {
@@ -47,7 +52,9 @@ export const checkAndNotifyActivityInactivity = async () => {
 export const updateIsActiveNotificationSentStatus = async (value: boolean) => {
     try {
         const activityId = await getCurrentActivityId()
-        await updateIsActiveNotificationSent({ value: value, activityId: activityId })
+        if (activityId) {
+            await updateInactivityNotificationStatus(activityId, value)
+        }
     }
     catch (error) {
         console.error("Something went wrong: ", error)

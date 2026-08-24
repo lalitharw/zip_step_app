@@ -1,11 +1,10 @@
-import { startActivityService, stopActivityService } from "@/services/activityService";
-import { checkIfActivityIsActive } from "@/services/api/LocationApi";
+import { getNewLocationPointsById } from "@/database/locationPoints";
+import { checkIfActivityIsRunning, startActivity, stopActivity } from "@/services/activityService";
 import { getCurrentLocation, stopWatchingLocation } from "@/services/locationService";
 import { useLocationStore } from "@/store/locationStore";
-import { getNewLocationPointsById } from "@/utils/database";
+import { getCurrentActivityId } from "@/utils/activity";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
-import * as SecureStore from "expo-secure-store";
 import { useEffect, useRef, useState } from "react";
 import { Button, Spinner, View } from "tamagui";
 import GpsOffModal from "./modals/GpsOffModal";
@@ -59,7 +58,7 @@ export default function MapBox() {
     const [isLoading, setLoading] = useState(false);
 
     const cameraRef = useRef<CameraRef>(null);
-    const lastLoadedId = useRef<number | null>(null)
+    const lastLoadedId = useRef<number | null>(0)
 
 
 
@@ -108,14 +107,14 @@ export default function MapBox() {
             }
         };
 
-        const checkIfActive = async () => {
-            await checkIfActivityIsActive()
+        const checkIfRunningActivityPresent = async () => {
+            await checkIfActivityIsRunning()
         }
 
         startLocationWatcher();
 
-        
-        checkIfActive()
+
+        checkIfRunningActivityPresent()
 
 
         return () => {
@@ -173,21 +172,23 @@ export default function MapBox() {
 
         const loadRoute = async () => {
             try {
-                console.log("Load Route")
-                const activity_id = await SecureStore.getItemAsync("activity_id")
-                if (activity_id === null) {
+                const activity_id = await getCurrentActivityId()
+                if (!activity_id) {
                     console.log("No Activity ID Found")
                     return
                 }
 
-                const newPoints = await getNewLocationPointsById(Number(activity_id), lastLoadedId.current)
-                console.log("New Points: ", newPoints)
+                const newPoints = await getNewLocationPointsById(activity_id, lastLoadedId.current ?? 0)
 
                 if (newPoints.length === 0) {
                     return
                 }
 
-                addCoordinate(newPoints)
+                newPoints.forEach((point) => addCoordinate({
+                    longitude: point.longitude,
+                    latitude: point.latitude,
+                    accuracy: point.accuracy
+                }))
 
                 lastLoadedId.current = newPoints[newPoints.length - 1].id
 
@@ -218,73 +219,99 @@ export default function MapBox() {
 
 
 
+    // const handleStartTracking = async () => {
+    //     try {
+    //         setLoading(true);
+    //         lastLoadedId.current = null
+
+    //         await startActivityService()
+
+    //         console.log(
+    //             "Recording started"
+    //         );
+    //     } catch (error) {
+    //         console.error(
+    //             "START ERROR:",
+    //             error
+    //         );
+
+    //         if (error instanceof Error) {
+    //             setErrorMsg(error.message);
+    //         } else {
+    //             setErrorMsg(
+    //                 "Something went wrong"
+    //             );
+    //         }
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
     const handleStartTracking = async () => {
         try {
-            setLoading(true);
-            lastLoadedId.current = null
-
-            await startActivityService()
-
-            console.log(
-                "Recording started"
-            );
-        } catch (error) {
-            console.error(
-                "START ERROR:",
-                error
-            );
-
-            if (error instanceof Error) {
-                setErrorMsg(error.message);
-            } else {
-                setErrorMsg(
-                    "Something went wrong"
-                );
-            }
-        } finally {
-            setLoading(false);
+            setLoading(true)
+            lastLoadedId.current = 0
+            await startActivity()
         }
-    };
+        catch (error) {
+
+        }
+        finally {
+            setLoading(false)
+        }
+    }
 
 
+
+    // const handleStopTracking = async () => { 
+    //     try {
+    //         setLoading(true);
+    //         await stopActivityService()
+    //         console.log(
+    //             "Location tracking stopped"
+    //         );
+    //         const finalRoute =
+    //             useLocationStore.getState()
+    //                 .routeCoordinates;
+
+    //         console.log(
+    //             "Final Route:",
+    //             finalRoute
+    //         );
+    //         console.log(
+    //             "Total points:",
+    //             finalRoute.length
+    //         );
+    //     } catch (error) {
+    //         console.error(
+    //             "STOP ERROR:",
+    //             error
+    //         );
+
+    //         if (error instanceof Error) {
+    //             setErrorMsg(error.message);
+    //         } else {
+    //             setErrorMsg(
+    //                 "Something went wrong"
+    //             );
+    //         }
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     const handleStopTracking = async () => {
         try {
-            setLoading(true);
-            await stopActivityService()
-            console.log(
-                "Location tracking stopped"
-            );
-            const finalRoute =
-                useLocationStore.getState()
-                    .routeCoordinates;
-
-            console.log(
-                "Final Route:",
-                finalRoute
-            );
-            console.log(
-                "Total points:",
-                finalRoute.length
-            );
-        } catch (error) {
-            console.error(
-                "STOP ERROR:",
-                error
-            );
-
-            if (error instanceof Error) {
-                setErrorMsg(error.message);
-            } else {
-                setErrorMsg(
-                    "Something went wrong"
-                );
-            }
-        } finally {
-            setLoading(false);
+            setLoading(true)
+            await stopActivity()
         }
-    };
+        catch (error) {
 
+        }
+        finally {
+            setLoading(false)
+        }
+    }
 
 
     return (
@@ -434,79 +461,6 @@ export default function MapBox() {
                     </Button>
                 )}
             </View>
-
-
-            {/* <Modal
-                visible={
-                    isGpsOff
-                }
-                transparent
-                animationType="fade"
-            // onRequestClose={() =>
-            //     isGpsOff
-            // }
-            >
-                <View
-                    style={{
-                        flex: 1,
-                        justifyContent:
-                            "center",
-                        alignItems:
-                            "center",
-                        backgroundColor:
-                            "rgba(0,0,0,0.5)",
-                    }}
-                >
-                    <View
-                        style={{
-                            width: "85%",
-                            padding: 20,
-                            borderRadius: 15,
-                            backgroundColor:
-                                "black",
-                        }}
-                    >
-                        <Text
-                            style={{
-                                fontSize: 20,
-                                color: "white",
-                                fontWeight:
-                                    "bold",
-                            }}
-                        >
-                            Location Required
-                        </Text>
-
-                        <Text
-                            style={{
-                                color: "white",
-                                marginTop: 10,
-                                textAlign:
-                                    "center",
-                            }}
-                        >
-                            {errorMsg}
-                        </Text>
-
-                        <Button
-                            borderRadius="$10"
-                            onPress={() =>
-                                setErrorMsg(
-                                    null
-                                )
-                            }
-                            width="100%"
-                            paddingHorizontal={
-                                30
-                            }
-                        >
-                            Close
-                        </Button>
-                    </View>
-                </View>
-            </Modal> */}
-
-
             <ResumeModal isVisible={showResumeModal} />
             <GpsOffModal isVisible={isGpsOff} />
 

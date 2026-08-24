@@ -1,5 +1,5 @@
 import { colors } from "@/constants/theme";
-import { stopActivityService } from "@/services/activityService";
+import { stopActivity } from "@/services/activityService";
 import { useLocationStore } from "@/store/locationStore";
 import { PlayIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
@@ -14,18 +14,12 @@ export default function ResumeModal({ isVisible }: { isVisible: boolean }) {
     const handleDiscardActivity = async () => {
         try {
             setIsLoading(true)
-            await stopActivityService()
+            await stopActivity()
             setShowResumeModal(false)
         }
         catch (error) {
-            console.log(error)
-            // if (error instanceof Error) {
-            //         setErrorMsg(error.message);
-            //     } else {
-            //         setErrorMsg(
-            //             "Unable to get your location"
-            //         );
-            //     }
+            console.error("Something went wrong: ", error)
+            throw error
         }
         finally {
             setIsLoading(false)

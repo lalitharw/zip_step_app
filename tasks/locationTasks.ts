@@ -1,7 +1,7 @@
+import { getLastLocationPoint, saveLocationPoint } from "@/database/locationPoints";
 import { checkAndNotifyActivityInactivity, updateIsActiveNotificationSentStatus } from "@/services/activityInActiveService";
 import { getCurrentActivityId } from "@/utils/activity";
 import { coordinateDistance } from "@/utils/coordinateDistance";
-import { getLastLocationPoint, saveLocationPoints } from "@/utils/database";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 
@@ -53,16 +53,16 @@ TaskManager.defineTask(
             if (!previous_coordinates) {
                 if (accuracy == null || accuracy <= 30) {
                     console.log("Adding first point")
-                    await saveLocationPoints({
-                        point: {
-                            latitude,
-                            longitude,
-                            altitude,
-                            accuracy,
-                            speed,
-                            timestamp: new Date(location.timestamp).toISOString()
-                        }, activity_id: activity_id
-                    })
+                    await saveLocationPoint({
+                        activityId: activity_id,
+                        latitude,
+                        longitude,
+                        altitude,
+                        accuracy,
+                        speed,
+                        timestamp: new Date(location.timestamp).toISOString()
+                    }
+                    )
 
                     await updateIsActiveNotificationSentStatus(false)
                 }
@@ -124,16 +124,16 @@ TaskManager.defineTask(
             }
 
             console.log("Adding Points")
-            await saveLocationPoints({
-                point: {
-                    latitude,
-                    longitude,
-                    altitude,
-                    accuracy,
-                    speed,
-                    timestamp: new Date(location.timestamp).toISOString()
-                }, activity_id: activity_id
-            })
+            await saveLocationPoint({
+                activityId: activity_id,
+                latitude,
+                longitude,
+                altitude,
+                accuracy,
+                speed,
+                timestamp: new Date(location.timestamp).toISOString()
+            }
+            )
             await updateIsActiveNotificationSentStatus(false)
 
         }

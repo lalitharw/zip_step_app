@@ -46,7 +46,7 @@ export const useLocationStore = create<LocationState>((set) => ({
         set((state) => ({
             routeCoordinates: [
                 ...state.routeCoordinates,
-                ...coordinate
+                coordinate
             ]
         }))
     },
