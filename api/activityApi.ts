@@ -3,7 +3,7 @@ import api from "@/utils/api"
 type createActivityInput = {
     client_id: string | null,
     started_at: string,
-    stopped_at:string
+    stopped_at: string | null
 }
 
 export const createActivityOnServer = async (data: createActivityInput) => {
