@@ -1,6 +1,5 @@
 import { AuthProvider } from "@/context/AuthContext";
 import { initDatabase } from "@/database/initDatabase";
-import { networkStatus } from "@/services/networkService";
 import { setUpNotificationChannel } from "@/services/notificationService";
 import tamaguiConfig from "@/tamagui.config";
 import '@tamagui/native/setup-expo-linear-gradient';
@@ -15,13 +14,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     initDatabase()
-    const unsubscribe = networkStatus()
     setUpNotificationChannel()
-
-    return () => {
-      unsubscribe()
-    }
   }, [])
+
 
   return (
 

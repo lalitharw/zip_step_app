@@ -7,6 +7,7 @@ export  function initDatabase() {
         CREATE TABLE IF NOT EXISTS activities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             server_id INTEGER NULL,
+            client_id TEXT NOT NULL UNIQUE,
             status TEXT NOT NULL DEFAULT 'running'
                 CHECK (status IN ('completed', 'cancelled','running')),
             started_at TEXt NULL,

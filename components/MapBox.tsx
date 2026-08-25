@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button, Spinner, View } from "tamagui";
 import GpsOffModal from "./modals/GpsOffModal";
 import ResumeModal from "./modals/resumeModal";
+import { networkStatus } from "@/services/networkService";
 
 export default function MapBox() {
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
@@ -85,6 +86,14 @@ export default function MapBox() {
             ]),
         },
     };
+
+    useEffect(() => {
+        const unsubscribe = networkStatus()
+
+        return () => {
+            unsubscribe()
+        }
+    }, [])
 
 
     useEffect(() => {
