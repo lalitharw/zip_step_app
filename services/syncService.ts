@@ -16,7 +16,6 @@ export const syncActivities = async () => {
 
         console.log("Syncing...")
         const activities = await getUnsyncedActivities()
-
         if (activities && activities?.length > 0) {
             for (const activity of activities) {
                 const result = await createActivityOnServer(activity)
