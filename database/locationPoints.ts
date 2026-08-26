@@ -1,5 +1,5 @@
+import * as Crypto from "expo-crypto";
 import { db } from "./initDatabase";
-
 
 type LocationPointInput = {
     activityId: number,
@@ -18,6 +18,7 @@ export type LocationPoint = {
     longitude: number,
     accuracy: number | null,
     altitude: number | null,
+    client_id: string | null,
     speed: number | null,
     timestamp: string,
     synced: number,
@@ -27,10 +28,11 @@ export async function saveLocationPoint(point: LocationPointInput): Promise<void
     await db.runAsync(
         `
         INSERT INTO location_points
-        (activity_id,latitude,longitude,accuracy,altitude,speed,timestamp)
-        VALUES(?,?,?,?,?,?,?)
+        (activity_id, client_id,latitude,longitude,accuracy,altitude,speed,timestamp)
+        VALUES(?,?,?,?,?,?,?,?)
         `,
         point.activityId,
+        Crypto.randomUUID(),
         point.latitude,
         point.longitude,
         point.accuracy ?? null,
@@ -101,11 +103,12 @@ export async function getLocationPoints(activityId: number): Promise<LocationPoi
 }
 
 export async function getUnsyncedLocationPoints(activityId: number): Promise<LocationPoint[]> {
-    return db.getAllAsync<LocationPoint>(`
+    return await db.getAllAsync<LocationPoint>(`
          SELECT id,
             activity_id AS activityId,
             latitude,
             longitude,
+            client_id,
             accuracy,
             altitude,
             speed,
@@ -113,15 +116,15 @@ export async function getUnsyncedLocationPoints(activityId: number): Promise<Loc
             synced
             FROM location_points
             WHERE activity_id = ?
-            AND sycned = 0
+            AND synced = 0
             ORDER BY id ASC
         `, activityId)
 }
 
-export async function markLocationPointsAsSynced(activityId: number) {
+export async function markLocationPointsAsSynced(pointIds: number) {
     await db.runAsync(`
-            UPDATE location_activites
+            UPDATE location_points
             SET synced = 1
-            WHERE activity_id = ?
-        `, activityId)
+            WHERE id IN (?)
+        `, pointIds)
 }

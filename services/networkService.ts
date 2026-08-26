@@ -1,11 +1,11 @@
 import NetInfo from '@react-native-community/netinfo';
-import { syncActivities } from './syncService';
+import { syncData } from './syncService';
 
 export const networkStatus = () => {
 
-    return NetInfo.addEventListener((state) => {
-        if (state.isConnected ) {
-            syncActivities()
+    return NetInfo.addEventListener(async(state) => {
+        if (state.isConnected) {
+           await syncData()
         }
     })
 }

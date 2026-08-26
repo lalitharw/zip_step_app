@@ -1,5 +1,7 @@
 import { createActivityOnServer } from "@/api/activityApi"
-import { getUnsyncedActivities, markActivityAsSynced, updateActivityServerId } from "@/database/activities"
+import { uploadLocationPoint } from "@/api/locationPointApi"
+import { getActivitiesWithUnSyncedPoints, getUnsyncedActivities, markActivityAsSynced, updateActivityServerId } from "@/database/activities"
+import { getUnsyncedLocationPoints, markLocationPointsAsSynced } from "@/database/locationPoints"
 
 let isSyncing = false
 
@@ -39,3 +41,46 @@ export const syncActivities = async () => {
     }
 
 }
+
+
+export const syncLocationPoints = async () => {
+    if (isSyncing) {
+        return
+    }
+
+    isSyncing = true
+    try {
+        const activities = await getActivitiesWithUnSyncedPoints()
+
+        if (activities && activities.length > 0) {
+            for (const activity of activities) {
+                if (!activity.server_id) {
+                    continue
+                }
+                const points = await getUnsyncedLocationPoints(activity.id)
+                if (points.length == 0) {
+                    continue
+                }
+                await uploadLocationPoint(points, activity.server_id)
+                // console.log("ID: ", points.map((point) => point.id).join(","))
+                await markLocationPointsAsSynced(Number(points.map((point) => point.id).join(",")))
+
+            }
+        }
+    }
+    catch (error) {
+        console.error("Something went wrong: ", error)
+        throw error
+    }
+    finally {
+        isSyncing = false
+    }
+}
+
+
+export const syncData = async () => {
+    await syncActivities()
+    await syncLocationPoints()
+}
+
+

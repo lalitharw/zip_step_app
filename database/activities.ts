@@ -100,3 +100,20 @@ export async function markActivityAsSynced(clientId: number) {
         `, clientId)
 }
 
+
+export const getActivitiesWithUnSyncedPoints = async () => {
+    const result = await db.getAllAsync<Activity>(
+        `
+        SELECT DISTINCT a.* 
+        FROM activities a
+        INNER JOIN location_points lp
+        on a.id = lp.activity_id
+        WHERE a.server_id IS NOT NULL
+        AND lp.synced = 0
+        ORDER BY a.id ASC
+        `
+    )
+
+    return result
+}
+

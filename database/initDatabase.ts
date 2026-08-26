@@ -20,6 +20,7 @@ export  function initDatabase() {
          CREATE TABLE IF NOT EXISTS location_points (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             activity_id INTEGER NOT NULL,
+            client_id TEXT NOT NULL UNIQUE,
             latitude REAL NOT NULL,
             longitude REAL NOT NULL,
             accuracy REAL,
