@@ -33,7 +33,7 @@ export async function createActivity() {
 export async function getAllActivity(): Promise<Activity[] | null> {
     return db.getAllAsync<Activity>(`
             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced
-            FROM activities`)
+            FROM activities ORDER BY id ASC`)
 }
 
 export async function getActivity(activityId: number): Promise<Activity | null> {

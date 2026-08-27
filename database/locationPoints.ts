@@ -102,6 +102,22 @@ export async function getLocationPoints(activityId: number): Promise<LocationPoi
         `, activityId)
 }
 
+export async function getAllLocationPoint() {
+    return await db.getAllAsync(`
+            SELECT id,
+            activity_id AS activityId,
+            latitude,
+            longitude,
+            accuracy,
+            altitude,
+            speed,
+            timestamp,
+            synced
+            FROM location_points
+            ORDER BY id ASC
+        `)
+}
+
 export async function getUnsyncedLocationPoints(activityId: number): Promise<LocationPoint[]> {
     return await db.getAllAsync<LocationPoint>(`
          SELECT id,
@@ -118,13 +134,18 @@ export async function getUnsyncedLocationPoints(activityId: number): Promise<Loc
             WHERE activity_id = ?
             AND synced = 0
             ORDER BY id ASC
-        `, activityId)
+        `, activityId)  
 }
 
-export async function markLocationPointsAsSynced(pointIds: number) {
+export async function markLocationPointsAsSynced(pointIds: number[]) {
+    if(pointIds.length === 0){
+        return
+    }
+
+    const Ids = pointIds.join(".")
     await db.runAsync(`
             UPDATE location_points
             SET synced = 1
-            WHERE id IN (?)
-        `, pointIds)
+            WHERE id IN (${Ids})
+        `)
 }

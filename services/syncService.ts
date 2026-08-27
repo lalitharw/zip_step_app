@@ -14,8 +14,8 @@ export const syncActivities = async () => {
 
     try {
 
-        console.log("Syncing...")
         const activities = await getUnsyncedActivities()
+
         if (activities && activities?.length > 0) {
             for (const activity of activities) {
                 const result = await createActivityOnServer(activity)
@@ -61,14 +61,16 @@ export const syncLocationPoints = async () => {
                     continue
                 }
                 await uploadLocationPoint(points, activity.server_id)
-                // console.log("ID: ", points.map((point) => point.id).join(","))
-                await markLocationPointsAsSynced(Number(points.map((point) => point.id).join(",")))
+
+                await markLocationPointsAsSynced(points.map((point) => point.id))
 
             }
         }
     }
-    catch (error) {
-        console.error("Something went wrong: ", error)
+    catch (error: any) {
+        console.log("STATUS:", error.response?.status)
+        console.log("DATA:", error.response?.data)
+        console.log("ERROR:", error.response?.data?.errors)
         throw error
     }
     finally {
