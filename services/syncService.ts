@@ -6,12 +6,6 @@ import { getUnsyncedLocationPoints, markLocationPointsAsSynced } from "@/databas
 let isSyncing = false
 
 export const syncActivities = async () => {
-    if (isSyncing) {
-        return
-    }
-
-    isSyncing = true
-
     try {
 
         const activities = await getUnsyncedActivities()
@@ -35,19 +29,11 @@ export const syncActivities = async () => {
         console.error("Something went wrong: ", error)
         throw error
     }
-    finally {
-        isSyncing = false
-    }
 
 }
 
 
 export const syncLocationPoints = async () => {
-    if (isSyncing) {
-        return
-    }
-
-    isSyncing = true
     try {
         const activities = await getActivitiesWithUnSyncedPoints()
 
@@ -73,15 +59,25 @@ export const syncLocationPoints = async () => {
         console.log("ERROR:", error.response?.data?.errors)
         throw error
     }
-    finally {
-        isSyncing = false
-    }
 }
 
 
 export const syncData = async () => {
-    await syncActivities()
-    await syncLocationPoints()
+    if (isSyncing) {
+        return
+    }
+    try {
+        isSyncing = true
+        await syncActivities()
+        await syncLocationPoints()
+    }
+    catch (error) {
+
+    }
+    finally {
+        isSyncing = false
+    }
+
 }
 
 
