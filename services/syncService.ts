@@ -46,9 +46,15 @@ export const syncLocationPoints = async () => {
                 if (points.length == 0) {
                     continue
                 }
-                await uploadLocationPoint(points, activity.server_id)
 
-                await markLocationPointsAsSynced(points.map((point) => point.id))
+                const batchSize = 20
+
+                for (let i = 0; i < points.length; i += batchSize) {
+                    const batchPoints = points.slice(i, i + batchSize)
+                    await uploadLocationPoint(batchPoints, activity.server_id)
+                    await markLocationPointsAsSynced(batchPoints.map((point) => point.id))
+                }
+
 
             }
         }

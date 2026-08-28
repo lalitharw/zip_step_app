@@ -142,7 +142,7 @@ export async function markLocationPointsAsSynced(pointIds: number[]) {
         return
     }
 
-    const Ids = pointIds.join(".")
+    const Ids = pointIds.join(",")
     await db.runAsync(`
             UPDATE location_points
             SET synced = 1
