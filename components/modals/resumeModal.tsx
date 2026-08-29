@@ -36,7 +36,7 @@ export default function ResumeModal({ isVisible }: { isVisible: boolean }) {
         >
 
 
-            <View flex={1} alignItems="center" justifyContent="center" paddingHorizontal={"$5"}>
+            <View flex={1} alignItems="center" justifyContent="center" backgroundColor={colors.lessOpacityBlack} paddingHorizontal={"$5"}>
                 <View alignItems="center" justifyContent="center" backgroundColor={colors.primaryBlack} borderRadius={"$6"} padding={"$6"} borderWidth={1} borderColor={colors.primaryWhite}>
                     <View
                         width={56}
