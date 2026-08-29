@@ -134,14 +134,12 @@ export default function MapBox() {
 
     useEffect(() => {
         if (!currentLocation) {
-            setIsGpsOff(true)
             return;
         }
         console.log(
             "Current Location:",
             currentLocation
         );
-        setIsGpsOff(false)
         cameraRef.current?.easeTo({
             center: [
                 currentLocation.longitude,
@@ -158,14 +156,12 @@ export default function MapBox() {
     useEffect(() => {
         const check = async () => {
             const enabled = await Location.hasServicesEnabledAsync();
-            if (!enabled) {
-                setIsGpsOff(true)
-            }
+            setIsGpsOff(!enabled)
         };
-
+        check()
         const id = setInterval(check, 5000);
         return () => clearInterval(id);
-    }, [isRecording]);
+    }, []);
 
 
 
@@ -174,21 +170,21 @@ export default function MapBox() {
             return;
         }
 
-        const checkGps = async () => {
-            try {
-                const gpsEnabled = await Location.hasServicesEnabledAsync()
-                if (!gpsEnabled) {
-                    setIsGpsOff(true)
-                    setErrorMsg("GPS is turned off. Please enable GPS to continue")
-                }
-                else {
-                    setIsGpsOff(false)
-                }
-            }
-            catch (error) {
-                console.error("GPS status check error: ", error)
-            }
-        }
+        // const checkGps = async () => {
+        //     try {
+        //         const gpsEnabled = await Location.hasServicesEnabledAsync()
+        //         if (!gpsEnabled) {
+        //             setIsGpsOff(true)
+        //             // setErrorMsg("GPS is turned off. Please enable GPS to continue")
+        //         }
+        //         else {
+        //             setIsGpsOff(false)
+        //         }
+        //     }
+        //     catch (error) {
+        //         console.error("GPS status check error: ", error)
+        //     }
+        // }
 
         const loadRoute = async () => {
             try {
@@ -218,12 +214,12 @@ export default function MapBox() {
             }
         }
 
-        checkGps()
+        // checkGps()
         loadRoute()
-        const gpsInterval = setInterval(checkGps, 3000)
+        // const gpsInterval = setInterval(checkGps, 3000)
         const routeInterval = setInterval(loadRoute, 2000)
         return () => {
-            clearInterval(gpsInterval);
+            // clearInterval(gpsInterval);
             clearInterval(routeInterval)
         };
     }, [isRecording]);
