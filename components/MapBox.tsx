@@ -1,6 +1,7 @@
 import { getNewLocationPointsById } from "@/database/locationPoints";
 import { checkIfActivityIsRunning, startActivity, stopActivity } from "@/services/activityService";
 import { getCurrentLocation, stopWatchingLocation } from "@/services/locationService";
+import { networkStatus } from "@/services/networkService";
 import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
@@ -9,7 +10,6 @@ import { useEffect, useRef, useState } from "react";
 import { Button, Spinner, View } from "tamagui";
 import GpsOffModal from "./modals/GpsOffModal";
 import ResumeModal from "./modals/resumeModal";
-import { networkStatus } from "@/services/networkService";
 
 export default function MapBox() {
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
@@ -143,13 +143,13 @@ export default function MapBox() {
             currentLocation
         );
 
-
         cameraRef.current?.easeTo({
             center: [
                 currentLocation.longitude,
                 currentLocation.latitude,
             ],
-            duration: 200,
+            zoom: 18,
+            duration: 2000
         });
 
     }, [
