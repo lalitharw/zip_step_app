@@ -121,8 +121,6 @@ export default function MapBox() {
         }
 
         startLocationWatcher();
-
-
         checkIfRunningActivityPresent()
 
 
@@ -136,13 +134,14 @@ export default function MapBox() {
 
     useEffect(() => {
         if (!currentLocation) {
+            setIsGpsOff(true)
             return;
         }
         console.log(
             "Current Location:",
             currentLocation
         );
-
+        setIsGpsOff(false)
         cameraRef.current?.easeTo({
             center: [
                 currentLocation.longitude,
@@ -155,6 +154,18 @@ export default function MapBox() {
     }, [
         currentLocation
     ]);
+
+    useEffect(() => {
+        const check = async () => {
+            const enabled = await Location.hasServicesEnabledAsync();
+            if (!enabled) {
+                setIsGpsOff(true)
+            }
+        };
+
+        const id = setInterval(check, 5000);
+        return () => clearInterval(id);
+    }, [isRecording]);
 
 
 
