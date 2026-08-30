@@ -7,7 +7,7 @@ import { getCurrentActivityId } from "@/utils/activity";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
-import { Button, Spinner, View } from "tamagui";
+import { Button, Spinner, View, XGroup } from "tamagui";
 import GpsOffModal from "./modals/GpsOffModal";
 import ResumeModal from "./modals/resumeModal";
 
@@ -57,6 +57,7 @@ export default function MapBox() {
 
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [isLoading, setLoading] = useState(false);
+    const [isPaused, setIsPaused] = useState<boolean>(false)
 
     const cameraRef = useRef<CameraRef>(null);
     const lastLoadedId = useRef<number | null>(0)
@@ -441,24 +442,50 @@ export default function MapBox() {
                 bottom={0}
                 width="100%"
             >
+
                 {isRecording ? (
-                    <Button
-                        borderRadius="$10"
-                        onPress={
-                            handleStopTracking
-                        }
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <Spinner
-                                size="small"
-                                color="$green10"
-                            />
-                        ) : (
-                            "Stop"
-                        )}
-                    </Button>
+                    <XGroup width="100%" gap={12} alignItems="center">
+                        <Button
+                            width={"40%"}
+                            borderRadius="$10"
+                            onPress={
+                                handleStopTracking
+                            }
+                            disabled={isLoading}
+                        >
+                            {/* {isLoading ? (
+                                <Spinner
+                                    size="small"
+                                    color="$green10"
+                                />
+                            ) : (
+                                (isPaused ? "Pause" : "Resume")
+                            )} */}
+                            {
+                                isPaused ? "Pause" : "Resume"
+                            }
+                        </Button>
+                        <Button
+                            flex={1}
+                            borderRadius="$10"
+                            onPress={
+                                handleStopTracking
+                            }
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <Spinner
+                                    size="small"
+                                    color="$green10"
+                                />
+                            ) : (
+                                "Stop"
+                            )}
+                        </Button>
+                    </XGroup>
                 ) : (
+
+
                     <Button
                         borderRadius="$10"
                         onPress={

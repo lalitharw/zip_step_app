@@ -9,7 +9,7 @@ export  function initDatabase() {
             server_id INTEGER NULL,
             client_id TEXT NOT NULL UNIQUE,
             status TEXT NOT NULL DEFAULT 'running'
-                CHECK (status IN ('completed', 'cancelled','running')),
+                CHECK (status IN ('completed', 'cancelled','running','pause','resume')),
             started_at TEXt NULL,
             stopped_at TEXt NULL,
             inactivity_notification_sent INTEGER DEFAULT 0,
@@ -28,6 +28,16 @@ export  function initDatabase() {
             speed REAL,
             timestamp TEXT NOT NULL,
             synced INTEGER DEFAULT 0
+        )
+        `)
+
+    db.execAsync(`
+        CREATE TABLE IF NOT EXISTS activity_pauses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            activity_id INTEGER NOT NULL,
+            client_id TEXT NOT NULL UNIQUE,
+            pause_at TEXT NULL,
+            resume_at TEXT NULL
         )
         `)
 }
