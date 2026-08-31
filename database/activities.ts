@@ -36,6 +36,7 @@ export async function getAllActivity(): Promise<Activity[] | null> {
             FROM activities ORDER BY id ASC`)
 }
 
+
 export async function getActivity(activityId: number): Promise<Activity | null> {
     return db.getFirstAsync<Activity>(`
             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced
@@ -115,5 +116,22 @@ export const getActivitiesWithUnSyncedPoints = async () => {
     )
 
     return result
+}
+
+
+export const updateActivityStatusToPause = async (activityId: number) => {
+    await db.runAsync(`
+        UPDATE activities
+        SET status = 'paused'
+        WHERE id = ?
+        `, activityId)
+}
+
+export const updateActivityStatusToResume = async (activityId: number) => {
+    await db.runAsync(`
+        UPDATE activities
+        SET status = 'running'
+        WHERE id = ?
+        `, activityId)
 }
 

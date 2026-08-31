@@ -22,6 +22,7 @@ export default function Login() {
             router.replace("/(tabs)")
         }
         catch (err: any) {
+            console.log(err)
         }
         finally {
             setLoading(false)

@@ -24,7 +24,7 @@ export const checkActivityInactivity = async () => {
         const activity = await getActivity(activityId)
         return {
             "isInActive": caclulateTimeDifference >= 15,
-            "isNotificationSent": activity?.inactivityNotificationSent
+            "isNotificationSent": activity?.inactivity_notification_sent
         }
     }
     catch (error) {

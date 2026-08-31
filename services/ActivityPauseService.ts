@@ -1,12 +1,20 @@
+import { updateActivityStatusToPause, updateActivityStatusToResume } from "@/database/activities"
 import { storePauseAt, storeResumeAt } from "@/database/activityPause"
+import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { getCurrentActivityId } from "@/utils/activity"
+import { getCurrentPauseActivityId, setPauseActivityId } from "@/utils/activityPause"
 
 export const storePauseActivity = async () => {
     try {
+        console.log("Calling Pause Activity")
         const activityId = await getCurrentActivityId()
-        if (!activityId)
+        if (!activityId){
             throw new Error("Activity ID not found")
-        await storePauseAt(activityId)
+        }
+        const res = await storePauseAt(activityId)
+        await setPauseActivityId(res)
+        await updateActivityStatusToPause(activityId)
+        useActivityPauseStore.getState().setIsActivityPaused(true)
         return true
     }
     catch (error) {
@@ -15,9 +23,20 @@ export const storePauseActivity = async () => {
     }
 }
 
-export const storeResumeActivity = async (id: number) => {
+export const storeResumeActivity = async () => {
     try {
-        await storeResumeAt(id)
+        const pauseActivityId = await getCurrentPauseActivityId()
+        const activityId = await getCurrentActivityId()
+        if (!pauseActivityId) {
+            throw new Error("Pause Activity ID not found")
+        }
+
+        if(!activityId){
+            throw new Error("Activity ID not found")
+        }
+        await storeResumeAt(pauseActivityId)
+        await updateActivityStatusToResume(activityId)
+        useActivityPauseStore.getState().setIsActivityPaused(false)
         return true
     }
     catch (error) {

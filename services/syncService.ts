@@ -1,6 +1,8 @@
 import { createActivityOnServer } from "@/api/activityApi"
+import { createActivityPauses } from "@/api/activityPausesApi"
 import { uploadLocationPoint } from "@/api/locationPointApi"
 import { getActivitiesWithUnSyncedPoints, getUnsyncedActivities, markActivityAsSynced, updateActivityServerId } from "@/database/activities"
+import { getUnsyncedActivityPauses, markActivityPauseAsSynced } from "@/database/activityPause"
 import { getUnsyncedLocationPoints, markLocationPointsAsSynced } from "@/database/locationPoints"
 
 let isSyncing = false
@@ -67,6 +69,25 @@ export const syncLocationPoints = async () => {
     }
 }
 
+export const syncActivityPauses = async () => {
+    try {
+        const activityPauses = await getUnsyncedActivityPauses()
+
+        if (activityPauses && activityPauses?.length > 0) {
+            for (const activityPause of activityPauses) {
+                const res = await createActivityPauses(activityPause)
+                if (res && res.id) {
+                    await markActivityPauseAsSynced(res.client_id)
+                }
+            }
+        }
+    }
+    catch (error) {
+        console.error("Something went wrong: ", error)
+        throw error
+    }
+}
+
 
 export const syncData = async () => {
     if (isSyncing) {
@@ -76,6 +97,7 @@ export const syncData = async () => {
         isSyncing = true
         await syncActivities()
         await syncLocationPoints()
+        await syncActivityPauses()
     }
     catch (error) {
 

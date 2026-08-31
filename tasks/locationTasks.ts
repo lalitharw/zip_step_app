@@ -1,3 +1,4 @@
+import { getActivity } from "@/database/activities";
 import { getLastLocationPoint, saveLocationPoint } from "@/database/locationPoints";
 import { checkAndNotifyActivityInactivity, updateIsActiveNotificationSentStatus } from "@/services/activityInActiveService";
 import { getCurrentActivityId } from "@/utils/activity";
@@ -29,6 +30,15 @@ TaskManager.defineTask(
 
         if (activity_id === null) {
             console.log("No activity ID Found")
+            return
+        }
+
+        const activity = await getActivity(activity_id)
+        if (!activity) {
+            return
+        }
+
+        if (activity.status === 'paused') {
             return
         }
 

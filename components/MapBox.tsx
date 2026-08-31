@@ -1,7 +1,9 @@
 import { getNewLocationPointsById } from "@/database/locationPoints";
+import { storePauseActivity, storeResumeActivity } from "@/services/ActivityPauseService";
 import { checkIfActivityIsRunning, startActivity, stopActivity } from "@/services/activityService";
 import { getCurrentLocation, stopWatchingLocation } from "@/services/locationService";
 import { networkStatus } from "@/services/networkService";
+import { useActivityPauseStore } from "@/store/ActivityPauseStore";
 import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
@@ -55,9 +57,12 @@ export default function MapBox() {
         (state) => state.setIsGpsOff
     )
 
+    const isPaused = useActivityPauseStore(
+        (state) => state.isActivityPaused
+    )
+
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [isLoading, setLoading] = useState(false);
-    const [isPaused, setIsPaused] = useState<boolean>(false)
 
     const cameraRef = useRef<CameraRef>(null);
     const lastLoadedId = useRef<number | null>(0)
@@ -117,17 +122,15 @@ export default function MapBox() {
             }
         };
 
-        const checkIfRunningActivityPresent = async () => {
+        const checkIfActivityIsRunningAndPaused = async () => {
             await checkIfActivityIsRunning()
         }
-
         startLocationWatcher();
-        checkIfRunningActivityPresent()
+        checkIfActivityIsRunningAndPaused()
 
 
         return () => {
             console.log("Current location watcher stopped");
-
             stopWatchingLocation();
         };
     }, []);
@@ -330,6 +333,25 @@ export default function MapBox() {
         }
     }
 
+    const handlePauseActivity = async () => {
+        try {
+            await storePauseActivity()
+        }
+        catch (error) {
+            console.error("Something went wrong: ", error)
+        }
+    }
+
+    const handleResumeActivity = async () => {
+        try {
+
+            await storeResumeActivity()
+        }
+        catch (error) {
+            console.error("Something went wrong: ", error)
+        }
+    }
+
 
     return (
         <View flex={1}>
@@ -372,7 +394,7 @@ export default function MapBox() {
                                 id="recorded-route-line"
                                 style={{
                                     lineColor:
-                                        "#00FF00",
+                                        "#1397c3",
                                     lineWidth: 5,
                                     lineCap:
                                         "round",
@@ -449,20 +471,13 @@ export default function MapBox() {
                             width={"40%"}
                             borderRadius="$10"
                             onPress={
-                                handleStopTracking
+                                (
+                                    isPaused ? handleResumeActivity : handlePauseActivity
+                                )
                             }
-                            disabled={isLoading}
                         >
-                            {/* {isLoading ? (
-                                <Spinner
-                                    size="small"
-                                    color="$green10"
-                                />
-                            ) : (
-                                (isPaused ? "Pause" : "Resume")
-                            )} */}
                             {
-                                isPaused ? "Pause" : "Resume"
+                                isPaused ? "Resume" : "Pause"
                             }
                         </Button>
                         <Button

@@ -1,7 +1,9 @@
 import { completeActivity, createActivity, getActivity, getAllActivity } from "@/database/activities"
 import { getLocationPoints } from "@/database/locationPoints"
+import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { useLocationStore } from "@/store/locationStore"
 import { deleteCurrentActivityId, getCurrentActivityId, setCurrentActivityId } from "@/utils/activity"
+import { deleteCurrentPauseActivityId } from "@/utils/activityPause"
 import { requestLocationPermission, startLocationTracking, stopLocationTracking } from "./locationService"
 
 
@@ -89,7 +91,9 @@ export const stopActivity = async () => {
             throw new Error("Failed to complete Activity")
         }
         await deleteCurrentActivityId()
+        await deleteCurrentPauseActivityId()
         useLocationStore.getState().setIsRecording(false)
+        useActivityPauseStore.getState().setIsActivityPaused(false)
         return true
     }
     catch (error) {
@@ -109,6 +113,10 @@ export const checkIfActivityIsRunning = async () => {
             }
             if (activity.status === "running") {
                 useLocationStore.getState().setShowResumeModal(true)
+                useActivityPauseStore.getState().setIsActivityPaused(false)
+            }
+            else if (activity.status == "paused") {
+                useActivityPauseStore.getState().setIsActivityPaused(true)
             }
         }
     }
