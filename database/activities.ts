@@ -118,6 +118,19 @@ export const getActivitiesWithUnSyncedPoints = async () => {
     return result
 }
 
+export const getActivitiesWithUnsyncedActivityPauses = async () => {
+    const result = await db.getAllAsync<Activity>(`
+        SELECT DISTINCT a.*
+        FROM activities a
+        INNER JOIN activity_pauses ap
+        on a.id = ap.activity_id
+        WHERE a.server_id IS NOT NULL AND a.status = 'completed'
+        AND ap.synced = 0
+        ORDER BY a.id ASC
+        `)
+    return result
+}
+
 
 export const updateActivityStatusToPause = async (activityId: number) => {
     await db.runAsync(`

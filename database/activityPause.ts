@@ -11,6 +11,22 @@ export type activityPause = {
 }
 
 
+export async function getActivityPause(activityId: number): Promise<activityPause[]> {
+    try {
+        return await db.getAllAsync<activityPause>(`
+                SELECT id, activity_id, client_id, pause_at, resume_at
+                FROM activity_pauses 
+                WHERE activity_id = ?
+                ORDER BY id ASC
+            `, activityId)
+    }
+    catch (error) {
+        console.error("DB Error: ", error)
+        throw error
+    }
+}
+
+
 export async function storePauseAt(activityId: number): Promise<number> {
     try {
         const result = await db.runAsync(`
@@ -40,20 +56,14 @@ export async function storeResumeAt(activityPauseId: number) {
     }
 }
 
-export async function getUnsyncedActivityPauses(): Promise<activityPause[] | null> {
-    try {
-        return await db.getAllAsync<activityPause>(`
-                SELECT id, activity_id, client_id, resume_at, pause_at
-                FROM activity_pauses
-                WHERE synced = 0 AND resume_at IS NOT NULL
-                ORDER BY id ASC  
-            `)
-
-    }
-    catch (error) {
-        console.error("DB Error: ", error)
-        throw error
-    }
+export async function getUnSyncedActivityPause(activityId: number): Promise<activityPause[]> {
+    return await db.getAllAsync<activityPause>(`
+            SELECT id, activity_id, client_id, pause_at, resume_at
+                FROM activity_pauses 
+                WHERE activity_id = ?
+                AND synced = 0
+                ORDER BY id ASC
+        `, activityId)
 }
 
 export async function markActivityPauseAsSynced(clientId: string) {

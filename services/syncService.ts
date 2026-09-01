@@ -1,8 +1,8 @@
 import { createActivityOnServer } from "@/api/activityApi"
 import { createActivityPauses } from "@/api/activityPausesApi"
 import { uploadLocationPoint } from "@/api/locationPointApi"
-import { getActivitiesWithUnSyncedPoints, getUnsyncedActivities, markActivityAsSynced, updateActivityServerId } from "@/database/activities"
-import { getUnsyncedActivityPauses, markActivityPauseAsSynced } from "@/database/activityPause"
+import { getActivitiesWithUnsyncedActivityPauses, getActivitiesWithUnSyncedPoints, getUnsyncedActivities, markActivityAsSynced, updateActivityServerId } from "@/database/activities"
+import { getUnSyncedActivityPause, markActivityPauseAsSynced } from "@/database/activityPause"
 import { getUnsyncedLocationPoints, markLocationPointsAsSynced } from "@/database/locationPoints"
 
 let isSyncing = false
@@ -71,14 +71,37 @@ export const syncLocationPoints = async () => {
 
 export const syncActivityPauses = async () => {
     try {
-        const activityPauses = await getUnsyncedActivityPauses()
+        // const activityPauses = await getUnsyncedActivityPauses()
 
-        if (activityPauses && activityPauses?.length > 0) {
+        // if (activityPauses && activityPauses?.length > 0) {
+        //     for (const activityPause of activityPauses) {
+        //         const res = await createActivityPauses(activityPause)
+        //         if (res && res.id) {
+        //             await markActivityPauseAsSynced(res.client_id)
+        //         }
+        //     }
+        // }
+
+        const activityPauses = await getActivitiesWithUnsyncedActivityPauses()
+        if (activityPauses && activityPauses.length > 0) {
             for (const activityPause of activityPauses) {
-                const res = await createActivityPauses(activityPause)
-                if (res && res.id) {
-                    await markActivityPauseAsSynced(res.client_id)
+                if (!activityPause.server_id) {
+                    continue
                 }
+
+                const activityPausePoints = await getUnSyncedActivityPause(activityPause.id)
+
+                if (activityPausePoints.length == 0) {
+                    continue
+                }
+
+                for (const activityPausePoint of activityPausePoints) {
+                    const res = await createActivityPauses(activityPausePoint)
+                    if (res && res.id) {
+                        await markActivityPauseAsSynced(res.client_id)
+                    }
+                }
+
             }
         }
     }
