@@ -54,11 +54,10 @@ TaskManager.defineTask(
                 accuracy,
                 speed,
                 heading,
+
             } = location.coords;
 
             const previous_coordinates = await getLastLocationPoint(activity_id)
-
-
             // first point
             if (!previous_coordinates) {
                 if (accuracy == null || accuracy <= 30) {
@@ -141,6 +140,7 @@ TaskManager.defineTask(
                 altitude,
                 accuracy,
                 speed,
+
                 timestamp: new Date(location.timestamp).toISOString()
             }
             )

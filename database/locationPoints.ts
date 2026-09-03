@@ -6,7 +6,7 @@ type LocationPointInput = {
     latitude: number,
     longitude: number,
     accuracy?: number | null,
-    altitude?: number | null,
+    altitude: number,
     speed?: number | null,
     timestamp: string
 }
@@ -17,7 +17,7 @@ export type LocationPoint = {
     latitude: number,
     longitude: number,
     accuracy: number | null,
-    altitude: number | null,
+    altitude: number,
     client_id: string | null,
     speed: number | null,
     timestamp: string,

@@ -96,17 +96,49 @@ export async function calculateAveragePace() {
     }
 }
 
-export async function calculateElevationGain(){
-    try{
+export async function calculateElevationGain() {
+    try {
         const activityId = await getCurrentActivityId()
 
-        
+        if (!activityId) {
+            throw new Error("Activity ID not found")
+        }
+
+        const points = await getLocationPoints(activityId)
+        let totalElevationGained = 0
+        if (points) {
+            for (let i = 1; i < points.length; i++) {
+                let currentElevation = points[i].altitude
+                let previousElevation = points[i - 1].altitude
+
+                if (currentElevation > previousElevation) {
+                    totalElevationGained += (currentElevation - previousElevation)
+                }
+            }
+        }
+
+
     }
-    catch(error){
+    catch (error) {
         console.error("Something went wrong: ", error)
         throw error
     }
 }
+
+// export async function calculateActivityMaxSpeed(){
+//     try{
+//         const activityId = await getCurrentActivityId()
+//         if(!activityId){
+//             throw new Error("Activity ID not found")
+//         }
+//         const points = await getLocationPoints(activityId)
+
+//     }
+//     catch(error){
+//         console.error("Something went wrong: ",error)
+//         throw error
+//     }
+// }
 
 
 

@@ -4,8 +4,10 @@ import { checkIfActivityIsRunning, startActivity, stopActivity } from "@/service
 import { getCurrentLocation, stopWatchingLocation } from "@/services/locationService";
 import { networkStatus } from "@/services/networkService";
 import { useActivityPauseStore } from "@/store/ActivityPauseStore";
+import { useActivityStatsStore } from "@/store/ActivityStatsStore";
 import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
+import { coordinateDistance } from "@/utils/coordinateDistance";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
@@ -27,6 +29,10 @@ export default function MapBox() {
 
     const setCoordinate = useLocationStore(
         (state) => state.setRouteCoordinate
+    )
+
+    const setStats = useActivityStatsStore(
+        (state) => state.setStats
     )
 
     const addCoordinate = useLocationStore(
@@ -197,21 +203,32 @@ export default function MapBox() {
                     console.log("No Activity ID Found")
                     return
                 }
-
                 const newPoints = await getNewLocationPointsById(activity_id, lastLoadedId.current ?? 0)
-
                 if (newPoints.length === 0) {
                     return
                 }
-
-                newPoints.forEach((point) => addCoordinate({
-                    longitude: point.longitude,
-                    latitude: point.latitude,
-                    accuracy: point.accuracy
-                }))
-
+                for (const point of newPoints) {
+                    const routeCoordinates = useLocationStore.getState().routeCoordinates
+                    const previousPoint = routeCoordinates[routeCoordinates.length - 1]
+                    if (previousPoint) {
+                        const currentDistance = useActivityStatsStore.getState().stats.distance
+                        const distance = coordinateDistance({
+                            lat1: previousPoint.latitude,
+                            lon1: previousPoint.longitude,
+                            lat2: point.latitude,
+                            lon2: point.longitude,
+                        })
+                        setStats({
+                            distance: currentDistance + distance
+                        })
+                    }
+                    addCoordinate({
+                        longitude: point.longitude,
+                        latitude: point.latitude,
+                        accuracy: point.accuracy
+                    })
+                }
                 lastLoadedId.current = newPoints[newPoints.length - 1].id
-
             }
             catch (error) {
                 console.error("Failed to refresh route: ", error)
@@ -223,7 +240,6 @@ export default function MapBox() {
         // const gpsInterval = setInterval(checkGps, 3000)
         const routeInterval = setInterval(loadRoute, 2000)
         return () => {
-            // clearInterval(gpsInterval);
             clearInterval(routeInterval)
         };
     }, [isRecording]);
@@ -494,7 +510,7 @@ export default function MapBox() {
                                     color="$green10"
                                 />
                             ) : (
-                                "Stop"
+                                `Stop ${useActivityStatsStore.getState().stats.distance}` 
                             )}
                         </Button>
                     </XGroup>
