@@ -27,9 +27,6 @@ export default function MapBox() {
         (state) => state.showResumeModal
     )
 
-    const setCoordinate = useLocationStore(
-        (state) => state.setRouteCoordinate
-    )
 
     const setStats = useActivityStatsStore(
         (state) => state.setStats
@@ -180,22 +177,6 @@ export default function MapBox() {
             return;
         }
 
-        // const checkGps = async () => {
-        //     try {
-        //         const gpsEnabled = await Location.hasServicesEnabledAsync()
-        //         if (!gpsEnabled) {
-        //             setIsGpsOff(true)
-        //             // setErrorMsg("GPS is turned off. Please enable GPS to continue")
-        //         }
-        //         else {
-        //             setIsGpsOff(false)
-        //         }
-        //     }
-        //     catch (error) {
-        //         console.error("GPS status check error: ", error)
-        //     }
-        // }
-
         const loadRoute = async () => {
             try {
                 const activity_id = await getCurrentActivityId()
@@ -235,9 +216,7 @@ export default function MapBox() {
             }
         }
 
-        // checkGps()
         loadRoute()
-        // const gpsInterval = setInterval(checkGps, 3000)
         const routeInterval = setInterval(loadRoute, 2000)
         return () => {
             clearInterval(routeInterval)
@@ -255,34 +234,6 @@ export default function MapBox() {
 
 
 
-    // const handleStartTracking = async () => {
-    //     try {
-    //         setLoading(true);
-    //         lastLoadedId.current = null
-
-    //         await startActivityService()
-
-    //         console.log(
-    //             "Recording started"
-    //         );
-    //     } catch (error) {
-    //         console.error(
-    //             "START ERROR:",
-    //             error
-    //         );
-
-    //         if (error instanceof Error) {
-    //             setErrorMsg(error.message);
-    //         } else {
-    //             setErrorMsg(
-    //                 "Something went wrong"
-    //             );
-    //         }
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
     const handleStartTracking = async () => {
         try {
             setLoading(true)
@@ -296,45 +247,6 @@ export default function MapBox() {
             setLoading(false)
         }
     }
-
-
-
-    // const handleStopTracking = async () => { 
-    //     try {
-    //         setLoading(true);
-    //         await stopActivityService()
-    //         console.log(
-    //             "Location tracking stopped"
-    //         );
-    //         const finalRoute =
-    //             useLocationStore.getState()
-    //                 .routeCoordinates;
-
-    //         console.log(
-    //             "Final Route:",
-    //             finalRoute
-    //         );
-    //         console.log(
-    //             "Total points:",
-    //             finalRoute.length
-    //         );
-    //     } catch (error) {
-    //         console.error(
-    //             "STOP ERROR:",
-    //             error
-    //         );
-
-    //         if (error instanceof Error) {
-    //             setErrorMsg(error.message);
-    //         } else {
-    //             setErrorMsg(
-    //                 "Something went wrong"
-    //             );
-    //         }
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
 
     const handleStopTracking = async () => {
         try {
