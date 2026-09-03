@@ -1,6 +1,6 @@
 import { Text, View } from "tamagui";
 
-export default function Stats() {
+export default function ActivityStats() {
     return (
         <View>
             <Text>Hello world</Text>

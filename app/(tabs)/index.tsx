@@ -1,5 +1,6 @@
 import GradientBackground from "@/components/GradientBackground"
 import MapBox from "@/components/MapBox"
+import ActivityStats from "@/components/stats/ActivityStats"
 import Timer from "@/components/Timer"
 import { useLocationStore } from "@/store/locationStore"
 import Animated, { LinearTransition } from "react-native-reanimated"
@@ -17,6 +18,8 @@ export default function index() {
                     </Animated.View>
                 }
                 <MapBox />
+
+                <ActivityStats/>
 
             </SafeAreaView>
         </GradientBackground>
