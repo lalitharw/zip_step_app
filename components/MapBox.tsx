@@ -7,6 +7,7 @@ import { useActivityPauseStore } from "@/store/ActivityPauseStore";
 import { useActivityStatsStore } from "@/store/ActivityStatsStore";
 import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
+import { calculateActivityMaxSpeed, calculateAveragePace, calculateElevationGain } from "@/utils/activityStats";
 import { coordinateDistance } from "@/utils/coordinateDistance";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
@@ -206,8 +207,15 @@ export default function MapBox() {
                     addCoordinate({
                         longitude: point.longitude,
                         latitude: point.latitude,
-                        accuracy: point.accuracy
+                        accuracy: point.accuracy,
+                        altitude: point.altitude,
+                        speed: point.speed
                     })
+
+                    // max speed
+                    await calculateActivityMaxSpeed()
+                    await calculateAveragePace()
+                    await calculateElevationGain()
                 }
                 lastLoadedId.current = newPoints[newPoints.length - 1].id
             }
@@ -237,6 +245,7 @@ export default function MapBox() {
     const handleStartTracking = async () => {
         try {
             setLoading(true)
+            useActivityStatsStore.getState().resetStats()
             lastLoadedId.current = 0
             await startActivity()
         }
@@ -422,7 +431,7 @@ export default function MapBox() {
                                     color="$green10"
                                 />
                             ) : (
-                                `Stop ${useActivityStatsStore.getState().stats.distance}` 
+                                `Stop ${useActivityStatsStore.getState().stats.averagePace}`
                             )}
                         </Button>
                     </XGroup>

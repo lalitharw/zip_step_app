@@ -16,10 +16,10 @@ export type LocationPoint = {
     activityId: number,
     latitude: number,
     longitude: number,
-    accuracy: number | null,
+    accuracy: number,
     altitude: number,
     client_id: string | null,
-    speed: number | null,
+    speed: number,
     timestamp: string,
     synced: number,
 }
@@ -134,11 +134,11 @@ export async function getUnsyncedLocationPoints(activityId: number): Promise<Loc
             WHERE activity_id = ?
             AND synced = 0
             ORDER BY id ASC
-        `, activityId)  
+        `, activityId)
 }
 
 export async function markLocationPointsAsSynced(pointIds: number[]) {
-    if(pointIds.length === 0){
+    if (pointIds.length === 0) {
         return
     }
 

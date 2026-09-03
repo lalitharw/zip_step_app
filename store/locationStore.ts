@@ -3,7 +3,9 @@ import { create } from "zustand"
 type Coordinates = {
     longitude: number,
     latitude: number,
-    accuracy: number | null
+    accuracy: number,
+    altitude: number,
+    speed: number
 }
 
 

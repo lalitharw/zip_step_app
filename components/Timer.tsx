@@ -1,12 +1,14 @@
 import { colors } from "@/constants/theme";
+import { useActivityStatsStore } from "@/store/ActivityStatsStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
+import { formatTime } from "@/utils/formatTime";
 import { useEffect, useState } from "react";
 import { Text, View } from "tamagui";
-import { formatTime } from "@/utils/formatTime";
 
 export default function Timer() {
-    const [elapsed, setElapsed] = useState<number>(0)
+    const setStats = useActivityStatsStore((state) => state.setStats)
+    const getTime = useActivityStatsStore((state) => state.stats.duration)
     const [activityId, setActivityId] = useState(0)
 
     useEffect(() => {
@@ -17,8 +19,10 @@ export default function Timer() {
             }
             setActivityId(activityId)
             const time = await getActivityElapsedTime(activityId)
-            if (time){
-                setElapsed(time)
+            if (time) {
+                setStats({
+                    duration: time
+                })
             }
         }
 
@@ -32,7 +36,7 @@ export default function Timer() {
 
         <View paddingVertical={45} alignItems="center">
             <Text color={colors.primaryWhite} fontWeight={"bold"} fontSize={70}>
-                {formatTime(elapsed)}
+                {formatTime(getTime)}
             </Text>
         </View>
     )
