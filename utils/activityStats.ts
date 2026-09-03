@@ -1,7 +1,5 @@
-import { getLocationPoints } from "@/database/locationPoints"
 import { useActivityStatsStore } from "@/store/ActivityStatsStore"
 import { useLocationStore } from "@/store/locationStore"
-import { getCurrentActivityId } from "./activity"
 import { coordinateDistance } from "./coordinateDistance"
 
 
@@ -9,24 +7,20 @@ import { coordinateDistance } from "./coordinateDistance"
 
 export async function calculateActivityDistance() {
     try {
-        const activityId = await getCurrentActivityId()
-        if (!activityId) {
-            throw new Error("Activity ID not found")
-        }
-        const points = await getLocationPoints(activityId)
-        let totalDistance = 0
-        for (let i = 1; i < points.length; i++) {
-            const previous = points[i - 1]
-            const current = points[i]
-            totalDistance += coordinateDistance({
-                lat1: previous.latitude,
-                lon1: previous.longitude,
-                lat2: current.latitude,
-                lon2: current.longitude,
-            }
-            )
-        }
-        return totalDistance
+        const routeCoordinates = useLocationStore.getState().routeCoordinates
+        if (routeCoordinates.length < 2) return
+        const previousPoint = routeCoordinates[routeCoordinates.length - 2]
+        const currentPoint = routeCoordinates[routeCoordinates.length - 1]
+        const distance = coordinateDistance({
+            lat1: previousPoint.latitude,
+            lon1: previousPoint.longitude,
+            lat2: currentPoint.latitude,
+            lon2: currentPoint.longitude,
+        })
+        const currentDistance = useActivityStatsStore.getState().stats.distance
+        useActivityStatsStore.getState().setStats({
+            distance: currentDistance + distance
+        })
     }
     catch (error) {
         console.error("Something went wrong: ", error)

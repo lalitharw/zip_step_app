@@ -7,8 +7,7 @@ import { useActivityPauseStore } from "@/store/ActivityPauseStore";
 import { useActivityStatsStore } from "@/store/ActivityStatsStore";
 import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
-import { calculateActivityMaxSpeed, calculateAveragePace, calculateElevationGain } from "@/utils/activityStats";
-import { coordinateDistance } from "@/utils/coordinateDistance";
+import { calculateActivityDistance, calculateActivityMaxSpeed, calculateAveragePace, calculateElevationGain } from "@/utils/activityStats";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
@@ -190,20 +189,20 @@ export default function MapBox() {
                     return
                 }
                 for (const point of newPoints) {
-                    const routeCoordinates = useLocationStore.getState().routeCoordinates
-                    const previousPoint = routeCoordinates[routeCoordinates.length - 1]
-                    if (previousPoint) {
-                        const currentDistance = useActivityStatsStore.getState().stats.distance
-                        const distance = coordinateDistance({
-                            lat1: previousPoint.latitude,
-                            lon1: previousPoint.longitude,
-                            lat2: point.latitude,
-                            lon2: point.longitude,
-                        })
-                        setStats({
-                            distance: currentDistance + distance
-                        })
-                    }
+                    // const routeCoordinates = useLocationStore.getState().routeCoordinates
+                    // const previousPoint = routeCoordinates[routeCoordinates.length - 1]
+                    // if (previousPoint) {
+                    //     const currentDistance = useActivityStatsStore.getState().stats.distance
+                    //     const distance = coordinateDistance({
+                    //         lat1: previousPoint.latitude,
+                    //         lon1: previousPoint.longitude,
+                    //         lat2: point.latitude,
+                    //         lon2: point.longitude,
+                    //     })
+                    //     setStats({
+                    //         distance: currentDistance + distance
+                    //     })
+                    // }
                     addCoordinate({
                         longitude: point.longitude,
                         latitude: point.latitude,
@@ -212,7 +211,7 @@ export default function MapBox() {
                         speed: point.speed
                     })
 
-                    // max speed
+                    await calculateActivityDistance()
                     await calculateActivityMaxSpeed()
                     await calculateAveragePace()
                     await calculateElevationGain()
