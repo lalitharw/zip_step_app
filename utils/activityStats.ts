@@ -62,8 +62,9 @@ export async function calculateActivityAverageSpeed() {
         const distance = useActivityStatsStore.getState().stats.distance
         const duration = useActivityStatsStore.getState().stats.duration
         if (distance <= 0 || duration <= 0) return
+        const durationSeconds = duration / 1000
         useActivityStatsStore.getState().setStats({
-            averageSpeed: distance / duration
+            averageSpeed: distance / durationSeconds
         })
     }
     catch (error) {
@@ -78,7 +79,8 @@ export async function calculateAveragePace() {
         const distance = useActivityStatsStore.getState().stats.distance
         const duration = useActivityStatsStore.getState().stats.duration
         if (distance <= 0 || duration <= 0) return
-        const averagePace = duration / (distance / 1000)
+        const durationSeconds = duration / 1000
+        const averagePace = distance / durationSeconds
         useActivityStatsStore.getState().setStats({
             averagePace: averagePace
         })
@@ -99,7 +101,7 @@ export async function calculateElevationGain() {
             return
         }
         if (currentElevation > previousElevation) {
-            const currentTotal = useActivityStatsStore.getState().stats.elevationGain ?? 0
+            const currentTotal = useActivityStatsStore.getState().stats.elevationGain
             const gain = currentElevation - previousElevation
             useActivityStatsStore.getState().setStats({
                 elevationGain: currentTotal + gain

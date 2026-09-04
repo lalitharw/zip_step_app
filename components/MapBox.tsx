@@ -177,7 +177,10 @@ export default function MapBox() {
             return;
         }
 
+        let isFetching = false
         const loadRoute = async () => {
+            if (isFetching) return
+            isFetching = true
             try {
                 const activity_id = await getCurrentActivityId()
                 if (!activity_id) {
@@ -189,20 +192,6 @@ export default function MapBox() {
                     return
                 }
                 for (const point of newPoints) {
-                    // const routeCoordinates = useLocationStore.getState().routeCoordinates
-                    // const previousPoint = routeCoordinates[routeCoordinates.length - 1]
-                    // if (previousPoint) {
-                    //     const currentDistance = useActivityStatsStore.getState().stats.distance
-                    //     const distance = coordinateDistance({
-                    //         lat1: previousPoint.latitude,
-                    //         lon1: previousPoint.longitude,
-                    //         lat2: point.latitude,
-                    //         lon2: point.longitude,
-                    //     })
-                    //     setStats({
-                    //         distance: currentDistance + distance
-                    //     })
-                    // }
                     addCoordinate({
                         longitude: point.longitude,
                         latitude: point.latitude,
@@ -211,15 +200,32 @@ export default function MapBox() {
                         speed: point.speed
                     })
 
-                    await calculateActivityDistance()
-                    await calculateActivityMaxSpeed()
-                    await calculateAveragePace()
-                    await calculateElevationGain()
+                    try {
+                        await calculateActivityDistance()
+                        await calculateActivityMaxSpeed()
+                        await calculateAveragePace()
+                        await calculateElevationGain()
+
+                        console.log("----Activity Stats----")
+                        console.log("Distance: ", useActivityStatsStore.getState().stats.distance)
+                        console.log("Duration: ", useActivityStatsStore.getState().stats.duration)
+                        console.log("MaxSpeed: ", useActivityStatsStore.getState().stats.maxSpeed)
+                        console.log("AveragePace: ", useActivityStatsStore.getState().stats.averagePace)
+                        console.log("ElevationGain: ", useActivityStatsStore.getState().stats.elevationGain)
+                    }
+                    catch (statsError) {
+                        console.error("Failed to update stats: ", statsError);
+                    }
                 }
+
                 lastLoadedId.current = newPoints[newPoints.length - 1].id
+
             }
             catch (error) {
                 console.error("Failed to refresh route: ", error)
+            }
+            finally {
+                isFetching = false
             }
         }
 
