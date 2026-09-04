@@ -18,6 +18,7 @@ import ActivityStats from "./ActivityStats";
 import GpsOffModal from "./modals/GpsOffModal";
 import ResumeModal from "./modals/resumeModal";
 
+
 export default function MapBox() {
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
 
