@@ -1,6 +1,7 @@
 import { completeActivity, createActivity, getActivity, getAllActivity } from "@/database/activities"
 import { getLocationPoints } from "@/database/locationPoints"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
+import { useActivityStore } from "@/store/ActivityStore"
 import { useLocationStore } from "@/store/locationStore"
 import { deleteCurrentActivityId, getCurrentActivityId, setCurrentActivityId } from "@/utils/activity"
 import { deleteCurrentPauseActivityId } from "@/utils/activityPause"
@@ -61,6 +62,7 @@ export const startActivity = async () => {
         }
 
         await setCurrentActivityId(activity)
+        useActivityStore.getState().setActivityId(activity)
         const trackingStarted = await startLocationTracking()
         if (!trackingStarted) {
             await completeActivity(activity)
@@ -92,6 +94,7 @@ export const stopActivity = async () => {
         }
         await deleteCurrentActivityId()
         await deleteCurrentPauseActivityId()
+        useActivityStore.getState().setActivityId(null)
         useLocationStore.getState().setIsRecording(false)
         useActivityPauseStore.getState().setIsActivityPaused(false)
         return true

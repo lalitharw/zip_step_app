@@ -5,13 +5,16 @@ import { getCurrentLocation, stopWatchingLocation } from "@/services/locationSer
 import { networkStatus } from "@/services/networkService";
 import { useActivityPauseStore } from "@/store/ActivityPauseStore";
 import { useActivityStatsStore } from "@/store/ActivityStatsStore";
+import { useActivityStore } from "@/store/ActivityStore";
 import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
+import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
 import { calculateActivityDistance, calculateActivityMaxSpeed, calculateAveragePace, calculateElevationGain } from "@/utils/activityStats";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from "react";
 import { Button, Spinner, View, XGroup } from "tamagui";
+import ActivityStats from "./ActivityStats";
 import GpsOffModal from "./modals/GpsOffModal";
 import ResumeModal from "./modals/resumeModal";
 
@@ -34,6 +37,10 @@ export default function MapBox() {
 
     const addCoordinate = useLocationStore(
         (state) => state.addRouteCoordinate
+    )
+
+    const activityId = useActivityStore(
+        (state) => state.activityId
     )
 
     const currentLocation = useLocationStore(
@@ -95,6 +102,47 @@ export default function MapBox() {
             ]),
         },
     };
+
+    useEffect(() => {
+        if (!isRecording || !activityId) {
+            return
+        }
+        const updateTimer = async () => {
+            const start = Date.now()
+            try {
+                if (!activityId) {
+                    throw new Error("Activity ID Not found")
+                }
+
+                const time = await getActivityElapsedTime(activityId)
+
+
+                if (time !== null) {
+                    console.log(
+                        "Time:",
+                        time,
+                        "Tick:",
+                        new Date().toLocaleTimeString()
+                    )
+                    console.log("Time: ", time)
+                    setStats({
+                        duration: time
+                    })
+                }
+            }
+            catch (error) {
+                console.error("Something went wrong: ", error)
+                throw error
+            }
+        }
+        updateTimer()
+
+        const interval = setInterval(updateTimer, 1000)
+
+        return () => {
+            clearInterval(interval)
+        }
+    }, [isRecording, activityId])
 
     useEffect(() => {
         const unsubscribe = networkStatus()
@@ -297,6 +345,9 @@ export default function MapBox() {
 
     return (
         <View flex={1}>
+            {
+                isRecording && <ActivityStats />
+            }
             <View
                 height="100%"
                 width="100%"
@@ -398,8 +449,6 @@ export default function MapBox() {
 
                 </Map>
             </View>
-
-
             <View
                 padding={20}
                 position="absolute"
@@ -436,7 +485,7 @@ export default function MapBox() {
                                     color="$green10"
                                 />
                             ) : (
-                                `Stop ${useActivityStatsStore.getState().stats.averagePace}`
+                                `Stop`
                             )}
                         </Button>
                     </XGroup>
