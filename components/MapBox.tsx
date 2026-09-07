@@ -108,7 +108,6 @@ export default function MapBox() {
             return
         }
         const updateTimer = async () => {
-            const start = Date.now()
             try {
                 if (!activityId) {
                     throw new Error("Activity ID Not found")
@@ -118,13 +117,6 @@ export default function MapBox() {
 
 
                 if (time !== null) {
-                    console.log(
-                        "Time:",
-                        time,
-                        "Tick:",
-                        new Date().toLocaleTimeString()
-                    )
-                    console.log("Time: ", time)
                     setStats({
                         duration: time
                     })
