@@ -91,6 +91,7 @@ export async function calculateAveragePace() {
     }
 }
 
+
 export async function calculateElevationGain() {
     try {
         const routeCoordinates = useLocationStore.getState().routeCoordinates
@@ -104,7 +105,8 @@ export async function calculateElevationGain() {
             const currentTotal = useActivityStatsStore.getState().stats.elevationGain
             const gain = currentElevation - previousElevation
             useActivityStatsStore.getState().setStats({
-                elevationGain: currentTotal + gain
+                elevationGain: currentTotal + gain,
+                currentElevation: currentElevation
             })
         }
     }
@@ -120,6 +122,7 @@ export async function calculateActivityMaxSpeed() {
         let latestPoint = routeCoordinates[routeCoordinates.length - 1]
         if (!latestPoint) return
         const maxSpeed = useActivityStatsStore.getState().stats.maxSpeed
+        console.log("Max Speed: ", maxSpeed)
         useActivityStatsStore.getState().setStats({
             maxSpeed: Math.max(maxSpeed, latestPoint.speed)
         })

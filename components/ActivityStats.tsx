@@ -70,7 +70,7 @@ export default function ActivityStats() {
                                     height={"65%"}
                                     backgroundColor={colors.secondaryWhite}
                                 />
-                                <Stats flex={1} label="Elevation" value={`${Math.round(stats.elevationGain)} m`} />
+                                <Stats flex={1} label="Elev. Gain" value={`${Math.round(stats.elevationGain)} m`} />
 
                             </XStack>
                             <View
@@ -85,7 +85,7 @@ export default function ActivityStats() {
                                     height={"65%"}
                                     backgroundColor={colors.secondaryWhite}
                                 />
-                                <Stats flex={1} label="Current Speed" value={`${(stats.currentSpeed * 3.6).toFixed(1)} km/h`} />
+                                <Stats flex={1} label="Current Speed" value={`${stats.currentSpeed} km/h`} />
 
                             </XStack>
                         </>

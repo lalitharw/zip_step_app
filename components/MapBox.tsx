@@ -173,7 +173,6 @@ export default function MapBox() {
 
 
         return () => {
-            console.log("Current location watcher stopped");
             stopWatchingLocation();
         };
     }, []);
@@ -183,10 +182,6 @@ export default function MapBox() {
         if (!currentLocation) {
             return;
         }
-        console.log(
-            "Current Location:",
-            currentLocation
-        );
         cameraRef.current?.easeTo({
             center: [
                 currentLocation.longitude,
