@@ -80,9 +80,9 @@ export async function calculateAveragePace() {
         const duration = useActivityStatsStore.getState().stats.duration
         if (distance <= 0 || duration <= 0) return
         const durationSeconds = duration / 1000
-        const averagePace = distance / durationSeconds
+        const paceSecondsPerKm = (durationSeconds / distance) * 1000
         useActivityStatsStore.getState().setStats({
-            averagePace: averagePace
+            averagePace: paceSecondsPerKm
         })
     }
     catch (error) {

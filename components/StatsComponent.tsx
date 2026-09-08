@@ -4,14 +4,15 @@ import { Text, View } from "tamagui"
 type statsType = {
     label: string,
     value: string,
-    fontSize?: number | null
+    fontSize?: number | null,
+    flex: number
 }
 
-export default function StatsComponent({ label, value, fontSize }: statsType) {
+export default function StatsComponent({ label, value, fontSize, flex }: statsType) {
     return (
-        <View alignItems="center" paddingHorizontal={20} paddingVertical={20}>
-            <Text textTransform="capitalize" color={colors.secondaryWhite}>{label}</Text>
-            <Text fontSize={fontSize ?? 18} color={colors.primaryWhite}>
+        <View justifyContent="center" alignItems="center" flex={flex} padding={15} >
+            <Text marginBottom={6} textTransform="capitalize" color={colors.secondaryWhite}>{label}</Text>
+            <Text fontSize={fontSize ?? 15} color={colors.primaryWhite}>
                 {value}
             </Text>
         </View>

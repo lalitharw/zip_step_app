@@ -246,12 +246,6 @@ export default function MapBox() {
                         await calculateAveragePace()
                         await calculateElevationGain()
 
-                        console.log("----Activity Stats----")
-                        console.log("Distance: ", useActivityStatsStore.getState().stats.distance)
-                        console.log("Duration: ", useActivityStatsStore.getState().stats.duration)
-                        console.log("MaxSpeed: ", useActivityStatsStore.getState().stats.maxSpeed)
-                        console.log("AveragePace: ", useActivityStatsStore.getState().stats.averagePace)
-                        console.log("ElevationGain: ", useActivityStatsStore.getState().stats.elevationGain)
                     }
                     catch (statsError) {
                         console.error("Failed to update stats: ", statsError);
@@ -278,12 +272,12 @@ export default function MapBox() {
 
 
 
-    useEffect(() => {
-        console.log(
-            "Route Coordinates:",
-            routeCoordinates
-        );
-    }, [routeCoordinates]);
+    // useEffect(() => {
+    //     console.log(
+    //         "Route Coordinates:",
+    //         routeCoordinates
+    //     );
+    // }, [routeCoordinates]);
 
 
 

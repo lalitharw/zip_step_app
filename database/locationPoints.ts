@@ -36,7 +36,7 @@ export async function saveLocationPoint(point: LocationPointInput): Promise<void
         point.latitude,
         point.longitude,
         point.accuracy ?? null,
-        point.altitude ?? null,
+        point.altitude,
         point.speed ?? null,
         point.timestamp
     )

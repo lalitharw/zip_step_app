@@ -11,7 +11,7 @@ export const LOCATION_TASK_NAME = "stride_flow_location_task";
 TaskManager.defineTask(
     LOCATION_TASK_NAME,
     async ({ data, error }) => {
-        console.log("🔥 LOCATION TASK FIRED");
+        // console.log("🔥 LOCATION TASK FIRED");
 
         if (error) {
             console.error("Location task error:", error);
@@ -57,16 +57,17 @@ TaskManager.defineTask(
 
             } = location.coords;
 
+            console.log("Location Coords: ", location.coords)
+
             const previous_coordinates = await getLastLocationPoint(activity_id)
             // first point
             if (!previous_coordinates) {
                 if (accuracy == null || accuracy <= 30) {
-                    console.log("Adding first point")
                     await saveLocationPoint({
                         activityId: activity_id,
                         latitude,
                         longitude,
-                        altitude,
+                        altitude: altitude ?? 0,
                         accuracy,
                         speed,
                         timestamp: new Date(location.timestamp).toISOString()
@@ -93,7 +94,6 @@ TaskManager.defineTask(
                 lon2: longitude
             })
 
-            console.log("Distance: ", distance)
 
             // check if timestamp is valid
             const previousTimestamp = new Date(previous_coordinates.timestamp).getTime()
@@ -132,12 +132,11 @@ TaskManager.defineTask(
                 continue
             }
 
-            console.log("Adding Points")
             await saveLocationPoint({
                 activityId: activity_id,
                 latitude,
                 longitude,
-                altitude,
+                altitude: altitude ?? 0,
                 accuracy,
                 speed,
 
