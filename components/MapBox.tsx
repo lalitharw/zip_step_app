@@ -75,8 +75,6 @@ export default function MapBox() {
     const cameraRef = useRef<CameraRef>(null);
     const lastLoadedId = useRef<number | null>(0)
 
-
-
     const startPoint =
         routeCoordinates.length > 0
             ? routeCoordinates[0]
