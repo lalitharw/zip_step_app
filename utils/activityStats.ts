@@ -5,7 +5,7 @@ import { coordinateDistance } from "./coordinateDistance"
 
 // Note: Every Output is meters per seconds later will be format it
 
-export async function calculateActivityDistance() {
+export function calculateActivityDistance() {
     try {
         const routeCoordinates = useLocationStore.getState().routeCoordinates
         if (routeCoordinates.length < 2) return
@@ -56,7 +56,7 @@ export async function calculateActivityDistance() {
 //     }
 // }
 
-export async function calculateActivityAverageSpeed() {
+export function calculateAverageSpeed() {
     // average speed = total distance / total time
     try {
         const distance = useActivityStatsStore.getState().stats.distance
@@ -74,13 +74,13 @@ export async function calculateActivityAverageSpeed() {
 }
 
 
-export async function calculateAveragePace() {
+export function calculateAveragePace() {
     try {
         const distance = useActivityStatsStore.getState().stats.distance
         const duration = useActivityStatsStore.getState().stats.duration
         if (distance <= 0 || duration <= 0) return
         const durationSeconds = duration / 1000
-        const paceSecondsPerKm = (durationSeconds / distance) * 1000
+        const paceSecondsPerKm = (durationSeconds / distance)
         useActivityStatsStore.getState().setStats({
             averagePace: paceSecondsPerKm
         })
@@ -92,7 +92,7 @@ export async function calculateAveragePace() {
 }
 
 
-export async function calculateElevationGain() {
+export function calculateElevationGain() {
     try {
         const routeCoordinates = useLocationStore.getState().routeCoordinates
         if (routeCoordinates.length < 2) return
@@ -116,15 +116,15 @@ export async function calculateElevationGain() {
     }
 }
 
-export async function calculateActivityMaxSpeed() {
+export function calculateActivityMaxSpeed() {
     try {
         const routeCoordinates = useLocationStore.getState().routeCoordinates
         let latestPoint = routeCoordinates[routeCoordinates.length - 1]
         if (!latestPoint) return
         const maxSpeed = useActivityStatsStore.getState().stats.maxSpeed
-        console.log("Max Speed: ", maxSpeed)
         useActivityStatsStore.getState().setStats({
-            maxSpeed: Math.max(maxSpeed, latestPoint.speed)
+            maxSpeed: Math.max(maxSpeed, latestPoint.speed),
+            currentSpeed: latestPoint.speed
         })
     }
     catch (error) {

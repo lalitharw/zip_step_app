@@ -58,13 +58,13 @@ export default function ActivityStats() {
                                 backgroundColor={colors.secondaryWhite}
                             />
                             <XStack alignItems="center" justifyContent="flex-start">
-                                <Stats flex={1} label="Avg Speed" value={`${metersToKilometers(stats.averageSpeed)} km/h`} />
+                                <Stats flex={1} label="Avg Speed" value={`${(stats.averageSpeed * 3.6).toFixed(2)} km/h`} />
                                 <View
                                     width={1}
                                     height={"65%"}
                                     backgroundColor={colors.secondaryWhite}
                                 />
-                                <Stats flex={1} label="Max Speed" value={`${metersToKilometers(stats.maxSpeed)} km/h`} />
+                                <Stats flex={1} label="Max Speed" value={`${(stats.maxSpeed * 3.6).toFixed(2)} km/h`} />
                                 <View
                                     width={1}
                                     height={"65%"}
@@ -85,7 +85,7 @@ export default function ActivityStats() {
                                     height={"65%"}
                                     backgroundColor={colors.secondaryWhite}
                                 />
-                                <Stats flex={1} label="Current Speed" value={`${stats.currentSpeed} km/h`} />
+                                <Stats flex={1} label="Current Speed" value={`${(stats.currentSpeed * 3.6).toFixed(2)} km/h`} />
 
                             </XStack>
                         </>
