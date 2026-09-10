@@ -12,6 +12,7 @@ import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
 import { calculateActivityDistance, calculateActivityMaxSpeed, calculateAveragePace, calculateAverageSpeed, calculateElevationGain } from "@/utils/activityStats";
 import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
+import { AnimatePresence } from "moti";
 import { useEffect, useRef, useState } from "react";
 import { Button, Spinner, View, XGroup } from "tamagui";
 import ActivityStats from "./ActivityStats";
@@ -323,9 +324,12 @@ export default function MapBox() {
 
     return (
         <View flex={1}>
-            {
-                isRecording && <ActivityStats />
-            }
+            <AnimatePresence>
+                {
+                    isRecording &&
+                    <ActivityStats />
+                }
+            </AnimatePresence>
             <View
                 height="100%"
                 width="100%"

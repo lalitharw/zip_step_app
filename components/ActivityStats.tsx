@@ -14,6 +14,7 @@ export default function ActivityStats() {
 
     const [expanded, setExpanded] = useState(false)
     return (
+
         <View
             backgroundColor="$black"
             zIndex={300}
@@ -22,114 +23,132 @@ export default function ActivityStats() {
             top={0}
             width="100%"
         >
-
-            <YStack backgroundColor={colors.primaryBlack}
-                borderRadius={20}
-                borderColor={colors.primaryWhite}
-                borderWidth={1}
-                shadowRadius={12}
-                shadowOpacity={0.25}
-                padding={10}
-                elevation={8}
-            >
-                <XStack alignItems="center">
-                    <Stats flex={1} label="Distance" value={`${metersToKilometers(stats.distance)} km`} />
-                    <View
-                        width={1}
-                        height={"65%"}
-                        backgroundColor={colors.secondaryWhite}
-                    />
-                    <Stats flex={1} fontSize={20} label="Time" value={formatTime(stats.duration)} />
-                    <View
-                        width={1}
-                        height={"65%"}
-                        backgroundColor={colors.secondaryWhite}
-                    />
-                    <Stats flex={1} label="Pace" value={`${metersToKilometers(stats.averagePace)}/km`} />
-
-                </XStack>
-                <AnimatePresence>
-                    {
+            <MotiView
+                from={{
+                    opacity: 0,
+                    translateY: -10,
+                }}
+                animate={{
+                    opacity: 1,
+                    translateY: 0,
+                }}
+                exit={{
+                    opacity: 0,
+                    translateY: -10,
+                }}
+                transition={{
+                    type: "timing",
+                    duration: 250,
+                }}>
 
 
-                        expanded && (
-                            <MotiView
-                                from={{
-                                    opacity: 0,
-                                    translateY: -10,
-                                }}
-                                animate={{
-                                    opacity: 1,
-                                    translateY: 0,
-                                }}
-                                exit={{
-                                    opacity: 0,
-                                    translateY: -10,
-                                }}
-                                transition={{
-                                    type: "timing",
-                                    duration: 250,
-                                }}>
-                                <View
-                                    width={"100%"}
-                                    height={1}
-                                    backgroundColor={colors.secondaryWhite}
-                                />
-                                <XStack alignItems="center" justifyContent="flex-start">
-                                    <Stats flex={1} label="Avg Speed" value={`${(stats.averageSpeed * 3.6).toFixed(2)} km/h`} />
-                                    <View
-                                        width={1}
-                                        height={"65%"}
-                                        backgroundColor={colors.secondaryWhite}
-                                    />
-                                    <Stats flex={1} label="Max Speed" value={`${(stats.maxSpeed * 3.6).toFixed(2)} km/h`} />
-                                    <View
-                                        width={1}
-                                        height={"65%"}
-                                        backgroundColor={colors.secondaryWhite}
-                                    />
-                                    <Stats flex={1} label="Elev. Gain" value={`${Math.round(stats.elevationGain)} m`} />
-
-                                </XStack>
-                                <View
-                                    width={"100%"}
-                                    height={1}
-                                    backgroundColor={colors.secondaryWhite}
-                                />
-                                <XStack alignItems="center" justifyContent="flex-start">
-                                    <Stats flex={1} label="Current Elevation" value={`${Math.round(stats.currentElevation)} m`} />
-                                    <View
-                                        width={1}
-                                        height={"65%"}
-                                        backgroundColor={colors.secondaryWhite}
-                                    />
-                                    <Stats flex={1} label="Current Speed" value={`${(stats.currentSpeed * 3.6).toFixed(2)} km/h`} />
-
-                                </XStack>
-                            </MotiView>
-                        )
-                    }
-                </AnimatePresence>
-
-                <Button
-                    unstyled
-                    marginTop={10}
-                    paddingVertical={6}
-                    alignItems="center"
-                    onPress={() => setExpanded(prev => !prev)}
+                <YStack backgroundColor={colors.primaryBlack}
+                    borderRadius={20}
+                    borderColor={colors.primaryWhite}
+                    borderWidth={1}
+                    shadowRadius={12}
+                    shadowOpacity={0.25}
+                    padding={10}
+                    elevation={8}
                 >
-                    <Text
-                        color={colors.secondaryWhite}
-                        fontSize={13}
-                        fontWeight="600"
+                    <XStack alignItems="center">
+                        <Stats flex={1} label="Distance" value={`${metersToKilometers(stats.distance)} km`} />
+                        <View
+                            width={1}
+                            height={"65%"}
+                            backgroundColor={colors.secondaryWhite}
+                        />
+                        <Stats flex={1} fontSize={20} label="Time" value={formatTime(stats.duration)} />
+                        <View
+                            width={1}
+                            height={"65%"}
+                            backgroundColor={colors.secondaryWhite}
+                        />
+                        <Stats flex={1} label="Pace" value={`${metersToKilometers(stats.averagePace)}/km`} />
+
+                    </XStack>
+                    <AnimatePresence>
+                        {
+                            expanded && (
+                                <MotiView
+                                    from={{
+                                        opacity: 0,
+                                        translateY: -10,
+                                    }}
+                                    animate={{
+                                        opacity: 1,
+                                        translateY: 0,
+                                    }}
+                                    exit={{
+                                        opacity: 0,
+                                        translateY: -10,
+                                    }}
+                                    transition={{
+                                        type: "timing",
+                                        duration: 250,
+                                    }}>
+                                    <View
+                                        width={"100%"}
+                                        height={1}
+                                        backgroundColor={colors.secondaryWhite}
+                                    />
+                                    <XStack alignItems="center" justifyContent="flex-start">
+                                        <Stats flex={1} label="Avg Speed" value={`${(stats.averageSpeed * 3.6).toFixed(2)} km/h`} />
+                                        <View
+                                            width={1}
+                                            height={"65%"}
+                                            backgroundColor={colors.secondaryWhite}
+                                        />
+                                        <Stats flex={1} label="Max Speed" value={`${(stats.maxSpeed * 3.6).toFixed(2)} km/h`} />
+                                        <View
+                                            width={1}
+                                            height={"65%"}
+                                            backgroundColor={colors.secondaryWhite}
+                                        />
+                                        <Stats flex={1} label="Elev. Gain" value={`${Math.round(stats.elevationGain)} m`} />
+
+                                    </XStack>
+                                    <View
+                                        width={"100%"}
+                                        height={1}
+                                        backgroundColor={colors.secondaryWhite}
+                                    />
+                                    <XStack alignItems="center" justifyContent="flex-start">
+                                        <Stats flex={1} label="Current Elevation" value={`${Math.round(stats.currentElevation)} m`} />
+                                        <View
+                                            width={1}
+                                            height={"65%"}
+                                            backgroundColor={colors.secondaryWhite}
+                                        />
+                                        <Stats flex={1} label="Current Speed" value={`${(stats.currentSpeed * 3.6).toFixed(2)} km/h`} />
+
+                                    </XStack>
+                                </MotiView>
+                            )
+                        }
+                    </AnimatePresence>
+
+
+                    <Button
+                        unstyled
+                        marginTop={10}
+                        paddingVertical={6}
+                        alignItems="center"
+                        onPress={() => setExpanded(prev => !prev)}
                     >
-                        {expanded ? "Show Less ︿" : "See More  ﹀"}
-                    </Text>
-                </Button>
+                        <Text
+                            color={colors.secondaryWhite}
+                            fontSize={13}
+                            fontWeight="600"
+                        >
+                            {expanded ? "Show Less ︿" : "See More  ﹀"}
+                        </Text>
+                    </Button>
 
 
-            </YStack>
-
+                </YStack>
+            </MotiView>
         </View>
+
     )
 }
