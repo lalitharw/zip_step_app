@@ -331,13 +331,11 @@ export default function MapBox() {
                 }
             </AnimatePresence>
             <View
-                height="100%"
-                width="100%"
+                flex={1}
             >
-                <Map
-                    flex={1}
+                <Map style={{width:"100%",height:"100%"}}
+
                     mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${MAPTILER_API_KEY}`}
-                    logoEnabled
                     attributionPosition={{
                         bottom: 8,
                         right: 8,

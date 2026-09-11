@@ -6,7 +6,7 @@ type ActivityInput = {
     client_id: string
 }
 
-type Activity = {
+export type Activity = {
     id: number,
     server_id: number | null,
     status: string,
@@ -33,7 +33,7 @@ export async function createActivity() {
 export async function getAllActivity(): Promise<Activity[] | null> {
     return db.getAllAsync<Activity>(`
             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced
-            FROM activities ORDER BY id ASC`)
+            FROM activities ORDER BY id DESC`)
 }
 
 
