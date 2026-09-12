@@ -1,6 +1,8 @@
 import { colors } from "@/constants/theme";
 import { Camera, Map } from "@maplibre/maplibre-react-native";
 import { Text, View } from "tamagui";
+import { Link, useRouter } from "expo-router";
+import { Pressable } from "react-native";
 
 
 type activityCard = {
@@ -8,6 +10,7 @@ type activityCard = {
 }
 
 export default function ActivityCard({ text }: activityCard) {
+    const router = useRouter()
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
     return (
         <View marginBottom={20}
@@ -19,6 +22,7 @@ export default function ActivityCard({ text }: activityCard) {
             shadowOpacity={0.25}
             overflow="hidden"
         >
+            <Pressable onPress={() => router.push(`/(tabs)/history/${text}`)}>
             <View height={120}>
                 <Map style={{ flex: 1, overflow: "hidden" }}
                     mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${MAPTILER_API_KEY}`}
@@ -110,6 +114,8 @@ export default function ActivityCard({ text }: activityCard) {
                     </View>
                 </View>
             </View>
+            </Pressable>
+            
         </View >
     )
 }

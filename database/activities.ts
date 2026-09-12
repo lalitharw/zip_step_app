@@ -148,3 +148,17 @@ export const updateActivityStatusToResume = async (activityId: number) => {
         `, activityId)
 }
 
+
+export const getActivityWithLocationPoints = async (activityId: number) => {
+    const activity = await db.getFirstAsync(`
+        SELECT * FROM activities WHERE id = ?`, activityId)
+
+    const location_points = await db.getAllAsync(
+        `SELECT * FROM location_points WHERE activity_id = ? ORDER BY id ASC`, activityId
+    )
+
+    return {
+        activity, location_points
+    }
+}
+

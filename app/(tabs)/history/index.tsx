@@ -1,6 +1,7 @@
 import ActivityCard from "@/components/ActivityCard"
 import GradientBackground from "@/components/GradientBackground"
 import { Activity, getAllActivity } from "@/database/activities"
+import { Link } from "expo-router"
 import { AnimatePresence } from "moti"
 import { useEffect, useState } from "react"
 import { FlatList } from "react-native"
@@ -21,7 +22,6 @@ export default function index() {
     return (
         <GradientBackground>
             <SafeAreaView>
-
                 <View paddingHorizontal={20}>
                     <AnimatePresence>
                         <FlatList
