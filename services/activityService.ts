@@ -107,6 +107,15 @@ export const stopActivity = async () => {
     }
 }
 
+const storeActivityStats = async() => {
+    try{
+
+    }
+    catch(error){
+        console.error("Something went wrong: ",error)
+    }
+}
+
 
 export const checkIfActivityIsRunning = async () => {
     try {
