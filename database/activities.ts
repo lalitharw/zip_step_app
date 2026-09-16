@@ -14,7 +14,8 @@ export type Activity = {
     stopped_at: string | null,
     inactivity_notification_sent: number,
     client_id: string | null,
-    synced: number
+    synced: number,
+    map_image_path: string
 }
 
 export async function createActivity() {
@@ -149,6 +150,17 @@ export const updateActivityStatusToResume = async (activityId: number) => {
 }
 
 
+export const getAllActivitiesOnlyIfLocationPointIsPresent = async () => {
+    return await db.getAllAsync<Activity>(
+        `
+        SELECT a.* FROM activities a
+        WHERE (SELECT COUNT(*) FROM location_points lp WHERE lp.activity_id = a.id) >= 2
+        ORDER BY a.id ASC
+        `
+    );
+};
+
+
 export const getActivityWithLocationPoints = async (activityId: number) => {
     const activity = await db.getFirstAsync(`
         SELECT * FROM activities WHERE id = ?`, activityId)
@@ -160,5 +172,14 @@ export const getActivityWithLocationPoints = async (activityId: number) => {
     return {
         activity, location_points
     }
+}
+
+
+export const updateImagePath = async (activityId: number, imagePath: string) => {
+    await db.runAsync(`
+        UPDATE activities
+        SET map_image_path = ?
+        WHERE id = ?
+        `, imagePath, activityId)
 }
 

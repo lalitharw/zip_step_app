@@ -19,6 +19,7 @@ export default function ActivityDetail() {
             try {
                 const data = await getActivityWithLocationPoints(id)
                 if (data) {
+                    console.log(data)
                     setActivity(data.activity)
                     setLocationPoints(data.location_points)
                 }

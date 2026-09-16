@@ -1,6 +1,6 @@
 import ActivityCard from "@/components/ActivityCard"
 import GradientBackground from "@/components/GradientBackground"
-import { Activity, getAllActivity } from "@/database/activities"
+import { Activity, getAllActivitiesOnlyIfLocationPointIsPresent, getAllActivity } from "@/database/activities"
 import { Link } from "expo-router"
 import { AnimatePresence } from "moti"
 import { useEffect, useState } from "react"
@@ -13,7 +13,8 @@ export default function index() {
     const [activities, setActivities] = useState<Activity[] | null>([])
     useEffect(() => {
         const loadActivities = async () => {
-            const data = await getAllActivity()
+            console.log(await getAllActivity())
+            const data = await getAllActivitiesOnlyIfLocationPointIsPresent()
             setActivities(data)
         }
         loadActivities()
@@ -30,7 +31,7 @@ export default function index() {
                             // ListFooterComponent={loading ? <ActivityIndicator /> : null}
                             onEndReachedThreshold={0.5}
                             renderItem={({ item }) => (
-                                <ActivityCard text={item.id} />
+                                <ActivityCard {...item} />
                             )}
                         />
                     </AnimatePresence>

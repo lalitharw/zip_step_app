@@ -10,10 +10,20 @@ export function initDatabase() {
             client_id TEXT NOT NULL UNIQUE,
             status TEXT NOT NULL DEFAULT 'running'
                 CHECK (status IN ('completed', 'paused', 'running')),
-            started_at TEXt NULL,
-            stopped_at TEXt NULL,
+            started_at TEXT NULL,
+            stopped_at TEXT NULL,
+            distance INTEGER NULL,
+            duration INTEGER NULL,
+            average_speed INTEGER NULL,
+            average_pace INTEGER NULL,
+            elevation_gain INTEGER NULL,
+            current_elevation INTEGER NULL,
+            max_speed INTEGER NULL,
+            map_image_path TEXT NULL,
+            map_image_url TEXT NULL,
             inactivity_notification_sent INTEGER DEFAULT 0,
             synced INTEGER DEFAULT 0
+            
         );`)
 
     db.execAsync(`

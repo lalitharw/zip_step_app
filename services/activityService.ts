@@ -1,5 +1,4 @@
-import { completeActivity, createActivity, getActivity, getAllActivity } from "@/database/activities"
-import { getLocationPoints } from "@/database/locationPoints"
+import { completeActivity, createActivity, getActivity, updateImagePath } from "@/database/activities"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { useActivityStore } from "@/store/ActivityStore"
 import { useLocationStore } from "@/store/locationStore"
@@ -80,15 +79,17 @@ export const startActivity = async () => {
 
 export const stopActivity = async () => {
     try {
+        console.log("Inside Stop Activity")
         await stopLocationTracking()
         const activityId = await getCurrentActivityId()
         if (!activityId) {
             throw new Error("Activity Id not found")
         }
-        console.log("Activity:", await getAllActivity())
-        console.log("Location Points:", await getLocationPoints(activityId))
+        const imagePath = useActivityStore.getState().imagePath
+        if (imagePath) {
+            await updateImagePath(activityId, imagePath)
+        }
         const completed = await completeActivity(activityId)
-
         if (!completed) {
             throw new Error("Failed to complete Activity")
         }
@@ -97,6 +98,7 @@ export const stopActivity = async () => {
         useActivityStore.getState().setActivityId(null)
         useLocationStore.getState().setIsRecording(false)
         useActivityPauseStore.getState().setIsActivityPaused(false)
+        useActivityStore.getState().deleteMapPath()
         return true
     }
     catch (error) {

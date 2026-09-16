@@ -10,7 +10,8 @@ import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
 import { calculateActivityDistance, calculateActivityMaxSpeed, calculateAveragePace, calculateAverageSpeed, calculateElevationGain } from "@/utils/activityStats";
-import { Camera, GeoJSONSource, Layer, Map, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
+import { mapSnapShot } from "@/utils/mapSnapShot";
+import { Camera, GeoJSONSource, Layer, Map, MapRef, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { AnimatePresence } from "moti";
 import { useEffect, useRef, useState } from "react";
@@ -74,6 +75,7 @@ export default function MapBox() {
     const [isLoading, setLoading] = useState(false);
 
     const cameraRef = useRef<CameraRef>(null);
+    const mapRef = useRef<MapRef>(null!);
     const lastLoadedId = useRef<number | null>(0)
 
     const startPoint =
@@ -289,9 +291,12 @@ export default function MapBox() {
         }
     }
 
+
+
     const handleStopTracking = async () => {
         try {
             setLoading(true)
+            await mapSnapShot(mapRef)
             await stopActivity()
         }
         catch (error) {
@@ -333,8 +338,8 @@ export default function MapBox() {
             <View
                 flex={1}
             >
-                <Map style={{width:"100%",height:"100%"}}
-
+                <Map style={{ width: "100%", height: "100%" }}
+                    ref={mapRef}
                     mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${MAPTILER_API_KEY}`}
                     attributionPosition={{
                         bottom: 8,
