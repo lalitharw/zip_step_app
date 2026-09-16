@@ -7,7 +7,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function TabLayout() {
     const { user, isLoading } = useAuth()
-
     if (isLoading) return null
 
     if (!user) {

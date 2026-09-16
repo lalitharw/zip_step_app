@@ -1,7 +1,7 @@
 import ActivityCard from "@/components/ActivityCard"
 import GradientBackground from "@/components/GradientBackground"
 import ActivityCardHistorySkeleton from "@/components/skeleton_loading/ActivityCardHistorySkeleton"
-import { Activity, getAllActivitiesOnlyIfLocationPointIsPresent, getAllActivity } from "@/database/activities"
+import { Activity, getAllActivitiesOnlyIfLocationPointIsPresent } from "@/database/activities"
 import { useEffect, useState } from "react"
 import { FlatList } from "react-native"
 import { View } from "tamagui"
@@ -9,12 +9,20 @@ import { View } from "tamagui"
 
 export default function index() {
     const [activities, setActivities] = useState<Activity[] | null>([])
-    const [loading, setLoading] = useState<boolean>(true)
+    const [loading, setLoading] = useState<boolean>(false)
     useEffect(() => {
         const loadActivities = async () => {
-            console.log(await getAllActivity())
-            const data = await getAllActivitiesOnlyIfLocationPointIsPresent()
-            setActivities(data)
+            try {
+                setLoading(true)
+                const data = await getAllActivitiesOnlyIfLocationPointIsPresent()
+                setActivities(data)
+            }
+            catch (error) {
+                console.error("Something went wrong: ", error)
+            }
+            finally {
+                setLoading(false)
+            }
         }
         loadActivities()
     }, [])

@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setLoading(false)
                 return
             }
-            const { data } = await api.get("/user")
+            const { data } = await api.get("/users")
             setUser(data)
         }
         catch (err) {
