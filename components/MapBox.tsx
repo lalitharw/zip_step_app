@@ -178,21 +178,17 @@ export default function MapBox() {
 
 
     useEffect(() => {
-        if (!currentLocation) {
-            return;
-        }
-        cameraRef.current?.easeTo({
+        if (!currentLocation || !cameraRef.current) return
+
+        cameraRef.current.easeTo({
             center: [
                 currentLocation.longitude,
-                currentLocation.latitude,
+                currentLocation.latitude
             ],
-            zoom: 18,
-            duration: 2000
-        });
-
-    }, [
-        currentLocation
-    ]);
+            zoom: 19,
+            duration: 1000
+        })
+    }, [currentLocation])
 
     useEffect(() => {
         const check = async () => {
@@ -329,16 +325,14 @@ export default function MapBox() {
 
     return (
         <View flex={1}>
-            <AnimatePresence>
-                {
-                    isRecording &&
-                    <ActivityStats />
-                }
-            </AnimatePresence>
-            <View
-                flex={1}
-            >
-                <Map style={{ width: "100%", height: "100%" }}
+            <View flex={1}>
+                <Map style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                }}
                     ref={mapRef}
                     mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${MAPTILER_API_KEY}`}
                     attributionPosition={{
@@ -363,6 +357,7 @@ export default function MapBox() {
 
 
                     {routeCoordinates.length > 1 && (
+
                         <GeoJSONSource
                             id="recorded-route"
                             data={routeGeoJSON}
@@ -434,6 +429,13 @@ export default function MapBox() {
 
                 </Map>
             </View>
+            <AnimatePresence>
+                {
+                    isRecording &&
+                    <ActivityStats />
+                }
+            </AnimatePresence>
+
             <View
                 padding={20}
                 position="absolute"

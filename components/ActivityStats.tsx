@@ -20,7 +20,7 @@ export default function ActivityStats() {
             zIndex={300}
             padding={10}
             position="absolute"
-            top={0}
+            top={30}
             width="100%"
         >
             <MotiView

@@ -1,12 +1,12 @@
 import GradientBackground from "@/components/GradientBackground"
 import MapBox from "@/components/MapBox"
-import { SafeAreaView } from "react-native-safe-area-context"
+import { View } from "tamagui"
 export default function index() {
     return (
         <GradientBackground>
-            <SafeAreaView style={{ flex: 1 }}>
+            <View style={{ flex: 1 }}>
                 <MapBox />
-            </SafeAreaView>
+            </View>
         </GradientBackground>
     )
 }
