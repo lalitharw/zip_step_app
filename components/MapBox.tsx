@@ -262,16 +262,6 @@ export default function MapBox() {
     }, [isRecording]);
 
 
-
-    // useEffect(() => {
-    //     console.log(
-    //         "Route Coordinates:",
-    //         routeCoordinates
-    //     );
-    // }, [routeCoordinates]);
-
-
-
     const handleStartTracking = async () => {
         try {
             setLoading(true)
@@ -286,8 +276,6 @@ export default function MapBox() {
             setLoading(false)
         }
     }
-
-
 
     const handleStopTracking = async () => {
         try {
@@ -321,7 +309,6 @@ export default function MapBox() {
             console.error("Something went wrong: ", error)
         }
     }
-
 
     return (
         <View flex={1}>

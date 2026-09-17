@@ -18,6 +18,10 @@ export type Activity = {
     map_image_path: string
 }
 
+type Stats = {
+
+}
+
 export async function createActivity() {
     const result = await db.runAsync(`
             INSERT INTO activities
@@ -181,5 +185,34 @@ export const updateImagePath = async (activityId: number, imagePath: string) => 
         SET map_image_path = ?
         WHERE id = ?
         `, imagePath, activityId)
+}
+
+
+export const updateActivityStats = async (activityId: number, stats: {
+    distance: number,
+    duration: number,
+    averageSpeed: number,
+    averagePace: number,
+    elevationGain: number,
+    currentElevation: number,
+    maxSpeed: number
+}) => {
+    await db.runAsync(`
+            UPDATE activites
+            SET distance = ?,
+            duration = ?,
+            average_speed = ?,
+            average_pace = ?,
+            elevation_gain = ?,
+            max_speed = ?
+            WHERE id = ?
+        `, stats.distance,
+        stats.duration,
+        stats.averageSpeed,
+        stats.averagePace,
+        stats.elevationGain,
+        stats.currentElevation,
+        stats.maxSpeed,
+        activityId)
 }
 

@@ -1,51 +1,11 @@
-import { completeActivity, createActivity, getActivity, updateImagePath } from "@/database/activities"
+import { completeActivity, createActivity, getActivity, updateActivityStats, updateImagePath } from "@/database/activities"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
+import { useActivityStatsStore } from "@/store/ActivityStatsStore"
 import { useActivityStore } from "@/store/ActivityStore"
 import { useLocationStore } from "@/store/locationStore"
 import { deleteCurrentActivityId, getCurrentActivityId, setCurrentActivityId } from "@/utils/activity"
 import { deleteCurrentPauseActivityId } from "@/utils/activityPause"
 import { requestLocationPermission, startLocationTracking, stopLocationTracking } from "./locationService"
-
-
-
-// export const stopActivityService = async () => {
-
-//     try {
-//         await stopLocationTracking()
-//         const stoppedActivity = await stopActivity()
-//         if (!stoppedActivity) {
-//             throw new Error("Failed to stop activity")
-//         }
-//         useLocationStore.getState().setIsRecording(false)
-//     }
-//     catch (error) {
-//         console.error("Stop activity service error: ", error)
-//         throw error
-//     }
-// }
-
-
-// export const startActivityService = async () => {
-//     try {
-//         await requestLocationPermission()
-//         useLocationStore.getState().clearRoute()
-//         const activityStarted = await startActivity()
-//         if (!activityStarted) {
-//             throw new Error("Failed to start activity")
-//         }
-
-//         const trackingStarted = await startLocationTracking()
-//         if (!trackingStarted) {
-//             throw new Error("Location Tracking did not start")
-//         }
-//         useLocationStore.getState().setIsRecording(true)
-
-//     }
-//     catch (error) {
-//         console.error("Start Activity service error: ", error)
-//         throw error
-//     }
-// }
 
 
 export const startActivity = async () => {
@@ -76,10 +36,8 @@ export const startActivity = async () => {
     }
 }
 
-
 export const stopActivity = async () => {
     try {
-        console.log("Inside Stop Activity")
         await stopLocationTracking()
         const activityId = await getCurrentActivityId()
         if (!activityId) {
@@ -89,6 +47,7 @@ export const stopActivity = async () => {
         if (imagePath) {
             await updateImagePath(activityId, imagePath)
         }
+        await storeActivityStats(activityId)
         const completed = await completeActivity(activityId)
         if (!completed) {
             throw new Error("Failed to complete Activity")
@@ -107,15 +66,16 @@ export const stopActivity = async () => {
     }
 }
 
-const storeActivityStats = async() => {
-    try{
+const storeActivityStats = async (activityId: number) => {
+    try {
+        const activityStats = useActivityStatsStore.getState().stats
 
+        await updateActivityStats(activityId, activityStats)
     }
-    catch(error){
-        console.error("Something went wrong: ",error)
+    catch (error) {
+        console.error("Something went wrong: ", error)
     }
 }
-
 
 export const checkIfActivityIsRunning = async () => {
     try {
