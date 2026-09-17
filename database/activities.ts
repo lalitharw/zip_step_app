@@ -70,7 +70,7 @@ export async function getActiveActivity(activityId: number): Promise<Activity | 
 export async function getUnsyncedActivities(): Promise<Activity[] | null> {
     return db.getAllAsync<Activity>(`
             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced, 
-            client_id
+            client_id, distance, duration, average_speed, average_pace, elevation_gain, current_elevation, max_speed
             FROM activities WHERE synced = 0 AND status = 'completed'
             ORDER BY id ASC
         `)

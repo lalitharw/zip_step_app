@@ -16,14 +16,11 @@ export const syncActivities = async () => {
             for (const activity of activities) {
                 const result = await createActivityOnServer(activity)
                 if (result && result.id) {
-                    console.log("API Result: ", result)
                     //update the local db activity with server_id
                     await updateActivityServerId(result.client_id, result.id)
-
                     // mark the activity as synced
                     await markActivityAsSynced(result.client_id)
                 }
-
             }
         }
     }
