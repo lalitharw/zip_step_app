@@ -1,9 +1,12 @@
 import { colors } from "@/constants/theme";
 import { metersToKilometers } from "@/utils/dataConversion";
-import { formatTime } from "@/utils/formatTime";
+import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
+import { LinearGradient } from "@tamagui/linear-gradient";
 import { useRouter } from "expo-router";
 import { Pressable } from "react-native";
 import { Image, Text, View } from "tamagui";
+import Divider from "./Divider";
+import StatBlock from "./StatsBlock";
 
 
 type activityCard = {
@@ -14,96 +17,76 @@ type activityCard = {
     duration: number | null
 }
 
-export default function ActivityCard({ id, map_image_path, started_at,distance, duration }: activityCard) {
+export default function ActivityCard({ id, map_image_path, started_at, distance, duration }: activityCard) {
     const router = useRouter()
+
     return (
-        <View marginBottom={20}
-            backgroundColor={colors.primaryBlack}
-            borderRadius={8}
-            borderColor={colors.primaryWhite}
-            borderWidth={1}
-            shadowRadius={12}
-            shadowOpacity={0.25}
-            overflow="hidden"
-        >
-            <Pressable onPress={() => router.push(`/(tabs)/history/${id}`)}>
-                <View height={120}>
-                    <Image height={"100%"} width={"100%"} src={`${map_image_path}`} />
-                </View>
-                <View padding={10} marginTop={10} >
-                    <Text
-                        color={colors.secondaryWhite}
-                        fontSize={13}
-                    >
-                        {/* Sep 11 • 7:32 PM */}
-                        {new Date(started_at).toDateString()}
-                    </Text>
-                    {/* <View
-                        flexDirection="row"
-                        justifyContent="space-between"
-                    >
-                        <View>
-                            <Text color={colors.secondaryWhite}>
-                                Distance
-                            </Text>
-                            <Text
-                                color={colors.primaryWhite}
-                                fontSize={18}
-                                fontWeight="600"
-                            >
-                                2.45 km
-                            </Text>
-                        </View>
-                        <View>
-                            <Text color={colors.secondaryWhite}>
-                                Duration
-                            </Text>
-                            <Text
-                                color={colors.primaryWhite}
-                                fontSize={18}
-                                fontWeight="600"
-                            >
-                                24:18
-                            </Text>
-                        </View>
-                    </View> */}
-
+        <Pressable onPress={() => router.push(`/(tabs)/history/${id}`)}>
+            <View
+                marginBottom={16}
+                backgroundColor={colors.primaryBlack}
+                borderRadius={16}
+                borderColor="rgba(255,255,255,0.08)"
+                borderWidth={1}
+                shadowColor="#000"
+                shadowOffset={{ width: 0, height: 4 }}
+                shadowRadius={12}
+                shadowOpacity={0.3}
+                overflow="hidden"
+            >
+                <View height={140}>
+                    <Image
+                        height="100%"
+                        width="100%"
+                        src={map_image_path}
+                    />
+                    <LinearGradient
+                        colors={["transparent", "rgba(0,0,0,0.6)"]}
+                        style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: 60,
+                        }}
+                    />
                     <View
-                        flexDirection="row"
-                        justifyContent="space-between"
-                        marginTop={10}
+                        position="absolute"
+                        bottom={10}
+                        left={12}
                     >
-                        <View>
-                            <Text color={colors.secondaryWhite}>
-                                Distance
-                            </Text>
-
-                            <Text
-                                color={colors.primaryWhite}
-                                fontSize={18}
-                                fontWeight="600"
-                            >
-                                {metersToKilometers(distance ?? 0)} km
-                            </Text>
-                        </View>
-
-                        <View>
-                            <Text color={colors.secondaryWhite}>
-                                Duration
-                            </Text>
-
-                            <Text
-                                color={colors.primaryWhite}
-                                fontSize={18}
-                                fontWeight="600"
-                            >
-                                {formatTime(duration ?? 0)} km/h
-                            </Text>
-                        </View>
+                        <Text color="white" fontSize={13} fontWeight="600">
+                            {new Date(started_at ?? 0).toLocaleDateString("en-IN", {
+                                day: "2-digit", month: "short", year: "numeric",
+                            })}
+                        </Text>
+                        <Text color="rgba(255,255,255,0.7)" fontSize={11}>
+                            {new Date(started_at ?? 0).toLocaleTimeString("en-IN", {
+                                hour: "2-digit", minute: "2-digit", hour12: true,
+                            })}
+                        </Text>
                     </View>
                 </View>
-            </Pressable>
 
-        </View >
+                <View
+                    flexDirection="row"
+                    paddingVertical={16}
+                    paddingHorizontal={16}
+                >
+                    <StatBlock
+                        label="Duration"
+                        value={duration ? milliSecondsToMinutes(duration) : "--"}
+                        unit="min"
+                    />
+                    <Divider />
+                    <StatBlock
+                        label="Distance"
+                        value={distance ? metersToKilometers(distance) : "--"}
+                        unit="km"
+                    />
+                </View>
+            </View>
+        </Pressable>
     )
 }
+

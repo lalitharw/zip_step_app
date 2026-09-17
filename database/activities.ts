@@ -171,6 +171,7 @@ export const getAllActivitiesOnlyIfLocationPointIsPresent = async () => {
         `
         SELECT a.* FROM activities a
         WHERE (SELECT COUNT(*) FROM location_points lp WHERE lp.activity_id = a.id) >= 2
+        AND a.status = 'completed'
         ORDER BY a.id DESC
         `
     );

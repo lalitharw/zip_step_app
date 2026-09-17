@@ -1,11 +1,13 @@
 import { colors } from "@/constants/theme";
 import { useActivityStatsStore } from "@/store/ActivityStatsStore";
 import { metersToKilometers } from "@/utils/dataConversion";
-import { formatTime } from "@/utils/formatTime";
+import { formatTime } from "@/utils/formatTimeUtills";
 import { AnimatePresence, MotiView } from "moti";
 import { useState } from "react";
 import { Button, Text, View, XStack, YStack } from "tamagui";
-import Stats from "./StatsComponent";
+import Divider from "./Divider";
+import DividerVertical from "./DividerVertical";
+import StatBlock from "./StatsBlock";
 
 export default function ActivityStats() {
     const stats = useActivityStatsStore(
@@ -52,20 +54,35 @@ export default function ActivityStats() {
                     elevation={8}
                 >
                     <XStack alignItems="center">
-                        <Stats flex={1} label="Distance" value={`${metersToKilometers(stats.distance)} km`} />
-                        <View
-                            width={1}
-                            height={"65%"}
-                            backgroundColor={colors.secondaryWhite}
-                        />
-                        <Stats flex={1} fontSize={20} label="Time" value={formatTime(stats.duration)} />
-                        <View
-                            width={1}
-                            height={"65%"}
-                            backgroundColor={colors.secondaryWhite}
-                        />
-                        <Stats flex={1} label="Pace" value={`${metersToKilometers(stats.averagePace)}/km`} />
+                        <StatBlock
+                            label="Distance"
+                            value={`${metersToKilometers(stats.distance)}`}
+                            unit="km"
+                            align="center"
+                            compact
 
+
+                        />
+                        <Divider />
+                        <StatBlock
+                            label="Time"
+                            value={`${formatTime(stats.duration)}`}
+                            unit=""
+                            align="center"
+                            compact
+                            paddingVertical={15}
+
+                        />
+                        <Divider />
+                        <StatBlock
+                            label="Avg. Pace"
+                            value={`${metersToKilometers(stats.averagePace)}`}
+                            unit="km"
+                            align="center"
+                            compact
+                            paddingVertical={15}
+
+                        />
                     </XStack>
                     <AnimatePresence>
                         {
@@ -87,40 +104,55 @@ export default function ActivityStats() {
                                         type: "timing",
                                         duration: 250,
                                     }}>
-                                    <View
-                                        width={"100%"}
-                                        height={1}
-                                        backgroundColor={colors.secondaryWhite}
-                                    />
+                                    <DividerVertical />
                                     <XStack alignItems="center" justifyContent="flex-start">
-                                        <Stats flex={1} label="Avg Speed" value={`${(stats.averageSpeed * 3.6).toFixed(2)} km/h`} />
-                                        <View
-                                            width={1}
-                                            height={"65%"}
-                                            backgroundColor={colors.secondaryWhite}
+                                        <StatBlock
+                                            label="Avg. Speed"
+                                            value={`${(stats.averageSpeed * 3.6).toFixed(2)}`}
+                                            unit="km/h"
+                                            align="center"
+                                            compact
+                                            paddingVertical={15}
                                         />
-                                        <Stats flex={1} label="Max Speed" value={`${(stats.maxSpeed * 3.6).toFixed(2)} km/h`} />
-                                        <View
-                                            width={1}
-                                            height={"65%"}
-                                            backgroundColor={colors.secondaryWhite}
+                                        <Divider />
+                                        <StatBlock
+                                            label="Max Speed"
+                                            value={`${(stats.maxSpeed * 3.6).toFixed(2)}`}
+                                            unit="km/h"
+                                            align="center"
+                                            compact
+                                            paddingVertical={15}
                                         />
-                                        <Stats flex={1} label="Elev. Gain" value={`${Math.round(stats.elevationGain)} m`} />
+                                        <Divider />
+                                        <StatBlock
+                                            label="Elev. Gain"
+                                            value={`${Math.round(stats.elevationGain)} `}
+                                            unit="m"
+                                            align="center"
+                                            compact
+                                            paddingVertical={15}
+                                        />
 
                                     </XStack>
-                                    <View
-                                        width={"100%"}
-                                        height={1}
-                                        backgroundColor={colors.secondaryWhite}
-                                    />
+                                    <DividerVertical />
                                     <XStack alignItems="center" justifyContent="flex-start">
-                                        <Stats flex={1} label="Current Elevation" value={`${Math.round(stats.currentElevation)} m`} />
-                                        <View
-                                            width={1}
-                                            height={"65%"}
-                                            backgroundColor={colors.secondaryWhite}
+                                        <StatBlock
+                                            label="Elev. Gain"
+                                            value={`${Math.round(stats.currentElevation)}`}
+                                            unit="m"
+                                            align="center"
+                                            compact
+                                            paddingVertical={15}
                                         />
-                                        <Stats flex={1} label="Current Speed" value={`${(stats.currentSpeed * 3.6).toFixed(2)} km/h`} />
+                                        <Divider />
+                                        <StatBlock
+                                            label="Elev. Gain"
+                                            value={`${(stats.currentSpeed * 3.6).toFixed(2)}`}
+                                            unit="km/h"
+                                            align="center"
+                                            compact
+                                            paddingVertical={15}
+                                        />
 
                                     </XStack>
                                 </MotiView>
