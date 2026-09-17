@@ -17,6 +17,7 @@ export default function Profile() {
 
     const handleLogout = async () => {
         try {
+            
             await logout()
             setIsLoading(true)
         }
@@ -28,16 +29,6 @@ export default function Profile() {
         }
     }
     return (
-        // <SafeAreaView>
-        //     <View>
-        //         <Text>Profile {user?.name}</Text>
-        //         <Button disabled={isLoading} onPress={handleLogout}>
-        //             {
-        //                 isLoading ? "Logging Out" : "Logout"
-        //             }
-        //         </Button>
-        //     </View>
-        // </SafeAreaView>
         <GradientBackground>
             <SafeAreaView style={{ flex: 1 }}>
                 <YStack padding={20} paddingVertical={40} flex={1}>

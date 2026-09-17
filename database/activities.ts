@@ -15,12 +15,16 @@ export type Activity = {
     inactivity_notification_sent: number,
     client_id: string | null,
     synced: number,
-    map_image_path: string
+    map_image_path: string,
+    distance: number | null,
+    duration: number | null,
+    average_speed: number | null,
+    average_pace: number | null,
+    elevation_gain: number | null,
+    current_elevation: number | null,
+    max_speed: number | null,
 }
 
-type Stats = {
-
-}
 
 export async function createActivity() {
     const result = await db.runAsync(`
@@ -37,7 +41,14 @@ export async function createActivity() {
 
 export async function getAllActivity(): Promise<Activity[] | null> {
     return db.getAllAsync<Activity>(`
-            SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced
+            SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced,
+            distance,
+            duration,
+            average_speed,
+            average_pace,
+            elevation_gain,
+            current_elevation,
+            max_speed
             FROM activities ORDER BY id DESC`)
 }
 
@@ -159,7 +170,7 @@ export const getAllActivitiesOnlyIfLocationPointIsPresent = async () => {
         `
         SELECT a.* FROM activities a
         WHERE (SELECT COUNT(*) FROM location_points lp WHERE lp.activity_id = a.id) >= 2
-        ORDER BY a.id ASC
+        ORDER BY a.id DESC
         `
     );
 };
@@ -198,7 +209,7 @@ export const updateActivityStats = async (activityId: number, stats: {
     maxSpeed: number
 }) => {
     await db.runAsync(`
-            UPDATE activites
+            UPDATE activities
             SET distance = ?,
             duration = ?,
             average_speed = ?,
@@ -211,7 +222,6 @@ export const updateActivityStats = async (activityId: number, stats: {
         stats.averageSpeed,
         stats.averagePace,
         stats.elevationGain,
-        stats.currentElevation,
         stats.maxSpeed,
         activityId)
 }

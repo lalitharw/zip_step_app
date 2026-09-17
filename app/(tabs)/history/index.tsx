@@ -1,7 +1,7 @@
 import ActivityCard from "@/components/ActivityCard"
 import GradientBackground from "@/components/GradientBackground"
 import ActivityCardHistorySkeleton from "@/components/skeleton_loading/ActivityCardHistorySkeleton"
-import { Activity, getAllActivitiesOnlyIfLocationPointIsPresent } from "@/database/activities"
+import { Activity, getAllActivitiesOnlyIfLocationPointIsPresent, getAllActivity } from "@/database/activities"
 import { useEffect, useState } from "react"
 import { FlatList } from "react-native"
 import { View } from "tamagui"

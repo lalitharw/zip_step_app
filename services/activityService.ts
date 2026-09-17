@@ -69,7 +69,6 @@ export const stopActivity = async () => {
 const storeActivityStats = async (activityId: number) => {
     try {
         const activityStats = useActivityStatsStore.getState().stats
-
         await updateActivityStats(activityId, activityStats)
     }
     catch (error) {
