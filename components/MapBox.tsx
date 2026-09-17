@@ -1,6 +1,5 @@
 import { getNewLocationPointsById } from "@/database/locationPoints";
-import { storePauseActivity, storeResumeActivity } from "@/services/ActivityPauseService";
-import { checkIfActivityIsRunning, startActivity, stopActivity } from "@/services/activityService";
+import { checkIfActivityIsRunning } from "@/services/activityService";
 import { getCurrentLocation, stopWatchingLocation } from "@/services/locationService";
 import { networkStatus } from "@/services/networkService";
 import { useActivityPauseStore } from "@/store/ActivityPauseStore";
@@ -10,15 +9,18 @@ import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
 import { calculateActivityDistance, calculateActivityMaxSpeed, calculateAveragePace, calculateAverageSpeed, calculateElevationGain } from "@/utils/activityStats";
-import { mapSnapShot } from "@/utils/mapSnapShot";
 import { Camera, GeoJSONSource, Layer, Map, MapRef, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { AnimatePresence } from "moti";
 import { useEffect, useRef, useState } from "react";
-import { Button, Spinner, View, XGroup } from "tamagui";
+import { View } from "tamagui";
 import ActivityStats from "./ActivityStats";
 import GpsOffModal from "./modals/GpsOffModal";
 import ResumeModal from "./modals/resumeModal";
+import PauseButton from "./PauseButton";
+import ResumeButton from "./ResumeButton";
+import StartButton from "./StartButton";
+import StopButton from "./StopButton";
 
 export default function MapBox() {
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
@@ -72,7 +74,6 @@ export default function MapBox() {
     )
 
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [isLoading, setLoading] = useState(false);
 
     const cameraRef = useRef<CameraRef>(null);
     const mapRef = useRef<MapRef>(null!);
@@ -262,53 +263,6 @@ export default function MapBox() {
     }, [isRecording]);
 
 
-    const handleStartTracking = async () => {
-        try {
-            setLoading(true)
-            useActivityStatsStore.getState().resetStats()
-            lastLoadedId.current = 0
-            await startActivity()
-        }
-        catch (error) {
-
-        }
-        finally {
-            setLoading(false)
-        }
-    }
-
-    const handleStopTracking = async () => {
-        try {
-            setLoading(true)
-            await mapSnapShot(mapRef)
-            await stopActivity()
-        }
-        catch (error) {
-
-        }
-        finally {
-            setLoading(false)
-        }
-    }
-
-    const handlePauseActivity = async () => {
-        try {
-            await storePauseActivity()
-        }
-        catch (error) {
-            console.error("Something went wrong: ", error)
-        }
-    }
-
-    const handleResumeActivity = async () => {
-        try {
-
-            await storeResumeActivity()
-        }
-        catch (error) {
-            console.error("Something went wrong: ", error)
-        }
-    }
 
     return (
         <View flex={1}>
@@ -327,8 +281,6 @@ export default function MapBox() {
                         right: 8,
                     }}
                 >
-
-
                     <Camera
                         ref={cameraRef}
                         initialViewState={{
@@ -423,70 +375,33 @@ export default function MapBox() {
                 }
             </AnimatePresence>
 
-            <View
-                padding={20}
-                position="absolute"
-                bottom={0}
-                width="100%"
-            >
-
-                {isRecording ? (
-                    <XGroup width="100%" gap={12} alignItems="center">
-                        <Button
-                            width={"40%"}
-                            borderRadius="$10"
-                            onPress={
-                                (
-                                    isPaused ? handleResumeActivity : handlePauseActivity
-                                )
-                            }
-                        >
-                            {
-                                isPaused ? "Resume" : "Pause"
-                            }
-                        </Button>
-                        <Button
-                            flex={1}
-                            borderRadius="$10"
-                            onPress={
-                                handleStopTracking
-                            }
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <Spinner
-                                    size="small"
-                                    color="$green10"
-                                />
-                            ) : (
-                                `Stop`
-                            )}
-                        </Button>
-                    </XGroup>
-                ) : (
 
 
-                    <Button
-                        borderRadius="$10"
-                        onPress={
-                            handleStartTracking
+            {
+                isRecording && (
+                    <View position="absolute" bottom={30} left={"15%"}>
+                        {
+                            isPaused ? <ResumeButton /> : <PauseButton />
                         }
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <Spinner
-                                size="small"
-                                color="$green10"
-                            />
-                        ) : (
-                            "Start"
-                        )}
-                    </Button>
-                )}
+                    </View>
+                )
+            }
+
+            <View position="absolute" bottom={20} left={0} right={0} alignItems="center">
+                {
+                    isRecording ? (
+                        <StopButton mapRef={mapRef} />
+                    ) : (
+
+                        <StartButton lastLoadedId={lastLoadedId} />
+                    )
+                }
+
+
             </View>
             <ResumeModal isVisible={showResumeModal} />
             <GpsOffModal isVisible={isGpsOff} />
 
-        </View>
+        </View >
     );
 }

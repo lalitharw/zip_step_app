@@ -8,7 +8,7 @@ export const storePauseActivity = async () => {
     try {
         console.log("Calling Pause Activity")
         const activityId = await getCurrentActivityId()
-        if (!activityId){
+        if (!activityId) {
             throw new Error("Activity ID not found")
         }
         const res = await storePauseAt(activityId)
@@ -31,7 +31,7 @@ export const storeResumeActivity = async () => {
             throw new Error("Pause Activity ID not found")
         }
 
-        if(!activityId){
+        if (!activityId) {
             throw new Error("Activity ID not found")
         }
         await storeResumeAt(pauseActivityId)
