@@ -1,4 +1,6 @@
 import { colors } from "@/constants/theme";
+import { metersToKilometers } from "@/utils/dataConversion";
+import { formatTime } from "@/utils/formatTime";
 import { useRouter } from "expo-router";
 import { Pressable } from "react-native";
 import { Image, Text, View } from "tamagui";
@@ -6,10 +8,13 @@ import { Image, Text, View } from "tamagui";
 
 type activityCard = {
     id: number,
-    map_image_path: string
+    map_image_path: string,
+    started_at: string,
+    distance: number | null,
+    duration: number | null
 }
 
-export default function ActivityCard({ id, map_image_path }: activityCard) {
+export default function ActivityCard({ id, map_image_path, started_at,distance, duration }: activityCard) {
     const router = useRouter()
     return (
         <View marginBottom={20}
@@ -25,14 +30,15 @@ export default function ActivityCard({ id, map_image_path }: activityCard) {
                 <View height={120}>
                     <Image height={"100%"} width={"100%"} src={`${map_image_path}`} />
                 </View>
-                <View padding={10} >
+                <View padding={10} marginTop={10} >
                     <Text
                         color={colors.secondaryWhite}
                         fontSize={13}
                     >
-                        Sep 11 • 7:32 PM
+                        {/* Sep 11 • 7:32 PM */}
+                        {new Date(started_at).toDateString()}
                     </Text>
-                    <View
+                    {/* <View
                         flexDirection="row"
                         justifyContent="space-between"
                     >
@@ -60,16 +66,16 @@ export default function ActivityCard({ id, map_image_path }: activityCard) {
                                 24:18
                             </Text>
                         </View>
-                    </View>
+                    </View> */}
 
                     <View
                         flexDirection="row"
                         justifyContent="space-between"
-                        marginTop={15}
+                        marginTop={10}
                     >
                         <View>
                             <Text color={colors.secondaryWhite}>
-                                Avg Pace
+                                Distance
                             </Text>
 
                             <Text
@@ -77,13 +83,13 @@ export default function ActivityCard({ id, map_image_path }: activityCard) {
                                 fontSize={18}
                                 fontWeight="600"
                             >
-                                9:55 /km
+                                {metersToKilometers(distance ?? 0)} km
                             </Text>
                         </View>
 
                         <View>
                             <Text color={colors.secondaryWhite}>
-                                Avg Speed
+                                Duration
                             </Text>
 
                             <Text
@@ -91,7 +97,7 @@ export default function ActivityCard({ id, map_image_path }: activityCard) {
                                 fontSize={18}
                                 fontWeight="600"
                             >
-                                6.1 km/h
+                                {formatTime(duration ?? 0)} km/h
                             </Text>
                         </View>
                     </View>

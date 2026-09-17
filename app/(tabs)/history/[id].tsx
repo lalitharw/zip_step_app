@@ -1,15 +1,17 @@
 import GradientBackground from "@/components/GradientBackground";
-import { getActivityWithLocationPoints } from "@/database/activities";
+import { Activity, getActivity } from "@/database/activities";
+import { getLocationPoints, LocationPoint } from "@/database/locationPoints";
 import { Camera, GeoJSONSource, Layer, Map } from "@maplibre/maplibre-react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView, View } from "tamagui";
 
+
 export default function ActivityDetail() {
-    const { id } = useLocalSearchParams()
-    const [activity, setActivity] = useState<any>({})
-    const [locationPoints, setLocationPoints] = useState<any>([])
+
+    const { id } = useLocalSearchParams<{ id: string }>()
+    const [activity, setActivity] = useState<Activity | null>(null)
+    const [locationPoints, setLocationPoints] = useState<LocationPoint[]>([])
 
 
 
@@ -17,11 +19,11 @@ export default function ActivityDetail() {
         if (!id) return
         const handleGetActivityData = async () => {
             try {
-                const data = await getActivityWithLocationPoints(id)
-                if (data) {
-                    console.log(data)
-                    setActivity(data.activity)
-                    setLocationPoints(data.location_points)
+                const activity = await getActivity(id)
+                if (activity) {
+                    setActivity(activity)
+                    const locationPoints = await getLocationPoints(id)
+                    setLocationPoints(locationPoints)
                 }
             }
             catch (error) {
@@ -38,7 +40,7 @@ export default function ActivityDetail() {
         properties: {},
         geometry: {
             type: "LineString" as const,
-            coordinates: locationPoints.map((point:{longitude:number,latitude:number}) => [
+            coordinates: locationPoints.map((point: { longitude: number, latitude: number }) => [
                 point.longitude,
                 point.latitude,
             ]),
@@ -48,7 +50,7 @@ export default function ActivityDetail() {
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
     return (
         <GradientBackground>
-            <SafeAreaView style={{ flex: 1 }}>
+            <View style={{ flex: 1 }}>
                 <ScrollView>
                     <View height={420}>
                         <Map style={{ flex: 1, overflow: "hidden" }}
@@ -90,7 +92,7 @@ export default function ActivityDetail() {
                     <View padding={20}>
                     </View>
                 </ScrollView>
-            </SafeAreaView>
+            </View>
         </GradientBackground>
     )
 }

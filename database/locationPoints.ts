@@ -85,7 +85,7 @@ export async function getNewLocationPointsById(activityId: number, lastLoadedPoi
 }
 
 
-export async function getLocationPoints(activityId: number): Promise<LocationPoint[]> {
+export async function getLocationPoints(activityId: number | string): Promise<LocationPoint[]> {
     return await db.getAllAsync<LocationPoint>(`
             SELECT id,
             activity_id AS activityId,
