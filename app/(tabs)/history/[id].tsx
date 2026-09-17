@@ -1,4 +1,5 @@
 import GradientBackground from "@/components/GradientBackground";
+import ActivityCardDetailSkeleton from "@/components/skeleton_loading/ActivityCardDetailSkeleton";
 import { Activity, getActivity } from "@/database/activities";
 import { getLocationPoints, LocationPoint } from "@/database/locationPoints";
 import { Camera, GeoJSONSource, Layer, Map } from "@maplibre/maplibre-react-native";
@@ -12,12 +13,14 @@ export default function ActivityDetail() {
     const { id } = useLocalSearchParams<{ id: string }>()
     const [activity, setActivity] = useState<Activity | null>(null)
     const [locationPoints, setLocationPoints] = useState<LocationPoint[]>([])
+    const [loading, setLoading] = useState<boolean>(false)
 
 
 
     useEffect(() => {
         if (!id) return
         const handleGetActivityData = async () => {
+            setLoading(true)
             try {
                 const activity = await getActivity(id)
                 if (activity) {
@@ -28,6 +31,9 @@ export default function ActivityDetail() {
             }
             catch (error) {
                 console.error("DB Error: ", error)
+            }
+            finally {
+                setLoading(false)
             }
         }
 
@@ -48,6 +54,15 @@ export default function ActivityDetail() {
     };
 
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
+
+    if (loading) {
+        return (
+            <GradientBackground>
+                <ActivityCardDetailSkeleton />
+            </GradientBackground>
+        )
+    }
+
     return (
         <GradientBackground>
             <View style={{ flex: 1 }}>
