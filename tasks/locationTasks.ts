@@ -57,7 +57,6 @@ TaskManager.defineTask(
             } = location.coords;
 
 
-
             logger.info("GPS","Coordinate Data",location.coords)
 
             // first point
