@@ -60,7 +60,6 @@ TaskManager.defineTask(
 
             logger.info("GPS","Coordinate Data",location.coords)
 
-
             // first point
             if (!previous_coordinates) {
                 if (accuracy == null || accuracy <= 25) {
