@@ -53,7 +53,6 @@ TaskManager.defineTask(
                 altitude,
                 accuracy,
                 speed,
-
             } = location.coords;
 
             logger.info("GPS","Coordinate Data",location.coords)
