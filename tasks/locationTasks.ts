@@ -2,7 +2,8 @@ import { getActivity } from "@/database/activities";
 import { getLastLocationPoint, saveLocationPoint } from "@/database/locationPoints";
 import { checkAndNotifyActivityInactivity, updateIsActiveNotificationSentStatus } from "@/services/activityInActiveService";
 import { getCurrentActivityId } from "@/utils/activity";
-import { coordinateDistance } from "@/utils/coordinateDistance";
+import logger from "@/utils/logger";
+import { validateLocationPoint } from "@/utils/validateLocationPoints";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 
@@ -11,7 +12,6 @@ export const LOCATION_TASK_NAME = "stride_flow_location_task";
 TaskManager.defineTask(
     LOCATION_TASK_NAME,
     async ({ data, error }) => {
-        // console.log("🔥 LOCATION TASK FIRED");
 
         if (error) {
             console.error("Location task error:", error);
@@ -27,7 +27,6 @@ TaskManager.defineTask(
         };
 
         const activity_id = await getCurrentActivityId()
-
         if (activity_id === null) {
             console.log("No activity ID Found")
             return
@@ -38,31 +37,33 @@ TaskManager.defineTask(
             return
         }
 
+
         if (activity.status === 'paused') {
             return
         }
 
         await checkAndNotifyActivityInactivity()
 
+        let previous_coordinates = await getLastLocationPoint(activity_id)
+
         for (const location of locations) {
-
-
             const {
                 latitude,
                 longitude,
                 altitude,
                 accuracy,
                 speed,
-                heading,
 
             } = location.coords;
 
-            console.log("Location Coords: ", location.coords)
 
-            const previous_coordinates = await getLastLocationPoint(activity_id)
+
+            logger.info("GPS","Coordinate Data",location.coords)
+
+
             // first point
             if (!previous_coordinates) {
-                if (accuracy == null || accuracy <= 30) {
+                if (accuracy == null || accuracy <= 25) {
                     await saveLocationPoint({
                         activityId: activity_id,
                         latitude,
@@ -80,58 +81,10 @@ TaskManager.defineTask(
             }
 
             // if already some points available
-            //Accuracy Check
-            if (accuracy == null || accuracy > 30) {
-                console.log("Rejected: Poor Accuracy")
+            const result = validateLocationPoint(location, previous_coordinates)
+            if (!result.valid) {
                 continue
             }
-
-            // calculate distance
-            const distance = coordinateDistance({
-                lat1: previous_coordinates.latitude,
-                lon1: previous_coordinates.longitude,
-                lat2: latitude,
-                lon2: longitude
-            })
-
-
-            // check if timestamp is valid
-            const previousTimestamp = new Date(previous_coordinates.timestamp).getTime()
-            let timeDifference: number | null = null
-            const currentTimestamp = location.timestamp
-            if (previousTimestamp !== null) {
-                timeDifference = (currentTimestamp - previousTimestamp) / 1000
-
-                if (timeDifference <= 0) {
-                    console.log("Rejected: Invalid Timestamp")
-                    continue
-                }
-
-                const now = Date.now()
-
-                const timeStampDifference = Math.abs(now - currentTimestamp) / 1000
-
-                if (timeStampDifference > 60) {
-                    console.log("Rejected: Timestamp too far from current time")
-                    continue
-                }
-            }
-
-            // check if speed is valid
-            if (timeDifference !== null) {
-                const calCulateSpeed = distance / timeDifference
-                if (calCulateSpeed > 12) {
-                    console.log("Rejected: Unrealistic Speed")
-                    continue
-                }
-            }
-
-            // check if distance is valid
-            if (distance > 100) {
-                console.log("Rejected: Distance is more than 100m")
-                continue
-            }
-
             await saveLocationPoint({
                 activityId: activity_id,
                 latitude,
@@ -139,10 +92,16 @@ TaskManager.defineTask(
                 altitude: altitude ?? 0,
                 accuracy,
                 speed,
+                timestamp: new Date(location.timestamp).toISOString()
+            })
 
+            previous_coordinates = {
+                ...previous_coordinates,
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
                 timestamp: new Date(location.timestamp).toISOString()
             }
-            )
+
             await updateIsActiveNotificationSentStatus(false)
 
         }
