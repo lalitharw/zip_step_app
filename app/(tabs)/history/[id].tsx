@@ -2,16 +2,17 @@ import Divider from "@/components/Divider";
 import GradientBackground from "@/components/GradientBackground";
 import ActivityCardDetailSkeleton from "@/components/skeleton_loading/ActivityCardDetailSkeleton";
 import StatBlock from "@/components/StatsBlock";
+import ReplayRouteButton from "@/components/ui/ReplayRouteUI";
 import { colors } from "@/constants/theme";
 import { Activity, getActivity } from "@/database/activities";
-import { getLocationPoints, LocationPoint } from "@/database/locationPoints";
+import { getLocationPoints } from "@/database/locationPoints";
+import { useReplayRouteStore } from "@/store/ReplayRouteStore";
 import { metersToKilometers } from "@/utils/dataConversion";
 import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
-import logger from "@/utils/logger";
 import { Camera, CameraRef, GeoJSONSource, Layer, Map } from "@maplibre/maplibre-react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Button, ScrollView, Text, View } from "tamagui";
+import { ScrollView, Text, View } from "tamagui";
 
 
 export default function ActivityDetail() {
@@ -19,42 +20,12 @@ export default function ActivityDetail() {
     const { id } = useLocalSearchParams<{ id: string }>()
     const cameraRef = useRef<CameraRef>(null)
     const [activity, setActivity] = useState<Activity | null>(null)
-    const [locationPoints, setLocationPoints] = useState<LocationPoint[]>([])
     const [loading, setLoading] = useState<boolean>(false)
-    const [isReplaying, setIsReplaying] = useState<boolean>(false)
-    const [replayCoordinates, setReplayCoordinates] = useState<[number, number][]>([])
 
-    const replayRoute = async () => {
-        try {
-            if (locationPoints.length < 2) return
-            setIsReplaying(true)
-            setReplayCoordinates([])
-            for (let i = 0; i < locationPoints.length; i++) {
-                const coordinate: [number, number] = [
-                    locationPoints[i].longitude,
-                    locationPoints[i].latitude
-                ]
-                setReplayCoordinates(prev => [
-                    ...prev,
-                    coordinate
-                ])
-                cameraRef.current?.easeTo({
-                    center: coordinate,
-                    duration: 500
-                })
-                await new Promise(resolve => setTimeout(resolve, 500))
-            }
-
-        }
-        catch (error) {
-            logger.error("Replay Co-ordinates", "Something went wrong", error)
-        }
-        finally {
-            setIsReplaying(false)
-            setReplayCoordinates([])
-        }
-    }
-
+    const isReplaying = useReplayRouteStore((state) => state.isReplaying)
+    const replayCoordinates = useReplayRouteStore((state) => state.replayRoute)
+    const setLocationPoints = useReplayRouteStore((state) => state.setLocationPoints)
+    const locationPoints = useReplayRouteStore((state) => state.locationPoints)
 
 
     useEffect(() => {
@@ -103,6 +74,8 @@ export default function ActivityDetail() {
         },
     };
 
+
+
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
 
     if (loading) {
@@ -117,7 +90,7 @@ export default function ActivityDetail() {
 
         <GradientBackground>
             <View flex={1}>
-                <View height={420} borderBottomLeftRadius={28} borderBottomRightRadius={28} overflow="hidden">
+                <View position="relative" height={420} borderBottomLeftRadius={28} borderBottomRightRadius={28} overflow="hidden">
                     <Map
                         style={{ flex: 1 }}
                         mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${MAPTILER_API_KEY}`}
@@ -156,7 +129,9 @@ export default function ActivityDetail() {
                             )
                         }
                     </Map>
-                    <Button onPress={() => replayRoute()} background={colors.primaryWhite}>Replay</Button>
+                    <View position="absolute" right={20} bottom={20}>
+                        <ReplayRouteButton cameraRef={cameraRef}  />
+                    </View>
                 </View>
 
 

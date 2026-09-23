@@ -296,7 +296,6 @@ export default function MapBox() {
 
 
                     {routeCoordinates.length > 1 && (
-
                         <GeoJSONSource
                             id="recorded-route"
                             data={routeGeoJSON}
