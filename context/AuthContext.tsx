@@ -1,5 +1,7 @@
 import { AlertDialog } from "@/components/AlertDialog";
 import api from "@/utils/api";
+import logger from "@/utils/logger";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as SecureStore from "expo-secure-store";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
@@ -13,6 +15,7 @@ type User = {
 type AuthContextType = {
     user: User | null;
     isLoading: boolean;
+    googleLogin: () => Promise<void>
     login: (email: string, password: string) => Promise<void>
     register: (email: string, password: string, name: string) => Promise<void>
     logout: () => Promise<void>,
@@ -28,8 +31,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setLoading] = useState(true)
 
     useEffect(() => {
+
+        GoogleSignin.configure({
+            webClientId: "182139057357-ibsvq19486ovbegnkj2no8l45u9dg3jc.apps.googleusercontent.com"
+        })
+
+
         getUserData()
     }, [])
+
+
+    async function googleLogin() {
+        try {
+            await GoogleSignin.hasPlayServices({
+                showPlayServicesUpdateDialog: true,
+            })
+            const response = await GoogleSignin.signIn()
+
+            if (response) {
+                logger.info("Google Auth", "User Data", response)
+            }
+
+        }
+        catch (error) {
+            logger.error("Google Auth", "Something went wrong", error)
+        }
+    }
 
 
     async function login(email: string, password: string) {
@@ -97,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
     return (
-        <AuthContext.Provider value={{ user, isLoading, register, login, logout, updateProfile }}>
+        <AuthContext.Provider value={{ user, isLoading, register, login, logout, updateProfile, googleLogin }}>
             {children}
         </AuthContext.Provider>
     )

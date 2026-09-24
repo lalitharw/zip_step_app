@@ -7,7 +7,7 @@ import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { Button, H4, Spinner, Text, XStack, YStack } from "tamagui";
 
 export default function Login() {
-    const { login } = useAuth();
+    const { login, googleLogin } = useAuth();
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
@@ -52,6 +52,16 @@ export default function Login() {
                                 Sign in to access smart, personalized travel plans made for you
                             </Text> */}
                         </YStack>
+
+                        <Button
+                            onPress={googleLogin}
+                            width="100%"
+                            backgroundColor="white"
+                            borderColor="$gray6"
+                            borderWidth={1}
+                        >
+                            Continue with Google
+                        </Button>
 
                         <YStack gap="$2">
                             <InputComponent

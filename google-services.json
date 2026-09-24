@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "182139057357",
+    "project_id": "stride-flow-9a5a3",
+    "storage_bucket": "stride-flow-9a5a3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:182139057357:android:69d3b7cbe56eb4f1846584",
+        "android_client_info": {
+          "package_name": "com.anonymous.stride_flow_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "182139057357-ibsvq19486ovbegnkj2no8l45u9dg3jc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDLBnmt8WIhqQBo4HooPultXm29Bc0QFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "182139057357-ibsvq19486ovbegnkj2no8l45u9dg3jc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
