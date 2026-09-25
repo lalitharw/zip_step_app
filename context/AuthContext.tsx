@@ -49,8 +49,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await GoogleSignin.signOut()
             const response = await GoogleSignin.signIn()
 
-            if (response) {
+            if (response && response.data) {
+                const result = await api.post("/auth/login/google", {
+                    id_token: response.data.idToken,
+                })
+
+                if(result){
+                    await SecureStore.setItemAsync("auth_token", result.data.token)
+                    setUser(result.data.user)
+                }
                 logger.info("Google Auth", "User Data", response)
+
             }
 
         }
