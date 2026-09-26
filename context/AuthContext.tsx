@@ -4,7 +4,7 @@ import logger from "@/utils/logger";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as SecureStore from "expo-secure-store";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-
+import {GoogleAuthProvider, signInWithCredential, getAuth} from "@react-native-firebase/auth"
 
 type User = {
     id: number;
@@ -46,19 +46,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await GoogleSignin.hasPlayServices({
                 showPlayServicesUpdateDialog: true,
             })
-            await GoogleSignin.signOut()
-            const response = await GoogleSignin.signIn()
 
-            if (response && response.data) {
+            await GoogleSignin.signOut()
+            const signInResult = await GoogleSignin.signIn()
+            const idToken = signInResult.data?.idToken
+
+            if (!idToken) {
+
+            }
+            const googleCredentails =  GoogleAuthProvider.credential(signInResult.data?.idToken)
+            const userCredentails = await signInWithCredential(getAuth(),googleCredentails)
+            const firebaseIdToken = await userCredentails.user.getIdToken()
+
+
+            if (firebaseIdToken) {
                 const result = await api.post("/auth/login/google", {
-                    id_token: response.data.idToken,
+                    id_token: firebaseIdToken,
                 })
 
-                if(result){
+                if (result) {
                     await SecureStore.setItemAsync("auth_token", result.data.token)
                     setUser(result.data.user)
                 }
-                logger.info("Google Auth", "User Data", response)
+
 
             }
 
