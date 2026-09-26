@@ -1,10 +1,10 @@
 import { AlertDialog } from "@/components/AlertDialog";
 import api from "@/utils/api";
 import logger from "@/utils/logger";
+import { getAuth, GoogleAuthProvider, signInWithCredential } from "@react-native-firebase/auth";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as SecureStore from "expo-secure-store";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import {GoogleAuthProvider, signInWithCredential, getAuth} from "@react-native-firebase/auth"
 
 type User = {
     id: number;
@@ -46,35 +46,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await GoogleSignin.hasPlayServices({
                 showPlayServicesUpdateDialog: true,
             })
-
             await GoogleSignin.signOut()
             const signInResult = await GoogleSignin.signIn()
+
             const idToken = signInResult.data?.idToken
 
             if (!idToken) {
-
+                throw new Error("Google did not return an ID token")
             }
-            const googleCredentails =  GoogleAuthProvider.credential(signInResult.data?.idToken)
-            const userCredentails = await signInWithCredential(getAuth(),googleCredentails)
-            const firebaseIdToken = await userCredentails.user.getIdToken()
+            const googleCredentials =
+                GoogleAuthProvider.credential(idToken)
 
+            const userCredentials = await signInWithCredential(
+                getAuth(),
+                googleCredentials
+            )
 
-            if (firebaseIdToken) {
-                const result = await api.post("/auth/login/google", {
-                    id_token: firebaseIdToken,
-                })
+            const firebaseIdToken =
+                await userCredentials.user.getIdToken()
 
-                if (result) {
-                    await SecureStore.setItemAsync("auth_token", result.data.token)
-                    setUser(result.data.user)
-                }
+            const { data } = await api.post("/auth/login/google", {
+                id_token: firebaseIdToken,
+            })
 
+            await SecureStore.setItemAsync(
+                "auth_token",
+                data.data.token
+            )
 
-            }
+            setUser(data.data.user)
 
-        }
-        catch (error) {
-            logger.error("Google Auth", "Something went wrong", error)
+        } catch (error) {
+            logger.error(
+                "Google Auth",
+                "Something went wrong",
+                error
+            )
         }
     }
 
