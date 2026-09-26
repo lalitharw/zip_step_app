@@ -53,14 +53,6 @@ export default function MapBox() {
         (state) => state.routeCoordinates
     );
 
-    const setIsRecording = useLocationStore(
-        (state) => state.setIsRecording
-    );
-
-    const clearRoute = useLocationStore(
-        (state) => state.clearRoute
-    );
-
     const isGpsOff = useLocationStore(
         (state) => state.isGpsOff
     )

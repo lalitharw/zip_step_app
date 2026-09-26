@@ -2,8 +2,9 @@ import { getActivity } from "@/database/activities";
 import { getLastLocationPoint, saveLocationPoint } from "@/database/locationPoints";
 import { checkAndNotifyActivityInactivity, updateIsActiveNotificationSentStatus } from "@/services/activityInActiveService";
 import { getCurrentActivityId } from "@/utils/activity";
+import { kalmanFilter } from "@/utils/gps/filtering/kalmanFilter";
+import { validateLocationPoint } from "@/utils/gps/validation/validateLocationPoints";
 import logger from "@/utils/logger";
-import { validateLocationPoint } from "@/utils/validateLocationPoints";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 
@@ -78,6 +79,7 @@ TaskManager.defineTask(
             }
 
             // if already some points available
+            const gpsFilter = new kalmanFilter()
             const result = validateLocationPoint(location, previous_coordinates)
             if (result.skip) {
                 logger.warn("GPS", "Point skipped (no meaningful movement)", result.reason)
@@ -87,10 +89,18 @@ TaskManager.defineTask(
                 logger.warn("GPS", `Point rejected for activity ${activity_id}: ${result.reason}`, location.coords)
                 continue
             }
-            await saveLocationPoint({
-                activityId: activity_id,
+
+            const smoothed = gpsFilter.update(
                 latitude,
                 longitude,
+                accuracy ?? 25,
+                location.timestamp
+            )
+
+            await saveLocationPoint({
+                activityId: activity_id,
+                latitude: smoothed.latitude,
+                longitude: smoothed.longitude,
                 altitude: altitude ?? 0,
                 accuracy,
                 speed,
