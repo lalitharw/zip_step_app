@@ -1,7 +1,6 @@
 import { coordinateDistance } from "./coordinateDistance";
 import logger from "./logger";
 
-
 type LocationPointType = {
     coords: {
         latitude: number,
@@ -17,12 +16,14 @@ type LocationPointType = {
 type PreviousLocationType = {
     latitude: number;
     longitude: number;
+    accuracy?: number | null
     timestamp: string | number | Date;
 };
 
 type validateLocationPointReturnType = {
     valid: boolean,
-    reason: string | null
+    reason: string | null,
+    skip?: boolean   // true = not an error, just nothing new to save
 }
 
 export function validateLocationPoint(location: LocationPointType, previousLocation: PreviousLocationType): validateLocationPointReturnType {
@@ -36,17 +37,8 @@ export function validateLocationPoint(location: LocationPointType, previousLocat
             heading,
         } = location.coords
 
-        //calculate distance
-        const distance = coordinateDistance({
-            lat1: previousLocation.latitude,
-            lon1: previousLocation.longitude,
-            lat2: latitude,
-            lon2: longitude
-        })
-
-
-        // accuracy check
-        if (accuracy == null || accuracy > 10) {
+        // accuracy check — reject if this reading itself is too unreliable
+        if (accuracy == null || accuracy > 25) {
             logger.warn("GPS", "Poor Accuracy")
             return {
                 valid: false,
@@ -54,14 +46,50 @@ export function validateLocationPoint(location: LocationPointType, previousLocat
             }
         }
 
-        //check if timestamp is valid
+        // calculate distance from the last saved point
+        const distance = coordinateDistance({
+            lat1: previousLocation.latitude,
+            lon1: previousLocation.longitude,
+            lat2: latitude,
+            lon2: longitude
+        })
+
+        // ---- NEW: scaled minimum-movement check ----
+        // Instead of one fixed number for everyone, the bar scales with
+        // how accurate these two readings are. Good GPS → trust small
+        // movements. Noisy GPS → require more movement before trusting it.
+        const previousAccuracy = previousLocation.accuracy ?? accuracy
+        const averageAccuracy = (previousAccuracy + accuracy) / 2
+
+        const MIN_DISTANCE_FLOOR = 1    
+        const ACCURACY_SCALE_FACTOR = 0.5
+
+        const minimumMeaningfulDistance = Math.max(
+            MIN_DISTANCE_FLOOR,
+            averageAccuracy * ACCURACY_SCALE_FACTOR
+        )
+
+        if (distance < minimumMeaningfulDistance) {
+            logger.info("GPS", "Skipped: movement too small relative to GPS accuracy", {
+                distance,
+                minimumMeaningfulDistance,
+                averageAccuracy
+            })
+            return {
+                valid: false,
+                skip: true,
+                reason: "Skipped: distance below meaningful threshold"
+            }
+        }
+        // ---- end new check ----
+
+        // check if timestamp is valid
         const previousTimestamp = new Date(previousLocation.timestamp).getTime()
         const currentTimestamp = location.timestamp
-        let timeDifference: number | null = null
-        timeDifference = (currentTimestamp - previousTimestamp) / 1000
+        const timeDifference = (currentTimestamp - previousTimestamp) / 1000
 
         if (timeDifference <= 0) {
-            console.log("Rejected: Invalid Timestamp")
+            logger.warn("GPS", "Rejected: Invalid Timestamp")
             return {
                 valid: false,
                 reason: "Rejected: Invalid Timestamp"
@@ -71,33 +99,25 @@ export function validateLocationPoint(location: LocationPointType, previousLocat
         const driftFromCurrentTime = Math.abs(Date.now() - currentTimestamp) / 1000
 
         if (driftFromCurrentTime > 60) {
-            console.log("Rejected: Timestamp too far from current Time")
+            logger.warn("GPS", "Rejected: Timestamp too far from current Time")
             return {
                 valid: false,
                 reason: "Rejected: Timestamp too far from current Time"
             }
         }
 
-        // check if distance is valid
-        if (distance > 100) {
-            console.log("Rejected: Distance is more than 100m")
+        // distance vs. realistic speed, with slack for GPS fuzziness
+        const MAX_SPEED_MPS = 12
+        const allowedSlack = previousAccuracy + accuracy
+        const maxPlausibleDistance = (timeDifference * MAX_SPEED_MPS) + allowedSlack
+
+        if (distance > maxPlausibleDistance) {
+            logger.error("GPS", "Rejected: Distance not valid", { distance, maxPlausibleDistance })
             return {
                 valid: false,
-                reason: "Rejected: Distance is more than 100m"
+                reason: "Rejected: Distance not valid"
             }
         }
-
-        if (timeDifference !== null) {
-            const calCulateSpeed = distance / timeDifference
-            if (calCulateSpeed > 12) {
-                console.log("Rejected: Unrealistic Speed")
-                return {
-                    valid: false,
-                    reason: "Rejected: Unrealistic Speed"
-                }
-            }
-        }
-
 
         return {
             valid: true,

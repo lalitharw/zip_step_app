@@ -45,8 +45,8 @@ TaskManager.defineTask(
         await checkAndNotifyActivityInactivity()
 
         let previous_coordinates = await getLastLocationPoint(activity_id)
-
-        for (const location of locations) {
+        const sortedLocations = [...locations].sort((a, b) => a.timestamp - b.timestamp)
+        for (const location of sortedLocations) {
             const {
                 latitude,
                 longitude,
@@ -55,30 +55,36 @@ TaskManager.defineTask(
                 speed,
             } = location.coords;
 
-            logger.info("GPS","Coordinate Data",location.coords)
+            logger.info("GPS", "Coordinate Data", location.coords)
 
             // first point
             if (!previous_coordinates) {
-                if (accuracy == null || accuracy <= 25) {
-                    await saveLocationPoint({
-                        activityId: activity_id,
-                        latitude,
-                        longitude,
-                        altitude: altitude ?? 0,
-                        accuracy,
-                        speed,
-                        timestamp: new Date(location.timestamp).toISOString()
-                    }
-                    )
-
-                    await updateIsActiveNotificationSentStatus(false)
+                if (accuracy == null || accuracy > 25) {
+                    logger.warn("GPS", "First Point Rejected: Poor Accuracy")
+                    continue
                 }
+                await saveLocationPoint({
+                    activityId: activity_id,
+                    latitude,
+                    longitude,
+                    altitude: altitude ?? 0,
+                    accuracy,
+                    speed,
+                    timestamp: new Date(location.timestamp).toISOString()
+                }
+                )
+                await updateIsActiveNotificationSentStatus(false)
                 continue
             }
 
             // if already some points available
             const result = validateLocationPoint(location, previous_coordinates)
+            if (result.skip) {
+                logger.warn("GPS", "Point skipped (no meaningful movement)", result.reason)
+                continue
+            }
             if (!result.valid) {
+                logger.warn("GPS", `Point rejected for activity ${activity_id}: ${result.reason}`, location.coords)
                 continue
             }
             await saveLocationPoint({
@@ -93,6 +99,7 @@ TaskManager.defineTask(
 
             previous_coordinates = {
                 ...previous_coordinates,
+                accuracy: location.coords.accuracy ?? 0,
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
                 timestamp: new Date(location.timestamp).toISOString()
