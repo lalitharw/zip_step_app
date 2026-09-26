@@ -170,8 +170,6 @@ export default function MapBox() {
         }
         startLocationWatcher();
         checkIfActivityIsRunningAndPaused()
-
-
         return () => {
             stopWatchingLocation();
         };
@@ -179,17 +177,37 @@ export default function MapBox() {
 
 
     useEffect(() => {
-        if (!currentLocation || !cameraRef.current) return
+        if(isRecording) return
+        if(!currentLocation || !cameraRef.current) return
 
         cameraRef.current.easeTo({
-            center: [
+            center:[
                 currentLocation.longitude,
                 currentLocation.latitude
             ],
             zoom: 19,
             duration: 1000
         })
-    }, [currentLocation])
+    },[currentLocation,isRecording])
+
+
+    useEffect(() => {
+        if(!isRecording) return
+        if(routeCoordinates.length == 0 || !cameraRef.current) return
+
+        const latestPoint = routeCoordinates[routeCoordinates.length - 1]
+
+        cameraRef.current.easeTo({
+            center: [
+                latestPoint.longitude,
+                latestPoint.latitude
+            ],
+            zoom:19,
+            duration:1000
+        })
+    },[routeCoordinates, isRecording])
+
+    
 
     useEffect(() => {
         const check = async () => {
@@ -204,7 +222,7 @@ export default function MapBox() {
 
 
     useEffect(() => {
-        if (!isRecording) {
+        if (!isRecording || isPaused) {
             return;
         }
 
@@ -230,18 +248,18 @@ export default function MapBox() {
                         altitude: point.altitude,
                         speed: point.speed
                     })
+                }
 
-                    try {
-                        calculateActivityDistance()
-                        calculateActivityMaxSpeed()
-                        calculateAveragePace()
-                        calculateElevationGain()
-                        calculateAverageSpeed()
+                try {
+                    calculateActivityDistance()
+                    calculateActivityMaxSpeed()
+                    calculateAveragePace()
+                    calculateElevationGain()
+                    calculateAverageSpeed()
 
-                    }
-                    catch (statsError) {
-                        console.error("Failed to update stats: ", statsError);
-                    }
+                }
+                catch (statsError) {
+                    console.error("Failed to update stats: ", statsError);
                 }
 
                 lastLoadedId.current = newPoints[newPoints.length - 1].id
