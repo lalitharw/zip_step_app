@@ -5,7 +5,8 @@ type Coordinates = {
     latitude: number,
     accuracy: number,
     altitude: number,
-    speed: number
+    speed: number,
+    heading: number
 }
 
 

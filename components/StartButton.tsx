@@ -1,5 +1,6 @@
 import { startActivity } from '@/services/activityService';
 import { useActivityStatsStore } from '@/store/ActivityStatsStore';
+import { clearLog } from '@/utils/logging/fileLogger';
 import { PlayIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { useState } from 'react';
@@ -10,22 +11,23 @@ type StartButtonProps = {
     lastLoadedId: React.MutableRefObject<number | null>
 }
 
-export default function StartButton({lastLoadedId}:StartButtonProps) {
-    const [isLoading,setLoading] = useState<boolean>(false)
-    
+export default function StartButton({ lastLoadedId }: StartButtonProps) {
+    const [isLoading, setLoading] = useState<boolean>(false)
 
-    const handleStartActivity = async() => {
-        try{
+
+    const handleStartActivity = async () => {
+        try {
             setLoading(true)
             useActivityStatsStore.getState().resetStats()
             lastLoadedId.current = 0
+            await clearLog()
             await startActivity()
-            
+
         }
-        catch(error){
+        catch (error) {
             console.log("Something went wrong: ", error)
         }
-        finally{
+        finally {
             setLoading(false)
         }
     }

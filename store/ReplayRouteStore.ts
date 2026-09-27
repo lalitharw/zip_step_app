@@ -2,7 +2,8 @@ import { create } from "zustand"
 
 type ReplayRoute = [
     longitude: number,
-    latitude: number
+    latitude: number,
+    heading: number
 ]
 
 type Points = {
@@ -11,6 +12,7 @@ type Points = {
     accuracy: number
     altitude: number
     speed: number
+    heading: number
 }
 
 type ReplayRouteState = {

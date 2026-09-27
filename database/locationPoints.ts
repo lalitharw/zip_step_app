@@ -3,6 +3,7 @@ import { db } from "./initDatabase";
 
 type LocationPointInput = {
     activityId: number,
+    heading: number,
     latitude: number,
     longitude: number,
     accuracy?: number | null,
@@ -18,6 +19,7 @@ export type LocationPoint = {
     longitude: number,
     accuracy: number,
     altitude: number,
+    heading: number,
     client_id: string | null,
     speed: number,
     timestamp: string,
@@ -28,8 +30,8 @@ export async function saveLocationPoint(point: LocationPointInput): Promise<void
     await db.runAsync(
         `
         INSERT INTO location_points
-        (activity_id, client_id,latitude,longitude,accuracy,altitude,speed,timestamp)
-        VALUES(?,?,?,?,?,?,?,?)
+        (activity_id, client_id,latitude,longitude,accuracy,altitude,speed,timestamp,heading)
+        VALUES(?,?,?,?,?,?,?,?,?)
         `,
         point.activityId,
         Crypto.randomUUID(),
@@ -38,7 +40,8 @@ export async function saveLocationPoint(point: LocationPointInput): Promise<void
         point.accuracy ?? null,
         point.altitude,
         point.speed ?? null,
-        point.timestamp
+        point.timestamp,
+        point.heading
     )
 }
 
@@ -94,6 +97,7 @@ export async function getLocationPoints(activityId: number | string): Promise<Lo
             accuracy,
             altitude,
             speed,
+            heading,
             timestamp,
             synced
             FROM location_points

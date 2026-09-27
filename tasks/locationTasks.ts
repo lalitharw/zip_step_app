@@ -4,7 +4,8 @@ import { checkAndNotifyActivityInactivity, updateIsActiveNotificationSentStatus 
 import { getCurrentActivityId } from "@/utils/activity";
 import { kalmanFilter } from "@/utils/gps/filtering/kalmanFilter";
 import { validateLocationPoint } from "@/utils/gps/validation/validateLocationPoints";
-import logger from "@/utils/logger";
+import { fileLog } from "@/utils/logging/fileLogger";
+import logger from "@/utils/logging/logger";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 
@@ -27,6 +28,15 @@ TaskManager.defineTask(
             locations: Location.LocationObject[];
         };
 
+        await fileLog(`RAW BATCH RECEIVED: ${locations.length} points`,
+            locations.map(l => ({
+                accuracy: l.coords.accuracy,
+                timestamp: l.timestamp,
+                latitude: l.coords.latitude,
+                longitude: l.coords.longitude
+            }))
+        )
+
         const activity_id = await getCurrentActivityId()
         if (activity_id === null) {
             console.log("No activity ID Found")
@@ -47,6 +57,7 @@ TaskManager.defineTask(
 
         let previous_coordinates = await getLastLocationPoint(activity_id)
         const sortedLocations = [...locations].sort((a, b) => a.timestamp - b.timestamp)
+        const gpsFilter = new kalmanFilter()
         for (const location of sortedLocations) {
             const {
                 latitude,
@@ -54,6 +65,7 @@ TaskManager.defineTask(
                 altitude,
                 accuracy,
                 speed,
+                heading
             } = location.coords;
 
             logger.info("GPS", "Coordinate Data", location.coords)
@@ -71,7 +83,8 @@ TaskManager.defineTask(
                     altitude: altitude ?? 0,
                     accuracy,
                     speed,
-                    timestamp: new Date(location.timestamp).toISOString()
+                    timestamp: new Date(location.timestamp).toISOString(),
+                    heading: heading ?? 0
                 }
                 )
                 await updateIsActiveNotificationSentStatus(false)
@@ -79,7 +92,7 @@ TaskManager.defineTask(
             }
 
             // if already some points available
-            const gpsFilter = new kalmanFilter()
+
             const result = validateLocationPoint(location, previous_coordinates)
             if (result.skip) {
                 logger.warn("GPS", "Point skipped (no meaningful movement)", result.reason)
@@ -104,7 +117,8 @@ TaskManager.defineTask(
                 altitude: altitude ?? 0,
                 accuracy,
                 speed,
-                timestamp: new Date(location.timestamp).toISOString()
+                timestamp: new Date(location.timestamp).toISOString(),
+                heading: heading ?? 0
             })
 
             previous_coordinates = {

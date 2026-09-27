@@ -9,9 +9,10 @@ import { getLocationPoints } from "@/database/locationPoints";
 import { useReplayRouteStore } from "@/store/ReplayRouteStore";
 import { metersToKilometers } from "@/utils/dataConversion";
 import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
+import { simplifyRoute } from "@/utils/gps/filtering/simplifyRoute";
 import { Camera, CameraRef, GeoJSONSource, Layer, Map } from "@maplibre/maplibre-react-native";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "tamagui";
 
 
@@ -52,12 +53,17 @@ export default function ActivityDetail() {
     }, [id])
 
 
+    const simplifiedRouteCoordinates = useMemo(
+        () => simplifyRoute(locationPoints),
+        [locationPoints]
+    )
+
     const routeGeoJSON = {
         type: "Feature" as const,
         properties: {},
         geometry: {
             type: "LineString" as const,
-            coordinates: locationPoints.map((point: { longitude: number, latitude: number }) => [
+            coordinates: simplifiedRouteCoordinates.map((point) => [
                 point.longitude,
                 point.latitude,
             ]),
@@ -65,6 +71,7 @@ export default function ActivityDetail() {
     };
 
 
+    
     const replayRouteGeoJSON = {
         type: "Feature" as const,
         properties: {},
@@ -130,7 +137,7 @@ export default function ActivityDetail() {
                         }
                     </Map>
                     <View position="absolute" right={20} bottom={20}>
-                        <ReplayRouteButton cameraRef={cameraRef}  />
+                        <ReplayRouteButton cameraRef={cameraRef} />
                     </View>
                 </View>
 
@@ -265,6 +272,3 @@ export default function ActivityDetail() {
 
     )
 }
-
-
-

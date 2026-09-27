@@ -33,6 +33,7 @@ export function initDatabase() {
             client_id TEXT NOT NULL UNIQUE,
             latitude REAL NOT NULL,
             longitude REAL NOT NULL,
+            heading REAL NOT NULL,
             accuracy REAL,
             altitude REAL,
             speed REAL,

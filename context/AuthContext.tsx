@@ -1,6 +1,6 @@
 import { AlertDialog } from "@/components/AlertDialog";
 import api from "@/utils/api";
-import logger from "@/utils/logger";
+import logger from "@/utils/logging/logger";
 import { getAuth, GoogleAuthProvider, signInWithCredential } from "@react-native-firebase/auth";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as SecureStore from "expo-secure-store";

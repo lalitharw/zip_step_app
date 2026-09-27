@@ -9,6 +9,7 @@ import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
 import { calculateActivityDistance, calculateActivityMaxSpeed, calculateAveragePace, calculateAverageSpeed, calculateElevationGain } from "@/utils/activityStats";
+import { simplifyRoute } from "@/utils/gps/filtering/simplifyRoute";
 import { Camera, GeoJSONSource, Layer, Map, MapRef, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { AnimatePresence } from "moti";
@@ -81,14 +82,14 @@ export default function MapBox() {
             ? routeCoordinates[routeCoordinates.length - 1]
             : null;
 
-
+    const simplifiedRouteCoordinates = simplifyRoute(routeCoordinates) ?? routeCoordinates
 
     const routeGeoJSON = {
         type: "Feature" as const,
         properties: {},
         geometry: {
             type: "LineString" as const,
-            coordinates: routeCoordinates.map((point) => [
+            coordinates: simplifiedRouteCoordinates.map((point) => [
                 point.longitude,
                 point.latitude,
             ]),
@@ -169,23 +170,23 @@ export default function MapBox() {
 
 
     useEffect(() => {
-        if(isRecording) return
-        if(!currentLocation || !cameraRef.current) return
+        if (isRecording) return
+        if (!currentLocation || !cameraRef.current) return
 
         cameraRef.current.easeTo({
-            center:[
+            center: [
                 currentLocation.longitude,
                 currentLocation.latitude
             ],
             zoom: 19,
             duration: 1000
         })
-    },[currentLocation,isRecording])
+    }, [currentLocation, isRecording])
 
 
     useEffect(() => {
-        if(!isRecording) return
-        if(routeCoordinates.length == 0 || !cameraRef.current) return
+        if (!isRecording) return
+        if (routeCoordinates.length == 0 || !cameraRef.current) return
 
         const latestPoint = routeCoordinates[routeCoordinates.length - 1]
 
@@ -194,12 +195,12 @@ export default function MapBox() {
                 latestPoint.longitude,
                 latestPoint.latitude
             ],
-            zoom:19,
-            duration:1000
+            zoom: 19,
+            duration: 1000
         })
-    },[routeCoordinates, isRecording])
+    }, [routeCoordinates, isRecording])
 
-    
+
 
     useEffect(() => {
         const check = async () => {
@@ -238,7 +239,8 @@ export default function MapBox() {
                         latitude: point.latitude,
                         accuracy: point.accuracy,
                         altitude: point.altitude,
-                        speed: point.speed
+                        speed: point.speed,
+                        heading: point.heading
                     })
                 }
 
@@ -401,8 +403,9 @@ export default function MapBox() {
                     isRecording ? (
                         <StopButton mapRef={mapRef} />
                     ) : (
-
-                        <StartButton lastLoadedId={lastLoadedId} />
+                        <>
+                            <StartButton lastLoadedId={lastLoadedId} />
+                        </>
                     )
                 }
 

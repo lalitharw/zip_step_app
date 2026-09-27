@@ -41,9 +41,9 @@ export async function getCurrentLocation() {
         }
     }
     locationSubscription = await Location.watchPositionAsync({
-        accuracy: Location.Accuracy.High,
-        timeInterval: 5000,
-        distanceInterval: 5
+        accuracy: Location.Accuracy.BestForNavigation,
+        timeInterval: 1000,
+        distanceInterval: 1
     },
         (location) => {
             useLocationStore.getState().setCurrentLocation({
@@ -79,8 +79,9 @@ export async function startLocationTracking() {
         LOCATION_TASK_NAME,
         {
 
-            accuracy: Location.Accuracy.High,
-            timeInterval: 5000,
+            accuracy: Location.Accuracy.BestForNavigation,
+            timeInterval: 1000,
+            distanceInterval: 1,
             foregroundService: {
                 notificationTitle: "StrideFlow is recording",
                 notificationBody: "Your workout is being Recorded"
