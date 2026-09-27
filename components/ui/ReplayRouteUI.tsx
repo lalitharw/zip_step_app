@@ -6,22 +6,28 @@ import { CameraRef } from "@maplibre/maplibre-react-native";
 import React, { useEffect, useRef } from "react";
 import { Button } from "tamagui";
 
-type replayRouteButtonProp = {
-    cameraRef: React.RefObject<CameraRef | null>
+type Coordinate = {
+    latitude: number,
+    longitude: number,
+    heading: number
 }
 
-export default function ReplayRouteButton({ cameraRef }: replayRouteButtonProp) {
+type replayRouteButtonProp = {
+    cameraRef: React.RefObject<CameraRef | null>,
+    locationPoints: Coordinate[]
+}
+
+export default function ReplayRouteButton({ cameraRef, locationPoints }: replayRouteButtonProp) {
 
     const setIsReplaying = useReplayRouteStore((state) => state.setIsReplaying)
     const addReplayCoordinate = useReplayRouteStore((state) => state.addReplayRoute)
     const clearReplayRoute = useReplayRouteStore((state) => state.clearReplayRoute)
-    const locationPoints = useReplayRouteStore((state) => state.locationPoints)
     const isReplaying = useReplayRouteStore((state) => state.isReplaying)
 
     const cancelRef = useRef(false)
 
     const STEP_DELAY_MS = 100
-    const MAX_STEPS = 300
+    // const MAX_STEPS = 300
 
     useEffect(() => {
         return () => {
@@ -36,17 +42,17 @@ export default function ReplayRouteButton({ cameraRef }: replayRouteButtonProp) 
         setIsReplaying(true)
         clearReplayRoute()
 
-        const step = Math.max(1, Math.floor(locationPoints.length / MAX_STEPS))
-        const pointsToPlay = locationPoints.filter((_, i) => i % step === 0)
+        // const step = Math.max(1, Math.floor(locationPoints.length / MAX_STEPS))
+        // const pointsToPlay = locationPoints.filter((_, i) => i % step === 0)
 
         try {
-            for (let i = 0; i < pointsToPlay.length; i++) {
+            for (let i = 0; i < locationPoints.length; i++) {
                 if (cancelRef.current) break
 
                 const coordinate: [number, number, number] = [
-                    pointsToPlay[i].longitude,
-                    pointsToPlay[i].latitude,
-                    pointsToPlay[i].heading
+                    locationPoints[i].longitude,
+                    locationPoints[i].latitude,
+                    locationPoints[i].heading
 
                 ]
 
