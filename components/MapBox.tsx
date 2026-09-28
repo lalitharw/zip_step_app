@@ -9,7 +9,6 @@ import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
 import { calculateActivityDistance, calculateActivityMaxSpeed, calculateAveragePace, calculateAverageSpeed, calculateElevationGain } from "@/utils/activityStats";
-import { simplifyRoute } from "@/utils/gps/filtering/simplifyRoute";
 import { Camera, GeoJSONSource, Layer, Map, MapRef, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { AnimatePresence } from "moti";
@@ -82,17 +81,17 @@ export default function MapBox() {
             ? routeCoordinates[routeCoordinates.length - 1]
             : null;
 
-    const simplifiedRouteCoordinates = simplifyRoute(routeCoordinates) ?? routeCoordinates
+    // const simplifiedRouteCoordinates = simplifyRoute(routeCoordinates) ?? routeCoordinates
 
     const routeGeoJSON = {
         type: "Feature" as const,
         properties: {},
         geometry: {
             type: "LineString" as const,
-            coordinates: simplifiedRouteCoordinates.map((point) => [
+            coordinates: routeCoordinates.map((point) => [
                 point.longitude,
-                point.latitude,
-            ]),
+                point.latitude
+            ])
         },
     };
 

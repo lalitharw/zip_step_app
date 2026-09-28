@@ -9,7 +9,6 @@ import { getLocationPoints } from "@/database/locationPoints";
 import { useReplayRouteStore } from "@/store/ReplayRouteStore";
 import { metersToKilometers } from "@/utils/dataConversion";
 import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
-import { simplifyRoute } from "@/utils/gps/filtering/simplifyRoute";
 import { Camera, CameraRef, GeoJSONSource, Layer, Map } from "@maplibre/maplibre-react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -53,20 +52,20 @@ export default function ActivityDetail() {
     }, [id])
 
 
-    const simplifiedRouteCoordinates = useMemo(
-        () => simplifyRoute(locationPoints),
-        [locationPoints]
-    )
+    // const simplifiedRouteCoordinates = useMemo(
+    //     () => simplifyRoute(locationPoints),
+    //     [locationPoints]
+    // )
 
     const routeGeoJSON = {
         type: "Feature" as const,
         properties: {},
         geometry: {
             type: "LineString" as const,
-            coordinates: simplifiedRouteCoordinates.map((point) => [
+            coordinates: locationPoints.map((point) => [
                 point.longitude,
-                point.latitude,
-            ]),
+                point.latitude
+            ])
         },
     };
 
@@ -128,7 +127,7 @@ export default function ActivityDetail() {
                                     <GeoJSONSource id="replay-route" data={replayRouteGeoJSON}>
                                         <Layer
                                             type="line"
-                                            id="recorded-route-line"
+                                            id="replay-route-line"
                                             style={{ lineColor: "#1397c3", lineWidth: 5, lineCap: "round", lineJoin: "round" }}
                                         />
                                     </GeoJSONSource>
@@ -137,7 +136,7 @@ export default function ActivityDetail() {
                         }
                     </Map>
                     <View position="absolute" right={20} bottom={20}>
-                        <ReplayRouteButton cameraRef={cameraRef} />
+                        <ReplayRouteButton cameraRef={cameraRef} locationPoints={locationPoints} />
                     </View>
                 </View>
 

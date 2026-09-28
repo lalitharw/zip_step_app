@@ -1,5 +1,6 @@
 import { colors } from "@/constants/theme";
 import { useReplayRouteStore } from "@/store/ReplayRouteStore";
+import logger from "@/utils/logging/logger";
 import { PlayIcon, StopIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { CameraRef } from "@maplibre/maplibre-react-native";
@@ -27,7 +28,7 @@ export default function ReplayRouteButton({ cameraRef, locationPoints }: replayR
     const cancelRef = useRef(false)
 
     const STEP_DELAY_MS = 100
-    // const MAX_STEPS = 300
+    const MAX_STEPS = 300
 
     useEffect(() => {
         return () => {
@@ -41,20 +42,21 @@ export default function ReplayRouteButton({ cameraRef, locationPoints }: replayR
         cancelRef.current = false
         setIsReplaying(true)
         clearReplayRoute()
-
-        // const step = Math.max(1, Math.floor(locationPoints.length / MAX_STEPS))
-        // const pointsToPlay = locationPoints.filter((_, i) => i % step === 0)
+        const step = Math.max(1, Math.ceil(locationPoints.length / MAX_STEPS))
+        const pointsToPlay = locationPoints.filter((_, i) => i % step === 0)
 
         try {
-            for (let i = 0; i < locationPoints.length; i++) {
+            for (let i = 0; i < pointsToPlay.length; i++) {
                 if (cancelRef.current) break
 
                 const coordinate: [number, number, number] = [
-                    locationPoints[i].longitude,
-                    locationPoints[i].latitude,
-                    locationPoints[i].heading
+                    pointsToPlay[i].longitude,
+                    pointsToPlay[i].latitude,
+                    pointsToPlay[i].heading
 
                 ]
+
+                
 
                 addReplayCoordinate(coordinate)
                 cameraRef.current?.easeTo({

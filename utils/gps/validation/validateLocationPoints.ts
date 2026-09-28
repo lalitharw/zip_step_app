@@ -51,7 +51,7 @@ export function validateLocationPoint(location: LocationPointType, previousLocat
         })
 
 
-        if (!validateAccuracy(accuracy ?? 0)) {
+        if (!validateAccuracy(accuracy ?? null)) {
             return {
                 valid: false,
                 reason: "Rejected: Poor Accuracy"

@@ -1,48 +1,178 @@
-import { calculateDistance } from "../calculation/calculateDistance";
-import { calculateHeadingDifference } from "../calculation/calculateHeadingDifference";
-import logger from "@/utils/logging/logger";
+// type KalmanState = {
+//     x: number;
+//     y: number;
+//     variance: number;
+//     timestamp: number;
+// };
 
-type Coordinate = {
-    longitude: number,
-    latitude: number,
-    heading: number
-}
+// export class KalmanFilter {
+//     private state: KalmanState | null = null;
 
-const MIN_DISTANCE_METERS = 5;
-const MIN_HEADING_CHANGE = 20;
+//     private readonly processNoise: number;
 
+//     private originLatitude: number | null = null;
+//     private originLongitude: number | null = null;
 
+//     constructor(processNoisePerSecond = 3) {
+//         this.processNoise = processNoisePerSecond;
+//     }
 
-export function simplifyRoute(coordinates: Coordinate[]) {
-    if (coordinates.length < 2) return coordinates
-    const simplified: Coordinate[] = [];
-    simplified.push(coordinates[0])
-    let lastKeptPoint = coordinates[0]
-    for (let i = 1; i < coordinates.length - 1; i++) {
-        const currentPoint = coordinates[i]
-        const distance = calculateDistance(lastKeptPoint, currentPoint)
+//     public update(
+//         latitude: number,
+//         longitude: number,
+//         accuracy: number,
+//         timestampMs: number
+//     ): {
+//         latitude: number;
+//         longitude: number;
+//     } {
+//         /*
+//          * First GPS point becomes our local coordinate origin.
+//          */
+//         if (
+//             this.originLatitude === null ||
+//             this.originLongitude === null
+//         ) {
+//             this.originLatitude = latitude;
+//             this.originLongitude = longitude;
+//         }
 
-        if (lastKeptPoint.heading !== null && currentPoint.heading !== null) {
-            const headingDifference = calculateHeadingDifference(lastKeptPoint.heading, currentPoint.heading)
+//         const { x, y } = this.toLocalMeters(
+//             latitude,
+//             longitude
+//         );
 
-            const headingChanged = headingDifference >= MIN_HEADING_CHANGE
-            const movedEnough = distance >= MIN_DISTANCE_METERS
+//         /*
+//          * First point initializes the Kalman state.
+//          */
+//         if (!this.state) {
+//             this.state = {
+//                 x,
+//                 y,
+//                 variance: accuracy * accuracy,
+//                 timestamp: timestampMs,
+//             };
 
-            if (movedEnough || headingChanged) {
-                simplified.push(currentPoint)
-                lastKeptPoint = currentPoint
-            }
-        }
+//             return {
+//                 latitude,
+//                 longitude,
+//             };
+//         }
 
-    }
+//         const elapsedSeconds = Math.max(
+//             0,
+//             (timestampMs - this.state.timestamp) / 1000
+//         );
 
-    const lastPoint = coordinates[coordinates.length - 1]
-    simplified.push(lastPoint)
+//         /*
+//          * Prediction
+//          */
+//         const predictedVariance =
+//             this.state.variance +
+//             elapsedSeconds *
+//                 this.processNoise *
+//                 this.processNoise;
 
+//         /*
+//          * Measurement uncertainty.
+//          *
+//          * Accuracy is already expressed in meters,
+//          * so this is now compatible with x/y.
+//          */
+//         const measurementVariance =
+//             accuracy * accuracy;
 
+//         /*
+//          * Kalman gain
+//          */
+//         const kalmanGain =
+//             predictedVariance /
+//             (predictedVariance + measurementVariance);
 
-    logger.info("GPS", `Route simplified: ${ coordinates.length } → ${ simplified.length } points`); 
-    return simplified;
+//         /*
+//          * Update position
+//          */
+//         const newX =
+//             this.state.x +
+//             kalmanGain * (x - this.state.x);
 
-}
+//         const newY =
+//             this.state.y +
+//             kalmanGain * (y - this.state.y);
 
+//         /*
+//          * Update uncertainty
+//          */
+//         const newVariance =
+//             (1 - kalmanGain) * predictedVariance;
+
+//         this.state = {
+//             x: newX,
+//             y: newY,
+//             variance: newVariance,
+//             timestamp: timestampMs,
+//         };
+
+//         /*
+//          * Convert meters back to GPS coordinates.
+//          */
+//         return this.fromLocalMeters(newX, newY);
+//     }
+
+//     public reset() {
+//         this.state = null;
+//         this.originLatitude = null;
+//         this.originLongitude = null;
+//     }
+
+//     private toLocalMeters(
+//         latitude: number,
+//         longitude: number
+//     ) {
+//         const lat0 = this.originLatitude!;
+//         const lon0 = this.originLongitude!;
+
+//         const metersPerDegreeLatitude = 111_320;
+
+//         const metersPerDegreeLongitude =
+//             111_320 *
+//             Math.cos((lat0 * Math.PI) / 180);
+
+//         const x =
+//             (longitude - lon0) *
+//             metersPerDegreeLongitude;
+
+//         const y =
+//             (latitude - lat0) *
+//             metersPerDegreeLatitude;
+
+//         return { x, y };
+//     }
+
+//     private fromLocalMeters(
+//         x: number,
+//         y: number
+//     ) {
+//         const lat0 = this.originLatitude!;
+//         const lon0 = this.originLongitude!;
+
+//         const metersPerDegreeLatitude = 111_320;
+
+//         const metersPerDegreeLongitude =
+//             111_320 *
+//             Math.cos((lat0 * Math.PI) / 180);
+
+//         const latitude =
+//             lat0 +
+//             y / metersPerDegreeLatitude;
+
+//         const longitude =
+//             lon0 +
+//             x / metersPerDegreeLongitude;
+
+//         return {
+//             latitude,
+//             longitude,
+//         };
+//     }
+// }
