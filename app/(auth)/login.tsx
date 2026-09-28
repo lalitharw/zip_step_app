@@ -11,6 +11,7 @@ export default function Login() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
+    const [googleLoading, setGoogleLoading] = useState(false)
 
     async function handleLogin() {
         if (!email || !password) {
@@ -31,11 +32,15 @@ export default function Login() {
 
     async function handleGoogleLogin() {
         try {
+            setGoogleLoading(true)
             await googleLogin()
             router.replace("/(tabs)")
         }
         catch (error) {
 
+        }
+        finally {
+            setGoogleLoading(false)
         }
     }
 
@@ -45,9 +50,8 @@ export default function Login() {
         <GradientBackground>
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-            >
-                <ScrollView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                <ScrollView pointerEvents={(loading || googleLoading) ? "none" : "auto"}
                     contentContainerStyle={{
                         flexGrow: 1,
                         paddingHorizontal: 20,
@@ -126,7 +130,14 @@ export default function Login() {
                                         fontSize="$3"
                                         fontWeight="600"
                                     >
-                                        Continue with Google
+
+                                        {googleLoading ? (
+                                            <Spinner
+                                                size="small"
+                                                color="#111"
+                                            />) : (<Text>Continue with Google</Text>)
+                                        }
+
                                     </Text>
                                 </XStack>
                             </Button>
@@ -254,7 +265,6 @@ export default function Login() {
                         </XStack>
                     </YStack>
                 </ScrollView>
-
                 <XStack
                     justifyContent="center"
                     alignItems="center"

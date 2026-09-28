@@ -1,3 +1,4 @@
+import { lastLocationPointReference } from "@/common/types/location";
 import { getActivity } from "@/database/activities";
 import { getLastLocationPoint, saveLocationPoint } from "@/database/locationPoints";
 import { checkAndNotifyActivityInactivity, updateIsActiveNotificationSentStatus } from "@/services/activityInActiveService";
@@ -10,6 +11,8 @@ import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 
 export const LOCATION_TASK_NAME = "stride_flow_location_task";
+
+
 
 TaskManager.defineTask(
     LOCATION_TASK_NAME,
@@ -55,7 +58,7 @@ TaskManager.defineTask(
 
         await checkAndNotifyActivityInactivity()
 
-        let previous_coordinates = await getLastLocationPoint(activity_id)
+        let lastLocationPoint: lastLocationPointReference | null = await getLastLocationPoint(activity_id)
         const sortedLocations = [...locations].sort((a, b) => a.timestamp - b.timestamp)
         const gpsFilter = new kalmanFilter()
         for (const location of sortedLocations) {
@@ -68,32 +71,42 @@ TaskManager.defineTask(
                 heading
             } = location.coords;
 
-            logger.info("GPS", "Coordinate Data", location.coords)
+
+            // accuracy check
+            if (accuracy == null || accuracy > 50) {
+                logger.warn("GPS", `Point Rejected: poor accuracy ${accuracy}`)
+                continue
+            }
+
 
             // first point
-            if (!previous_coordinates) {
-                if (accuracy == null || accuracy > 25) {
-                    logger.warn("GPS", "First Point Rejected: Poor Accuracy")
-                    continue
-                }
+            if (!lastLocationPoint) {
+                logger.warn("GPS", "Processing first GPS point")
+                const smoothed = gpsFilter.update(latitude, longitude, accuracy, location.timestamp)
                 await saveLocationPoint({
                     activityId: activity_id,
-                    latitude,
-                    longitude,
+                    latitude: smoothed.latitude,
+                    longitude: smoothed.longitude,
                     altitude: altitude ?? 0,
                     accuracy,
                     speed,
                     timestamp: new Date(location.timestamp).toISOString(),
                     heading: heading ?? 0
+                })
+
+                lastLocationPoint = {
+                    latitude: smoothed.latitude,
+                    longitude: smoothed.longitude,
+                    accuracy,
+                    timestamp: new Date(location.timestamp).toISOString()
                 }
-                )
                 await updateIsActiveNotificationSentStatus(false)
                 continue
             }
 
-            // if already some points available
 
-            const result = validateLocationPoint(location, previous_coordinates)
+            // if already some points available
+            const result = validateLocationPoint(location, lastLocationPoint)
             if (result.skip) {
                 logger.warn("GPS", "Point skipped (no meaningful movement)", result.reason)
                 continue
@@ -121,11 +134,11 @@ TaskManager.defineTask(
                 heading: heading ?? 0
             })
 
-            previous_coordinates = {
-                ...previous_coordinates,
-                accuracy: location.coords.accuracy ?? 0,
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
+            lastLocationPoint = {
+                ...lastLocationPoint,
+                accuracy: accuracy ?? 0,
+                latitude: smoothed.latitude,
+                longitude: smoothed.longitude,
                 timestamp: new Date(location.timestamp).toISOString()
             }
 

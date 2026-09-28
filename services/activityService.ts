@@ -5,6 +5,7 @@ import { useActivityStore } from "@/store/ActivityStore"
 import { useLocationStore } from "@/store/locationStore"
 import { deleteCurrentActivityId, getCurrentActivityId, setCurrentActivityId } from "@/utils/activity"
 import { deleteCurrentPauseActivityId } from "@/utils/activityPause"
+import { ensureBatteryOptimizationIgnored } from "@/utils/battery/batteryOptimization"
 import { requestLocationPermission, startLocationTracking, stopLocationTracking } from "./locationService"
 
 
@@ -14,6 +15,7 @@ export const startActivity = async () => {
         if (!permissionGranted) {
             throw new Error("Location permission was not granted")
         }
+        await ensureBatteryOptimizationIgnored()
         useLocationStore.getState().clearRoute()
         const activity = await createActivity()
         if (!activity) {

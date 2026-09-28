@@ -22,7 +22,6 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
             lastLoadedId.current = 0
             await clearLog()
             await startActivity()
-
         }
         catch (error) {
             console.log("Something went wrong: ", error)
