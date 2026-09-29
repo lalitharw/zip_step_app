@@ -33,6 +33,7 @@ export default function ReplayRouteButton({ cameraRef, locationPoints }: replayR
     useEffect(() => {
         return () => {
             cancelRef.current = true
+            setIsReplaying(false)
         }
     }, [])
 

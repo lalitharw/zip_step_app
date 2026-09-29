@@ -26,6 +26,7 @@
     "@tamagui/config": "^2.4.5",
     "@tamagui/linear-gradient": "^2.4.5",
     "axios": "^1.18.1",
+    "docsify-cli": "^5.0.0",
     "expo": "~54.0.36",
     "expo-battery": "~10.0.8",
     "expo-constants": "~18.0.13",
