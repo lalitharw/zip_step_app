@@ -1,6 +1,7 @@
 import { startActivity } from '@/services/activityService';
 import { useActivityStatsStore } from '@/store/ActivityStatsStore';
 import { clearLog } from '@/utils/logging/fileLogger';
+import { shareLog } from '@/utils/sharing/debugLoggerShare';
 import { PlayIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { useState } from 'react';
@@ -32,18 +33,22 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
     }
 
     return (
-
-        <Button onPress={handleStartActivity} width={90} disabled={isLoading} height={90} borderRadius={"50%"}>
-            {
-                isLoading ? <Spinner
-                    size="small"
-                    color="$green10"
-                />
-                    :
-                    <HugeiconsIcon
-                        icon={PlayIcon}
+        <>
+            <Button onPress={handleStartActivity} width={90} disabled={isLoading} height={90} borderRadius={"50%"}>
+                {
+                    isLoading ? <Spinner
+                        size="small"
+                        color="$green10"
                     />
-            }
-        </Button>
+                        :
+                        <HugeiconsIcon
+                            icon={PlayIcon}
+                        />
+
+                }
+            </Button>
+
+            <Button onPress={() => shareLog()}>Share</Button>
+        </>
     )
 }

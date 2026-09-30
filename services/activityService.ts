@@ -7,16 +7,20 @@ import { deleteCurrentActivityId, getCurrentActivityId, setCurrentActivityId } f
 import { deleteCurrentPauseActivityId } from "@/utils/activityPause"
 import { ensureBatteryOptimizationIgnored } from "@/utils/battery/batteryOptimization"
 import { requestLocationPermission, startLocationTracking, stopLocationTracking } from "./locationService"
+import { subscribeAccelerometer } from "@/utils/sensors/accelerometer"
 
 
+
+let accelerometer: ReturnType<typeof subscribeAccelerometer> | null = null
 export const startActivity = async () => {
     try {
+        useLocationStore.getState().clearRoute()
+        accelerometer = subscribeAccelerometer()
         const permissionGranted = await requestLocationPermission()
         if (!permissionGranted) {
             throw new Error("Location permission was not granted")
         }
         await ensureBatteryOptimizationIgnored()
-        useLocationStore.getState().clearRoute()
         const activity = await createActivity()
         if (!activity) {
             throw new Error("Failed to create activity")
@@ -40,6 +44,7 @@ export const startActivity = async () => {
 
 export const stopActivity = async () => {
     try {
+        accelerometer?.remove()
         await stopLocationTracking()
         const activityId = await getCurrentActivityId()
         if (!activityId) {
@@ -70,6 +75,8 @@ export const stopActivity = async () => {
 
 const storeActivityStats = async (activityId: number) => {
     try {
+        const acc = subscribeAccelerometer()
+        acc.remove()
         const activityStats = useActivityStatsStore.getState().stats
         await updateActivityStats(activityId, activityStats)
     }

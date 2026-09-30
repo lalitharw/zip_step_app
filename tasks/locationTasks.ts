@@ -31,14 +31,14 @@ TaskManager.defineTask(
             locations: Location.LocationObject[];
         };
 
-        await fileLog(`RAW BATCH RECEIVED: ${locations.length} points`,
-            locations.map(l => ({
-                accuracy: l.coords.accuracy,
-                timestamp: l.timestamp,
-                latitude: l.coords.latitude,
-                longitude: l.coords.longitude
-            }))
-        )
+        // await fileLog(`RAW BATCH RECEIVED: ${locations.length} points`,
+        //     locations.map(l => ({
+        //         accuracy: l.coords.accuracy,
+        //         timestamp: l.timestamp,
+        //         latitude: l.coords.latitude,
+        //         longitude: l.coords.longitude
+        //     }))
+        // )
 
         const activity_id = await getCurrentActivityId()
         if (activity_id === null) {
@@ -82,11 +82,10 @@ TaskManager.defineTask(
             // first point
             if (!lastLocationPoint) {
                 logger.warn("GPS", "Processing first GPS point")
-                const smoothed = gpsFilter.update(latitude, longitude, accuracy, location.timestamp)
                 await saveLocationPoint({
                     activityId: activity_id,
-                    latitude: smoothed.latitude,
-                    longitude: smoothed.longitude,
+                    latitude: latitude,
+                    longitude: longitude,
                     altitude: altitude ?? 0,
                     accuracy,
                     speed,
@@ -95,8 +94,8 @@ TaskManager.defineTask(
                 })
 
                 lastLocationPoint = {
-                    latitude: smoothed.latitude,
-                    longitude: smoothed.longitude,
+                    latitude: latitude,
+                    longitude: longitude,
                     accuracy,
                     timestamp: new Date(location.timestamp).toISOString()
                 }
@@ -116,17 +115,12 @@ TaskManager.defineTask(
                 continue
             }
 
-            const smoothed = gpsFilter.update(
-                latitude,
-                longitude,
-                accuracy ?? 25,
-                location.timestamp
-            )
+          
 
             await saveLocationPoint({
                 activityId: activity_id,
-                latitude: smoothed.latitude,
-                longitude: smoothed.longitude,
+                latitude: latitude,
+                longitude: longitude,
                 altitude: altitude ?? 0,
                 accuracy,
                 speed,
@@ -137,8 +131,8 @@ TaskManager.defineTask(
             lastLocationPoint = {
                 ...lastLocationPoint,
                 accuracy: accuracy ?? 0,
-                latitude: smoothed.latitude,
-                longitude: smoothed.longitude,
+                latitude: latitude,
+                longitude: longitude,
                 timestamp: new Date(location.timestamp).toISOString()
             }
 
