@@ -1,5 +1,5 @@
 import { getNewLocationPointsById } from "@/database/locationPoints";
-import { checkIfActivityIsRunning } from "@/services/activityService";
+import { checkIfActivityIsRunning } from "@/services/activity/activityService";
 import { getCurrentLocation, stopWatchingLocation } from "@/services/locationService";
 import { networkStatus } from "@/services/networkService";
 import { useActivityPauseStore } from "@/store/ActivityPauseStore";
@@ -9,7 +9,6 @@ import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
 import { calculateActivityDistance, calculateActivityMaxSpeed, calculateAveragePace, calculateAverageSpeed, calculateElevationGain } from "@/utils/activityStats";
-import { subscribeAccelerometer } from "@/utils/sensors/accelerometer";
 import { Camera, GeoJSONSource, Layer, Map, MapRef, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { AnimatePresence } from "moti";

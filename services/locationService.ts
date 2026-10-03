@@ -24,6 +24,7 @@ export async function requestLocationPermission() {
 }
 
 export async function getCurrentLocation() {
+    console.log("Watching current Location")
     if (locationSubscription) {
         return true
     }
@@ -43,7 +44,7 @@ export async function getCurrentLocation() {
     locationSubscription = await Location.watchPositionAsync({
         accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: 1000,
-        distanceInterval: 1
+        distanceInterval: 3
     },
         (location) => {
             useLocationStore.getState().setCurrentLocation({
@@ -60,12 +61,13 @@ export async function getCurrentLocation() {
 
 
 export function stopWatchingLocation() {
+
     locationSubscription?.remove()
     locationSubscription = null
 }
 
 export async function startLocationTracking() {
-
+    
     console.log("Task Registered: ", await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME))
     const alreadyRunning = await Location.hasStartedLocationUpdatesAsync(
         LOCATION_TASK_NAME
@@ -81,7 +83,9 @@ export async function startLocationTracking() {
 
             accuracy: Location.Accuracy.BestForNavigation,
             timeInterval: 1000,
-            distanceInterval: 1,
+            distanceInterval: 2,
+            activityType: Location.ActivityType.Fitness,
+            pausesUpdatesAutomatically: false,
             foregroundService: {
                 notificationTitle: "StrideFlow is recording",
                 notificationBody: "Your workout is being Recorded"

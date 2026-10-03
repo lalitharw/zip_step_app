@@ -1,27 +1,26 @@
 import { Accelerometer } from "expo-sensors";
-import { fileLog } from "../logging/fileLogger";
-import logger from "../logging/logger";
-import { motionDectector } from "./motionDection";
+import { motionDectector } from "./motionDetector";
+
+let accelometerSubscription: ReturnType<typeof Accelerometer.addListener> | null = null
 
 export const subscribeAccelerometer = () => {
+
+    if (accelometerSubscription) return
+
     Accelerometer.setUpdateInterval(100);
 
-    const subscription = Accelerometer.addListener(({ x, y, z }) => {
+    accelometerSubscription = Accelerometer.addListener(({ x, y, z }) => {
 
         const magnitude = Math.sqrt(x * x + y * y + z * z)
         const movement = Math.abs(magnitude - 1)
-        const isMoving = motionDectector.update(movement)
-        
-        logger.info(
-            "ACCELEROMETER",
-            "Reading",
-            `${x}:${y}:${z}, moving: ${isMoving}`
-
-        );
-
-
-        fileLog("Reading", `x:${x},y:${y},z:${z}, movement:${movement},moving: ${isMoving}`)
+        motionDectector.update(movement)
     });
 
-    return subscription;
+
 };
+
+
+export const stopAccelerometer = () => {
+    accelometerSubscription?.remove()
+    accelometerSubscription = null
+}

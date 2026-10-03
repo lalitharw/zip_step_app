@@ -1,7 +1,9 @@
-export const validateAccuracy = (accuracy: number |null, maxAccuracy = 25) => {
-    if(accuracy == null){
+import { MAX_ACCURACY_M } from "../gpsConfig";
+
+export const validateAccuracy = (accuracy: number | null) => {
+    if (accuracy == null) {
         return false;
     }
 
-    return accuracy <= maxAccuracy
+            return accuracy <= MAX_ACCURACY_M
 }

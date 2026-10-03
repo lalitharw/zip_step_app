@@ -1,3 +1,5 @@
+import logger from "@/utils/logging/logger";
+import { motionDectector } from "@/utils/sensors/motionDetector";
 import { coordinateDistance } from "../../coordinateDistance";
 import { calculateTimeDifference } from "../calculation/calculateTimeDifference";
 import { validateAccuracy } from "./validateAccuracy";
@@ -30,7 +32,13 @@ type validateLocationPointReturnType = {
     skip?: boolean
 }
 
-export function validateLocationPoint(location: LocationPointType, previousLocation: PreviousLocationType): validateLocationPointReturnType {
+
+export function validateLocationPoint(location: LocationPointType, previousLocation: PreviousLocationType, maxSpeed: number): validateLocationPointReturnType {
+    const gpsSpeed = location.coords.speed
+    const gpsMoving = gpsSpeed !== null && gpsSpeed > 0.8
+    // const moving = motionDectector.isMoving() || gpsMoving
+    const moving = motionDectector.isMoving()
+    logger.info("Moving", "IS User Moving", moving)
     try {
         const {
             latitude,
@@ -66,16 +74,29 @@ export function validateLocationPoint(location: LocationPointType, previousLocat
             }
         }
 
-        if (!validateMeaningfulMovement(distance, previousLocation.accuracy ?? 0, accuracy ?? 0)) {
-            return {
-                valid: false,
-                skip: true,
-                reason: "Skipped: distance below meaningful threshold"
+
+        if (!moving) {
+            if (!validateMeaningfulMovement(distance, previousLocation.accuracy ?? 0, accuracy ?? 0)) {
+                return {
+                    valid: false,
+                    skip: true,
+                    reason: "Skipped: distance below meaningful threshold"
+                }
             }
         }
+        // else {
+        //     const floor = Math.max(1.5, (accuracy ?? 0) * 0.25)
+        //     if (distance < floor) {
+        //         return {
+        //             valid: false,
+        //             skip: true,
+        //             reason: "Skipped: tiny move while moving"
+        //         }
+        //     }
+        // }
 
 
-        if (!validatePlausibleDistance(accuracy ?? 0, previousLocation.accuracy ?? 0, distance, timeDifference)) {
+        if (!validatePlausibleDistance(accuracy ?? 0, previousLocation.accuracy ?? 0, distance, timeDifference, maxSpeed)) {
             return {
                 valid: false,
                 reason: "Rejected: Distance not valid"

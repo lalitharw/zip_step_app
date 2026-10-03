@@ -12,7 +12,7 @@ import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
 import { Camera, CameraRef, GeoJSONSource, Layer, Map } from "@maplibre/maplibre-react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, Text, View } from "tamagui";
+import { Button, ScrollView, Text, View } from "tamagui";
 
 
 export default function ActivityDetail() {
@@ -21,6 +21,7 @@ export default function ActivityDetail() {
     const cameraRef = useRef<CameraRef>(null)
     const [activity, setActivity] = useState<Activity | null>(null)
     const [loading, setLoading] = useState<boolean>(false)
+    const [showRaw, setShowRaw] = useState<boolean>(false)
 
     const isReplaying = useReplayRouteStore((state) => state.isReplaying)
     const replayCoordinates = useReplayRouteStore((state) => state.replayRoute)
@@ -52,10 +53,6 @@ export default function ActivityDetail() {
     }, [id])
 
 
-    // const simplifiedRouteCoordinates = useMemo(
-    //     () => simplifyRoute(locationPoints),
-    //     [locationPoints]
-    // )
 
     const routeGeoJSON = {
         type: "Feature" as const,
@@ -70,7 +67,23 @@ export default function ActivityDetail() {
     };
 
 
-    
+    const rawRouteGeoJSON = useMemo(() => ({
+        type: "Feature" as const,
+        properties: {},
+        geometry: {
+            type: "LineString" as const,
+            coordinates: locationPoints.filter(point => {
+                return point.raw_latitude !== null && point.raw_longitude !== null
+            }).
+                map((point) => [
+                    point.raw_longitude,
+                    point.raw_latitude
+                ])
+        },
+    }), [locationPoints]);
+
+
+
     const replayRouteGeoJSON = {
         type: "Feature" as const,
         properties: {},
@@ -104,38 +117,46 @@ export default function ActivityDetail() {
                         attribution={false}
                         compass={false}
                     >
-
-
-
                         {(!isReplaying && locationPoints.length > 0) && (
                             <>
                                 <Camera center={[locationPoints[0].longitude, locationPoints[0].latitude]} zoom={18} />
-                                <GeoJSONSource id="recorded-route" data={routeGeoJSON}>
+
+
+                                <GeoJSONSource id="raw-route" data={showRaw  ? rawRouteGeoJSON : routeGeoJSON}>
                                     <Layer
                                         type="line"
-                                        id="recorded-route-line"
+                                        id="raw-route-line"
+                                        style={{ lineColor: "#1397c3", lineWidth: 5, lineCap: "round", lineJoin: "round" }}
+                                    />
+                                </GeoJSONSource>
+
+                            </>
+                        )}
+
+                        {(isReplaying && replayCoordinates.length >= 2) && (
+                            <>
+                                <Camera ref={cameraRef} zoom={18} />
+                                <GeoJSONSource id="replay-route" data={replayRouteGeoJSON}>
+                                    <Layer
+                                        type="line"
+                                        id="replay-route-line"
                                         style={{ lineColor: "#1397c3", lineWidth: 5, lineCap: "round", lineJoin: "round" }}
                                     />
                                 </GeoJSONSource>
                             </>
                         )}
 
+
+
+                    </Map>
+                    <View position="absolute" right={20} bottom={20}>
                         {
-                            (isReplaying && replayCoordinates.length >= 2) && (
+                            (__DEV__) && (
                                 <>
-                                    <Camera ref={cameraRef} zoom={18} />
-                                    <GeoJSONSource id="replay-route" data={replayRouteGeoJSON}>
-                                        <Layer
-                                            type="line"
-                                            id="replay-route-line"
-                                            style={{ lineColor: "#1397c3", lineWidth: 5, lineCap: "round", lineJoin: "round" }}
-                                        />
-                                    </GeoJSONSource>
+                                    <Button onPress={() => setShowRaw(value => !value)}>Raw: {showRaw ? "true" : "false"}</Button>
                                 </>
                             )
                         }
-                    </Map>
-                    <View position="absolute" right={20} bottom={20}>
                         <ReplayRouteButton cameraRef={cameraRef} locationPoints={locationPoints} />
                     </View>
                 </View>
@@ -264,7 +285,7 @@ export default function ActivityDetail() {
                 </ScrollView>
 
             </View>
-        </GradientBackground>
+        </GradientBackground >
 
 
 

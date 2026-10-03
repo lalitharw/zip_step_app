@@ -1,6 +1,7 @@
-import { startActivity } from '@/services/activityService';
+import { startActivity } from '@/services/activity/activityService';
 import { useActivityStatsStore } from '@/store/ActivityStatsStore';
 import { clearLog } from '@/utils/logging/fileLogger';
+import { stopAccelerometer, subscribeAccelerometer } from '@/utils/sensors/accelerometer';
 import { shareLog } from '@/utils/sharing/debugLoggerShare';
 import { PlayIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
@@ -14,10 +15,12 @@ type StartButtonProps = {
 
 export default function StartButton({ lastLoadedId }: StartButtonProps) {
     const [isLoading, setLoading] = useState<boolean>(false)
-
+    let accelerometer: ReturnType<typeof subscribeAccelerometer> | null = null
 
     const handleStartActivity = async () => {
         try {
+            stopAccelerometer()
+            accelerometer = subscribeAccelerometer()
             setLoading(true)
             useActivityStatsStore.getState().resetStats()
             lastLoadedId.current = 0
@@ -48,7 +51,9 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
                 }
             </Button>
 
-            <Button onPress={() => shareLog()}>Share</Button>
+            {
+                __DEV__ && <Button marginTop={20} onPress={() => shareLog()}>Share</Button>
+            }
         </>
     )
 }

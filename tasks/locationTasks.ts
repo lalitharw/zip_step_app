@@ -4,15 +4,16 @@ import { getLastLocationPoint, saveLocationPoint } from "@/database/locationPoin
 import { checkAndNotifyActivityInactivity, updateIsActiveNotificationSentStatus } from "@/services/activityInActiveService";
 import { getCurrentActivityId } from "@/utils/activity";
 import { kalmanFilter } from "@/utils/gps/filtering/kalmanFilter";
+import { DEFAULT_MAX_SPEED, MAX_ACCURACY_M, MAX_FIRST_POINT_ACCURACY_M, MAX_SPEED_BY_ACTIVITY } from "@/utils/gps/gpsConfig";
 import { validateLocationPoint } from "@/utils/gps/validation/validateLocationPoints";
-import { fileLog } from "@/utils/logging/fileLogger";
 import logger from "@/utils/logging/logger";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 
 export const LOCATION_TASK_NAME = "stride_flow_location_task";
 
-
+const gpsFilter = new kalmanFilter(3)
+let filterActivityId: number | null = null
 
 TaskManager.defineTask(
     LOCATION_TASK_NAME,
@@ -31,14 +32,6 @@ TaskManager.defineTask(
             locations: Location.LocationObject[];
         };
 
-        // await fileLog(`RAW BATCH RECEIVED: ${locations.length} points`,
-        //     locations.map(l => ({
-        //         accuracy: l.coords.accuracy,
-        //         timestamp: l.timestamp,
-        //         latitude: l.coords.latitude,
-        //         longitude: l.coords.longitude
-        //     }))
-        // )
 
         const activity_id = await getCurrentActivityId()
         if (activity_id === null) {
@@ -58,9 +51,14 @@ TaskManager.defineTask(
 
         await checkAndNotifyActivityInactivity()
 
+        if (filterActivityId !== activity_id) {
+            gpsFilter.reset()
+            filterActivityId = activity_id
+        }
+
         let lastLocationPoint: lastLocationPointReference | null = await getLastLocationPoint(activity_id)
         const sortedLocations = [...locations].sort((a, b) => a.timestamp - b.timestamp)
-        const gpsFilter = new kalmanFilter()
+        const maxSpeed = MAX_SPEED_BY_ACTIVITY[0] ?? DEFAULT_MAX_SPEED
         for (const location of sortedLocations) {
             const {
                 latitude,
@@ -73,29 +71,31 @@ TaskManager.defineTask(
 
 
             // accuracy check
-            if (accuracy == null || accuracy > 50) {
-                logger.warn("GPS", `Point Rejected: poor accuracy ${accuracy}`)
+            const maxAcc = lastLocationPoint ? MAX_ACCURACY_M : MAX_FIRST_POINT_ACCURACY_M
+            if (accuracy == null || accuracy > maxAcc) {
                 continue
             }
 
 
             // first point
             if (!lastLocationPoint) {
-                logger.warn("GPS", "Processing first GPS point")
+                const filtered = gpsFilter.update(latitude, longitude, accuracy, location.timestamp)
                 await saveLocationPoint({
                     activityId: activity_id,
-                    latitude: latitude,
-                    longitude: longitude,
+                    latitude: filtered.latitude,
+                    longitude: filtered.longitude,
                     altitude: altitude ?? 0,
                     accuracy,
                     speed,
                     timestamp: new Date(location.timestamp).toISOString(),
-                    heading: heading ?? 0
+                    heading: heading ?? 0,
+                    raw_latitude: latitude,
+                    raw_longitude: longitude
                 })
 
                 lastLocationPoint = {
-                    latitude: latitude,
-                    longitude: longitude,
+                    latitude: filtered.latitude,
+                    longitude: filtered.longitude,
                     accuracy,
                     timestamp: new Date(location.timestamp).toISOString()
                 }
@@ -105,7 +105,7 @@ TaskManager.defineTask(
 
 
             // if already some points available
-            const result = validateLocationPoint(location, lastLocationPoint)
+            const result = validateLocationPoint(location, lastLocationPoint,maxSpeed)
             if (result.skip) {
                 logger.warn("GPS", "Point skipped (no meaningful movement)", result.reason)
                 continue
@@ -115,29 +115,31 @@ TaskManager.defineTask(
                 continue
             }
 
-          
+            // kalman filtering
+            const filtered = gpsFilter.update(latitude, longitude, accuracy, location.timestamp)
 
             await saveLocationPoint({
                 activityId: activity_id,
-                latitude: latitude,
-                longitude: longitude,
+                latitude: filtered.latitude,
+                longitude: filtered.longitude,
                 altitude: altitude ?? 0,
                 accuracy,
                 speed,
                 timestamp: new Date(location.timestamp).toISOString(),
-                heading: heading ?? 0
+                heading: heading ?? 0,
+                raw_latitude: latitude,
+                raw_longitude: longitude
             })
 
             lastLocationPoint = {
                 ...lastLocationPoint,
                 accuracy: accuracy ?? 0,
-                latitude: latitude,
-                longitude: longitude,
+                latitude: filtered.latitude,
+                longitude: filtered.longitude,
                 timestamp: new Date(location.timestamp).toISOString()
             }
 
             await updateIsActiveNotificationSentStatus(false)
-
         }
     }
 );

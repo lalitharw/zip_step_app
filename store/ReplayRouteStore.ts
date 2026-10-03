@@ -12,7 +12,9 @@ type Points = {
     accuracy: number
     altitude: number
     speed: number
-    heading: number
+    heading: number,
+    raw_latitude: number,
+    raw_longitude: number
 }
 
 type ReplayRouteState = {

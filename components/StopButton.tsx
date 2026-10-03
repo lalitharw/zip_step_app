@@ -1,4 +1,7 @@
-import { stopActivity } from '@/services/activityService';
+import { resetActivity } from '@/services/activity/activityLifeCycle';
+import { stopActivity } from '@/services/activity/activityService';
+import { stopLocationTracking } from '@/services/locationService';
+import { saveMapSnapShot } from '@/utils/maps/saveMapSnapShot';
 import { mapSnapShot } from '@/utils/mapSnapShot';
 import { StopIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
@@ -12,12 +15,15 @@ type StopButtonProps = {
 
 export default function StopButton({ mapRef }: StopButtonProps) {
     const [isLoading, setLoading] = useState<boolean>(false)
-
     const handleStopTracking = async () => {
         try {
+            await stopLocationTracking()
             setLoading(true)
             await mapSnapShot(mapRef)
+            await saveMapSnapShot()
             await stopActivity()
+            await resetActivity()
+
         }
         catch (error) {
             console.log("Something went wrong: ", error)

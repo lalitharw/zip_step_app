@@ -25,6 +25,16 @@ export class kalmanFilter {
         }
 
         const elapsedSeconds = Math.max(0, (timestampMs - this.state.timestamp) / 1000)
+
+        if(elapsedSeconds > 10){
+            this.state = {
+                latitude,
+                longitude,
+                variance: accuracy * accuracy,
+                timestamp: timestampMs
+            }
+        }
+
         const predictedVariance = this.state.variance + elapsedSeconds * this.processNoise * this.processNoise
         const measurementVariance = accuracy * accuracy;
         const kalmanGain = predictedVariance / (predictedVariance + measurementVariance)
