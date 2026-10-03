@@ -106,7 +106,6 @@ export default function ActivityDetail() {
     }
 
     return (
-
         <GradientBackground>
             <View flex={1}>
                 <View position="relative" height={420} borderBottomLeftRadius={28} borderBottomRightRadius={28} overflow="hidden">
@@ -286,9 +285,5 @@ export default function ActivityDetail() {
 
             </View>
         </GradientBackground >
-
-
-
-
     )
 }

@@ -34,8 +34,8 @@ type validateLocationPointReturnType = {
 
 
 export function validateLocationPoint(location: LocationPointType, previousLocation: PreviousLocationType, maxSpeed: number): validateLocationPointReturnType {
-    const gpsSpeed = location.coords.speed
-    const gpsMoving = gpsSpeed !== null && gpsSpeed > 0.8
+    // const gpsSpeed = location.coords.speed
+    // const gpsMoving = gpsSpeed !== null && gpsSpeed > 0.8
     // const moving = motionDectector.isMoving() || gpsMoving
     const moving = motionDectector.isMoving()
     logger.info("Moving", "IS User Moving", moving)
