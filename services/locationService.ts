@@ -67,7 +67,7 @@ export function stopWatchingLocation() {
 }
 
 export async function startLocationTracking() {
-    
+
     console.log("Task Registered: ", await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME))
     const alreadyRunning = await Location.hasStartedLocationUpdatesAsync(
         LOCATION_TASK_NAME
@@ -82,8 +82,7 @@ export async function startLocationTracking() {
         {
 
             accuracy: Location.Accuracy.BestForNavigation,
-            timeInterval: 1000,
-            distanceInterval: 2,
+            timeInterval: 100,
             activityType: Location.ActivityType.Fitness,
             pausesUpdatesAutomatically: false,
             foregroundService: {

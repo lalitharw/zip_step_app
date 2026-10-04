@@ -6,6 +6,7 @@ import { getCurrentActivityId } from "@/utils/activity";
 import { kalmanFilter } from "@/utils/gps/filtering/kalmanFilter";
 import { DEFAULT_MAX_SPEED, MAX_ACCURACY_M, MAX_FIRST_POINT_ACCURACY_M, MAX_SPEED_BY_ACTIVITY } from "@/utils/gps/gpsConfig";
 import { validateLocationPoint } from "@/utils/gps/validation/validateLocationPoints";
+import { fileLog } from "@/utils/logging/fileLogger";
 import logger from "@/utils/logging/logger";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
@@ -60,6 +61,14 @@ TaskManager.defineTask(
         const sortedLocations = [...locations].sort((a, b) => a.timestamp - b.timestamp)
         const maxSpeed = MAX_SPEED_BY_ACTIVITY[0] ?? DEFAULT_MAX_SPEED
         for (const location of sortedLocations) {
+            fileLog(
+                `[GPS TASK] `,
+                `${location.timestamp} ` +
+                `lat=${location.coords.latitude} ` +
+                `lon=${location.coords.longitude} ` +
+                `accuracy=${location.coords.accuracy}`
+            )
+
             const {
                 latitude,
                 longitude,
@@ -105,7 +114,7 @@ TaskManager.defineTask(
 
 
             // if already some points available
-            const result = validateLocationPoint(location, lastLocationPoint,maxSpeed)
+            const result = validateLocationPoint(location, lastLocationPoint, maxSpeed)
             if (result.skip) {
                 logger.warn("GPS", "Point skipped (no meaningful movement)", result.reason)
                 continue
