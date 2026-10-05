@@ -1,57 +1,210 @@
 import GradientBackground from "@/components/GradientBackground";
 import InputComponent from "@/components/Input";
+import ErrorModal from "@/components/modals/ErrorModal";
 import { useAuth } from "@/context/AuthContext";
+import api from "@/utils/api";
 import { router } from "expo-router";
-import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
-import { Button, H4, Spinner, Text, XStack, YStack } from "tamagui";
+import { useEffect, useState } from "react";
+import {
+    Keyboard, KeyboardAvoidingView,
+    Platform,
+    ScrollView
+} from "react-native";
+import {
+    Button,
+    H4,
+    Image,
+    Overlay,
+    Spinner,
+    Text,
+    XStack,
+    YStack,
+} from "tamagui";
 
 export default function Login() {
+
     const { login, googleLogin } = useAuth();
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [loading, setLoading] = useState(false)
-    const [googleLoading, setGoogleLoading] = useState(false)
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+
+    const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const [checkingEmail, setCheckingEmail] = useState(false);
+
+    const [loginError, setLoginError] = useState<string | null>(null);
+
+
+
+
+    const isValidEmail = (value: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(value.trim());
+    };
+
+
+    useEffect(() => {
+        const trimmedEmail = email.trim();
+
+
+        if (!trimmedEmail) {
+            return;
+        }
+
+
+        if (!isValidEmail(trimmedEmail)) {
+            setEmailError("Please enter a valid email address.");
+        }
+
+        const timeout = setTimeout(async () => {
+            try {
+                setCheckingEmail(true);
+
+                const response = await api.post("/auth/check-email", {
+                    email: trimmedEmail,
+                });
+
+                // console.log("Email check:", response.data.data);
+
+
+                const exists = response.data?.data?.exists;
+
+                if (exists === false) {
+                    setEmailError(
+                        "No account found with this email. Please sign up."
+                    );
+                } else {
+                    setEmailError("");
+                }
+            } catch (error: any) {
+                console.log(
+                    "Email Check Failed:",
+                    error?.response?.data
+                );
+            } finally {
+                setCheckingEmail(false);
+            }
+        }, 400);
+
+        return () => clearTimeout(timeout);
+    }, [email]);
+
+
+    const validateLogin = () => {
+        let valid = true;
+
+        setEmailError("");
+        setPasswordError("");
+
+
+        if (!email.trim()) {
+            setEmailError("Email is required.");
+            valid = false;
+        }
+
+
+        else if (!isValidEmail(email)) {
+            setEmailError("Please enter a valid email address.");
+            valid = false;
+        }
+
+
+        if (!password) {
+            setPasswordError("Password is required.");
+            valid = false;
+        }
+
+        return valid;
+    };
+
+
+    const handleEmailChange = (value: string) => {
+        setEmail(value);
+
+
+        setEmailError("");
+    };
+
+
+    const handlePasswordChange = (value: string) => {
+        setPassword(value);
+
+        setPasswordError("");
+    };
+
 
     async function handleLogin() {
-        if (!email || !password) {
-            return
+        if (!validateLogin()) {
+            return;
         }
-        setLoading(true)
+
+        if (checkingEmail) {
+            return;
+        }
+
+        setLoading(true);
+
         try {
-            await login(email, password)
-            router.replace("/(tabs)")
-        }
-        catch (err: any) {
-            console.log(err)
-        }
-        finally {
-            setLoading(false)
+            Keyboard.dismiss()
+            await login(email.trim(), password);
+
+            router.replace("/(tabs)");
+        } catch (err: any) {
+            console.log("Login error:", err);
+
+            const message =
+                err?.response?.data?.message ||
+                "Something went wrong. Please try again.";
+
+            setLoginError(message);
+        } finally {
+            setLoading(false);
         }
     }
+
 
     async function handleGoogleLogin() {
         try {
-            setGoogleLoading(true)
-            await googleLogin()
-            router.replace("/(tabs)")
-        }
-        catch (error) {
+            Keyboard.dismiss()
+            setLoginError(null);
+            setGoogleLoading(true);
 
-        }
-        finally {
-            setGoogleLoading(false)
+            await googleLogin();
+
+            router.replace("/(tabs)");
+        } catch (error: any) {
+            const message =
+                error?.response?.data?.message ||
+                "Something went wrong. Please try again.";
+            setLoginError(message);
+        } finally {
+            setGoogleLoading(false);
         }
     }
 
+
+    const buttonDisabled =
+        loading ||
+        googleLoading ||
+        checkingEmail ||
+        !email.trim() ||
+        !password ||
+        !isValidEmail(email);
+
     return (
-
-
         <GradientBackground>
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}>
-                <ScrollView pointerEvents={(loading || googleLoading) ? "none" : "auto"}
+                behavior={
+                    Platform.OS === "ios"
+                        ? "padding"
+                        : "height"
+                }
+            >
+                <ScrollView
                     contentContainerStyle={{
                         flexGrow: 1,
                         paddingHorizontal: 20,
@@ -67,114 +220,56 @@ export default function Login() {
                         width="100%"
                         alignSelf="center"
                     >
-                        <YStack
-                            gap="$2"
-                            alignItems="center"
-                            marginBottom="$2"
-                        >
-                            <H4
-                                fontSize={36}
-                                color="#edede9"
-                                fontWeight="600"
-                                letterSpacing={-1}
-                            >
-                                Welcome Back
-                            </H4>
 
-                            <Text
-                                color="#edede9"
-                                opacity={0.55}
-                                fontSize="$3"
-                            >
-                                Sign in to continue your journey
-                            </Text>
-                        </YStack>
 
                         <YStack
                             backgroundColor="rgba(255,255,255,0.06)"
                             borderWidth={1}
                             borderColor="rgba(255,255,255,0.10)"
                             borderRadius="$6"
-                            padding="$4"
                             gap="$4"
+                            paddingVertical={"$6"}
+                            paddingHorizontal={"$4"}
                         >
 
-                            <Button
-                                onPress={() => handleGoogleLogin()}
-                                width="100%"
-                                height={52}
-                                backgroundColor="white"
-                                borderRadius="$4"
-                                borderWidth={0}
-                                pressStyle={{
-                                    scale: 0.98,
-                                    opacity: 0.9,
-                                }}
-                            >
-                                <XStack
-                                    alignItems="center"
-                                    justifyContent="center"
-                                    gap="$2"
-                                    width="100%"
-                                >
-                                    <Text
-                                        color="#111"
-                                        fontSize="$4"
-                                        fontWeight="600"
-                                    >
-                                        G
-                                    </Text>
-
-                                    <Text
-                                        color="#111"
-                                        fontSize="$3"
-                                        fontWeight="600"
-                                    >
-
-                                        {googleLoading ? (
-                                            <Spinner
-                                                size="small"
-                                                color="#111"
-                                            />) : (<Text>Continue with Google</Text>)
-                                        }
-
-                                    </Text>
-                                </XStack>
-                            </Button>
-
-                            <XStack
+                            <YStack
+                                gap="$2"
                                 alignItems="center"
-                                gap="$3"
-                                opacity={0.5}
+                                marginBottom="$2"
                             >
-                                <YStack
-                                    flex={1}
-                                    height={1}
-                                    backgroundColor="#edede9"
-                                />
+                                <H4
+                                    fontSize={28}
+                                    color="#edede9"
+                                    fontWeight="bolder"
+                                    letterSpacing={-1}
+
+                                >
+                                    Login
+                                </H4>
 
                                 <Text
                                     color="#edede9"
-                                    fontSize="$2"
+                                    opacity={0.55}
+                                    fontSize="$3"
                                 >
-                                    or continue with email
+                                    Enter your details to login.
                                 </Text>
+                            </YStack>
 
-                                <YStack
-                                    flex={1}
-                                    height={1}
-                                    backgroundColor="#edede9"
-                                />
-                            </XStack>
 
-                            <YStack gap="$3">
+                            <YStack gap="$5">
+
                                 <InputComponent
-                                    name="Email Address*"
+                                    name="Email"
                                     value={email}
-                                    setValue={setEmail}
+                                    setValue={handleEmailChange}
+                                    error={emailError}
                                     placeholder="example@gmail.com"
                                     extraOptions={{
-                                        keyboardType: "email-address",
+                                        onChangeText:
+                                            handleEmailChange,
+                                        keyboardType:
+                                            "email-address",
                                         autoCapitalize: "none",
                                         autoCorrect: false,
                                         returnKeyType: "next",
@@ -182,25 +277,29 @@ export default function Login() {
                                 />
 
                                 <InputComponent
-                                    name="Password*"
+                                    name="Password"
                                     value={password}
-                                    setValue={setPassword}
+                                    setValue={handlePasswordChange}
+                                    error={passwordError}
                                     placeholder="••••••••"
                                     extraOptions={{
                                         secureTextEntry: true,
                                         returnKeyType: "done",
+                                        onChangeText:
+                                            handlePasswordChange,
                                     }}
                                 />
                             </YStack>
 
-                            {/* Forgot password */}
                             <XStack
                                 justifyContent="flex-end"
                                 width="100%"
                             >
                                 <Text
                                     onPress={() =>
-                                        router.push("/(auth)/forgoutPassword")
+                                        router.push(
+                                            "/(auth)/forgoutPassword"
+                                        )
                                     }
                                     fontSize="$2"
                                     color="#edede9"
@@ -213,14 +312,14 @@ export default function Login() {
                                 </Text>
                             </XStack>
 
-                            {/* Sign In */}
                             <Button
                                 borderRadius="$4"
                                 width="100%"
                                 height={52}
                                 onPress={handleLogin}
-                                disabled={loading}
-                                backgroundColor="#edede9"
+                                disabled={buttonDisabled}
+                                backgroundColor={buttonDisabled ? "#e5e7eb" : "#edede9"}
+                                opacity={buttonDisabled ? 0.6 : 1}
                                 pressStyle={{
                                     scale: 0.98,
                                     opacity: 0.9,
@@ -233,7 +332,7 @@ export default function Login() {
                                     />
                                 ) : (
                                     <Text
-                                        color="#111"
+                                        color={buttonDisabled ? "#000104c6" : "#111"}
                                         fontSize="$3"
                                         fontWeight="700"
                                     >
@@ -241,57 +340,116 @@ export default function Login() {
                                     </Text>
                                 )}
                             </Button>
+
+                            <XStack
+                                alignItems="center"
+                                gap="$3"
+                                marginVertical={"$3"}
+                                opacity={0.5}
+                            >
+                                <YStack
+                                    flex={1}
+                                    height={1}
+                                    backgroundColor="#edede9"
+                                />
+
+                                <Text
+                                    color="#edede9"
+                                    fontSize="$2"
+                                >
+                                    OR
+                                </Text>
+
+                                <YStack
+                                    flex={1}
+                                    height={1}
+                                    backgroundColor="#edede9"
+                                />
+                            </XStack>
+
+                            <Button
+                                onPress={handleGoogleLogin}
+                                width="100%"
+                                height={52}
+                                backgroundColor="white"
+                                borderRadius="$4"
+                                borderWidth={0}
+                                disabled={googleLoading || loading}
+                                pressStyle={{
+                                    scale: 0.98,
+                                    opacity: 0.9,
+                                }}
+                            >
+                                <XStack
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    gap="$2"
+                                    width="100%"
+                                >
+                                    {googleLoading ? (
+                                        <Spinner
+                                            size="small"
+                                            color="#111"
+                                        />
+                                    ) : (
+                                        <XStack
+                                            alignItems="center"
+                                            gap={10}
+                                        >
+                                            <Image width={15} height={15} src={require("../../assets/icons/google.png")} />
+
+                                            <Text fontWeight={"bold"}>
+                                                Continue with Google
+                                            </Text>
+                                        </XStack>
+                                    )}
+                                </XStack>
+                            </Button>
+
+
+
+                            <XStack
+                                justifyContent="center"
+                                alignItems="center"
+
+                            >
+                                <Text
+                                    color="#edede9"
+                                    opacity={0.55}
+
+                                >
+                                    Don't have an account yet?
+                                </Text>
+
+                                <Text
+                                    onPress={() =>
+                                        router.push("/(auth)/register")
+                                    }
+                                    fontWeight="800"
+                                    color="#edede9"
+                                    marginLeft="$1"
+                                    pressStyle={{
+                                        opacity: 0.5,
+                                    }}
+                                    textDecorationLine="underline"
+                                >
+                                    Sign Up
+                                </Text>
+                            </XStack>
                         </YStack>
-
-                        <XStack
-                            justifyContent="center"
-                            alignItems="center"
-                            gap="$2"
-                            opacity={0.45}
-                        >
-                            <Text
-                                color="#edede9"
-                                fontSize="$2"
-                            >
-                                🔒
-                            </Text>
-
-                            <Text
-                                color="#edede9"
-                                fontSize="$2"
-                            >
-                                Your account is secure with us
-                            </Text>
-                        </XStack>
                     </YStack>
                 </ScrollView>
-                <XStack
-                    justifyContent="center"
-                    alignItems="center"
-                    paddingBottom="$6"
-                    paddingTop="$3"
-                >
-                    <Text
-                        color="#edede9"
-                        opacity={0.55}
-                    >
-                        Don't have an account?
-                    </Text>
 
-                    <Text
-                        onPress={() => router.push("/(auth)/register")}
-                        fontWeight="800"
-                        color="#edede9"
-                        marginLeft="$1"
-                        pressStyle={{
-                            opacity: 0.5,
-                        }}
-                    >
-                        Sign Up
-                    </Text>
-                </XStack>
+
             </KeyboardAvoidingView>
-        </GradientBackground>
 
-    )
+            {(loading || googleLoading) && <Overlay />}
+
+            <ErrorModal
+                visible={!!loginError}
+                message={loginError ?? ""}
+                onClose={() => setLoginError(null)}
+            />
+        </GradientBackground>
+    );
 }

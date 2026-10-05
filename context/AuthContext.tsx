@@ -1,4 +1,3 @@
-import { AlertDialog } from "@/components/AlertDialog";
 import api from "@/utils/api";
 import logger from "@/utils/logging/logger";
 import { getAuth, GoogleAuthProvider, signInWithCredential } from "@react-native-firebase/auth";
@@ -10,12 +9,13 @@ type User = {
     id: number;
     name: string;
     email: string;
+    provider: string
 }
 
 type AuthContextType = {
     user: User | null;
     isLoading: boolean;
-    googleLogin: () => Promise<void>
+    googleLogin: () => Promise<User>
     login: (email: string, password: string) => Promise<void>
     register: (email: string, password: string, name: string) => Promise<void>
     logout: () => Promise<void>,
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [])
 
 
-    async function googleLogin() {
+    async function googleLogin(): Promise<User> {
         try {
             await GoogleSignin.hasPlayServices({
                 showPlayServicesUpdateDialog: true,
@@ -75,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             )
 
             setUser(data.data.user)
+            return data.data.user
 
         } catch (error) {
             logger.error(
@@ -82,6 +83,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 "Something went wrong",
                 error
             )
+
+            throw error
         }
     }
 
@@ -92,13 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await SecureStore.setItemAsync("auth_token", data.data.token)
             setUser(data.data.user)
         }
-        catch (err) {
-            console.error(err.response.data.message)
-            AlertDialog({
-                title: "Error",
-                description: err.response.data.message || "Something went wrong! Please try again Later",
-                type: "error"
-            })
+        catch (error) {
+            throw error
         }
     }
 

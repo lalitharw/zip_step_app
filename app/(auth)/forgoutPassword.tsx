@@ -14,32 +14,7 @@ export default function forgotPassword() {
                 padding="$4"
                 gap="$5"
             >
-                <YStack
-                    gap="$2"
-                    alignItems="center"
-                    paddingHorizontal={15}
-                >
-                    <H4
-                        fontSize={34}
-                        textAlign="center"
-                        color="#e9eaed"
-                        fontWeight="600"
-                        letterSpacing={-0.5}
-                    >
-                        Forgot Password?
-                    </H4>
 
-                    <Text
-                        textAlign="center"
-                        color="#edede9"
-                        opacity={0.55}
-                        fontSize="$3"
-                        lineHeight={22}
-                    >
-                        Enter your email and we'll send you a
-                        5-digit verification code.
-                    </Text>
-                </YStack>
 
                 <YStack
                     gap="$4"
@@ -49,6 +24,32 @@ export default function forgotPassword() {
                     borderRadius="$6"
                     padding="$4"
                 >
+                    <YStack
+                        gap="$2"
+                        alignItems="center"
+                        paddingHorizontal={15}
+                    >
+                        <H4
+                            fontSize={28}
+                            textAlign="center"
+                            color="#e9eaed"
+                            fontWeight="600"
+                            letterSpacing={-0.5}
+                        >
+                            Forgot Password?
+                        </H4>
+
+                        <Text
+                            textAlign="center"
+                            color="#edede9"
+                            opacity={0.55}
+                            fontSize="$3"
+                            lineHeight={22}
+                        >
+                            Enter your email and we'll send you a
+                            5-digit verification code.
+                        </Text>
+                    </YStack>
                     <InputComponent
                         name="Email Address*"
                         value={email}

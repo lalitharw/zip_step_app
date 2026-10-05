@@ -54,32 +54,10 @@ export default function Register() {
                         maxWidth={500}
                         width="100%"
                         alignSelf="center"
+
                     >
                         {/* Header */}
-                        <YStack
-                            alignItems="center"
-                            gap="$2"
-                            marginBottom="$2"
-                        >
-                            <H4
-                                fontSize={34}
-                                textAlign="center"
-                                color="#edede9"
-                                fontWeight="600"
-                                letterSpacing={-0.8}
-                            >
-                                Create your account
-                            </H4>
 
-                            <Text
-                                textAlign="center"
-                                color="#edede9"
-                                opacity={0.55}
-                                fontSize="$3"
-                            >
-                                Start your journey with StrideFlow
-                            </Text>
-                        </YStack>
 
                         {/* Form Card */}
                         <YStack
@@ -87,12 +65,38 @@ export default function Register() {
                             borderWidth={1}
                             borderColor="rgba(255,255,255,0.10)"
                             borderRadius="$6"
-                            padding="$4"
+                            paddingVertical={"$6"}
+                            paddingHorizontal={"$4"}
                             gap="$4"
                         >
+
+                            <YStack
+                                alignItems="center"
+                                gap="$2"
+                                marginBottom="$2"
+                            >
+                                <H4
+                                    fontSize={28}
+                                    textAlign="center"
+                                    color="#edede9"
+                                    fontWeight="600"
+                                    letterSpacing={-0.8}
+                                >
+                                    Create your account
+                                </H4>
+
+                                <Text
+                                    textAlign="center"
+                                    color="#edede9"
+                                    opacity={0.55}
+                                    fontSize="$1"
+                                >
+                                    Start your journey with StrideFlow
+                                </Text>
+                            </YStack>
                             {/* Name */}
                             <InputComponent
-                                name="Name*"
+                                name="Name"
                                 value={name}
                                 setValue={setName}
                                 placeholder="Alex Smith"
@@ -105,7 +109,7 @@ export default function Register() {
 
                             {/* Email */}
                             <InputComponent
-                                name="Email*"
+                                name="Email"
                                 value={email}
                                 setValue={setEmail}
                                 placeholder="example@gmail.com"
@@ -119,7 +123,7 @@ export default function Register() {
 
                             {/* Password */}
                             <InputComponent
-                                name="Password*"
+                                name="Password"
                                 value={password}
                                 setValue={setPassword}
                                 placeholder="••••••••"
@@ -166,12 +170,38 @@ export default function Register() {
                                     <Text
                                         color="#111"
                                         fontSize="$3"
-                                        fontWeight="700"
+                                        fontWeight="bold"
                                     >
                                         Create Account
                                     </Text>
                                 )}
                             </Button>
+
+                            <XStack
+                                justifyContent="center"
+                                alignItems="center"
+                               
+                            >
+                                <Text
+                                    color="#edede9"
+                                    opacity={0.55}
+                                >
+                                    Already have an account?
+                                </Text>
+
+                                <Text
+                                    onPress={() => router.push("/(auth)/login")}
+                                    fontWeight="800"
+                                    color="#edede9"
+                                    marginLeft="$1"
+                                    pressStyle={{
+                                        opacity: 0.5,
+                                    }}
+                                    textDecorationLine="underline"
+                                >
+                                    Sign In
+                                </Text>
+                            </XStack>
                         </YStack>
 
                         {/* Terms */}
@@ -188,32 +218,8 @@ export default function Register() {
                     </YStack>
                 </ScrollView>
 
-                {/* Footer */}
-                <XStack
-                    justifyContent="center"
-                    alignItems="center"
-                    paddingTop="$3"
-                    paddingBottom="$6"
-                >
-                    <Text
-                        color="#edede9"
-                        opacity={0.55}
-                    >
-                        Already have an account?
-                    </Text>
 
-                    <Text
-                        onPress={() => router.push("/(auth)/login")}
-                        fontWeight="800"
-                        color="#edede9"
-                        marginLeft="$1"
-                        pressStyle={{
-                            opacity: 0.5,
-                        }}
-                    >
-                        Sign In
-                    </Text>
-                </XStack>
+
             </KeyboardAvoidingView>
         </GradientBackground>
     )
