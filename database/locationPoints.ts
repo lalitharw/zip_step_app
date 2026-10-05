@@ -11,7 +11,7 @@ type LocationPointInput = {
     speed?: number | null,
     timestamp: string,
     raw_latitude: number,
-    raw_longitude: number
+    raw_longitude: number,
 }
 
 export type LocationPoint = {
@@ -27,7 +27,7 @@ export type LocationPoint = {
     timestamp: string,
     synced: number,
     raw_latitude: number,
-    raw_longitude: number
+    raw_longitude: number,
 }
 
 export async function saveLocationPoint(point: LocationPointInput): Promise<void> {
@@ -47,7 +47,7 @@ export async function saveLocationPoint(point: LocationPointInput): Promise<void
         point.timestamp,
         point.heading,
         point.raw_latitude,
-        point.raw_longitude
+        point.raw_longitude,
     )
 }
 

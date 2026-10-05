@@ -8,7 +8,7 @@ import { useActivityStore } from "@/store/ActivityStore";
 import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
-import { calculateActivityDistance, calculateActivityMaxSpeed, calculateAveragePace, calculateAverageSpeed, calculateElevationGain } from "@/utils/activityStats";
+import { calculateActivityDistance, calculateActivityMaxSpeed, calculateAveragePace, calculateAverageSpeed, calculateElevation } from "@/utils/activityStats";
 import { Camera, GeoJSONSource, Layer, Map, MapRef, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { AnimatePresence } from "moti";
@@ -248,7 +248,7 @@ export default function MapBox() {
                     calculateActivityDistance()
                     calculateActivityMaxSpeed()
                     calculateAveragePace()
-                    calculateElevationGain()
+                    calculateElevation()
                     calculateAverageSpeed()
 
                 }

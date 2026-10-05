@@ -35,6 +35,7 @@ import {
 } from "@/utils/sensors/accelerometer"
 
 import { motionDectector } from "@/utils/sensors/motionDetector"
+import { stopBarometer } from "@/utils/sensors/barometer"
 
 
 export const startActivity = async () => {
@@ -124,6 +125,9 @@ export const stopActivity = async () => {
 
         // Reset motion detector
         motionDectector.reset()
+
+        stopBarometer()
+        
 
         // Stop GPS tracking
         await stopLocationTracking()

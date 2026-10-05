@@ -2,6 +2,7 @@ import { startActivity } from '@/services/activity/activityService';
 import { useActivityStatsStore } from '@/store/ActivityStatsStore';
 import { clearLog } from '@/utils/logging/fileLogger';
 import { stopAccelerometer, subscribeAccelerometer } from '@/utils/sensors/accelerometer';
+import { subscribeBarometer } from '@/utils/sensors/barometer';
 import { shareLog } from '@/utils/sharing/debugLoggerShare';
 import { PlayIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
@@ -20,6 +21,7 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
     const handleStartActivity = async () => {
         try {
             stopAccelerometer()
+            subscribeBarometer()
             accelerometer = subscribeAccelerometer()
             setLoading(true)
             useActivityStatsStore.getState().resetStats()

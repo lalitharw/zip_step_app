@@ -17,6 +17,7 @@ export function initDatabase() {
             average_speed INTEGER NULL,
             average_pace INTEGER NULL,
             elevation_gain INTEGER NULL,
+            elevation_loss INTEGER NULL,
             current_elevation INTEGER NULL,
             max_speed INTEGER NULL,
             map_image_path TEXT NULL,
@@ -37,7 +38,8 @@ export function initDatabase() {
             raw_longitude REAL NOT NULL,
             heading REAL NOT NULL,
             accuracy REAL,
-            altitude REAL,
+            altitude REAL, --this is gps reading
+            relative_altitude REAL NULL, --this is barometer senser reading
             speed REAL,
             timestamp TEXT NOT NULL,
             synced INTEGER DEFAULT 0

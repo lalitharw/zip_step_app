@@ -8,3 +8,5 @@ export const MAX_SPEED_BY_ACTIVITY: Record<string,number> = {
     run: 12, // 43 km/h
     cycle: 25 // 90 km/h
 }
+
+export const ELEVATION_THRESHOLD = 2

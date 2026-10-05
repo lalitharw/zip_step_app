@@ -1,6 +1,8 @@
 import { useActivityStatsStore } from "@/store/ActivityStatsStore"
 import { useLocationStore } from "@/store/locationStore"
 import { coordinateDistance } from "./coordinateDistance"
+import { ELEVATION_THRESHOLD } from "./gps/gpsConfig"
+import logger from "./logging/logger"
 
 
 // Note: Every Output is meters per seconds later will be format it
@@ -91,30 +93,61 @@ export function calculateAveragePace() {
     }
 }
 
+export function calculateElevation() {
+    const routeCoordinates = useLocationStore.getState().routeCoordinates
 
-export function calculateElevationGain() {
-    try {
-        const routeCoordinates = useLocationStore.getState().routeCoordinates
-        if (routeCoordinates.length < 2) return
-        const previousElevation = routeCoordinates[routeCoordinates.length - 2].altitude
-        const currentElevation = routeCoordinates[routeCoordinates.length - 1].altitude
-        if (previousElevation == null || currentElevation == null) {
-            return
-        }
-        if (currentElevation > previousElevation) {
-            const currentTotal = useActivityStatsStore.getState().stats.elevationGain
-            const gain = currentElevation - previousElevation
-            useActivityStatsStore.getState().setStats({
-                elevationGain: currentTotal + gain,
-                currentElevation: currentElevation
-            })
-        }
+    if (routeCoordinates.length < 2) return
+
+    let previousAltitude = routeCoordinates[routeCoordinates.length - 2].altitude
+    let currentAltitude = routeCoordinates[routeCoordinates.length - 1].altitude
+    if (currentAltitude == null || previousAltitude == null) return
+
+    const difference = currentAltitude - previousAltitude
+    logger.info("Difference","", difference)
+    let elevationGain = useActivityStatsStore.getState().stats.elevationGain
+    let elevationLoss = useActivityStatsStore.getState().stats.elevationLoss
+
+    logger.info("Elevation Gain","",elevationGain)
+    logger.info("Elevation Loss","",elevationLoss)
+
+    if (difference >= ELEVATION_THRESHOLD) {
+        elevationGain += difference
     }
-    catch (error) {
-        console.error("Something went wrong: ", error)
-        throw error
+    else if (difference <= -ELEVATION_THRESHOLD) {
+        elevationLoss += Math.abs(difference)
     }
+
+    useActivityStatsStore.getState().setStats({
+        currentElevation: currentAltitude,
+        elevationGain: elevationGain,
+        elevationLoss: elevationLoss
+    })
 }
+
+
+// export function calculateElevationGain() {
+//     try {
+//         const routeCoordinates = useLocationStore.getState().routeCoordinates
+//         if (routeCoordinates.length < 2) return
+//         const previousElevation = routeCoordinates[routeCoordinates.length - 2].altitude
+//         const currentElevation = routeCoordinates[routeCoordinates.length - 1].altitude
+//         if (previousElevation == null || currentElevation == null) {
+//             return
+//         }
+//         if (currentElevation > previousElevation) {
+//             const currentTotal = useActivityStatsStore.getState().stats.elevationGain
+//             const gain = currentElevation - previousElevation
+//             useActivityStatsStore.getState().setStats({
+//                 elevationGain: currentTotal + gain,
+//                 currentElevation: currentElevation
+//             })
+//         }
+//     }
+//     catch (error) {
+//         console.error("Something went wrong: ", error)
+//         throw error
+//     }
+// }
 
 export function calculateActivityMaxSpeed() {
     try {

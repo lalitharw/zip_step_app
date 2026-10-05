@@ -8,6 +8,7 @@ export type ActivitySta = {
     averagePace: number,
     elevationGain: number,
     currentElevation: number,
+    elevationLoss: number,
     maxSpeed: number
 }
 
@@ -18,6 +19,7 @@ const initialStats: ActivitySta = {
     averageSpeed: 0,
     averagePace: 0,
     elevationGain: 0,
+    elevationLoss: 0,
     currentElevation: 0,
     maxSpeed: 0
 }
