@@ -6,30 +6,26 @@ import Svg, {
 } from "react-native-svg";
 import { Avatar, YStack } from "tamagui";
 
-export default function ProfileAvatar() {
+export default function ProfileAvatar({date}: {
+  date: string
+}) {
   return (
     <YStack
-      width={190}
-      height={190}
+      width={130}
+      height={130}
       alignItems="center"
       justifyContent="center"
     >
       <Svg
-        width={190}
-        height={190}
+        width={170}
+        height={170}
         viewBox="0 0 190 190"
-        style={{
-          position: "absolute",
-        }}
+        style={{ position: "absolute" }}
       >
         <Defs>
           <Path
             id="memberCircle"
-            d="
-              M 95 15
-              A 80 80 0 1 1 95 175
-              A 80 80 0 1 1 95 15
-            "
+            d="M 15 95 A 80 80 0 0 1 175 95 A 80 80 0 0 1 15 95"
             fill="none"
           />
         </Defs>
@@ -40,11 +36,8 @@ export default function ProfileAvatar() {
           fontWeight="600"
           letterSpacing="2"
         >
-          <TextPath
-            href="#memberCircle"
-            startOffset="-8%"
-          >
-            MEMBER SINCE • 4 OCT 2026 •
+          <TextPath href="#memberCircle" startOffset="6%">
+            MEMBER SINCE • 4 OCT 2026
           </TextPath>
         </SvgText>
       </Svg>
@@ -56,7 +49,6 @@ export default function ProfileAvatar() {
             uri: "https://images.unsplash.com/photo-1548142813-c348350df52b?&w=150&h=150&dpr=2&q=80",
           }}
         />
-
         <Avatar.Fallback bg="$blue10" />
       </Avatar>
     </YStack>

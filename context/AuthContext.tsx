@@ -16,7 +16,7 @@ type AuthContextType = {
     user: User | null;
     isLoading: boolean;
     googleLogin: () => Promise<User>
-    login: (email: string, password: string) => Promise<void>
+    login: (email: string, password: string) => Promise<any>
     register: (email: string, password: string, name: string) => Promise<void>
     logout: () => Promise<void>,
     updateProfile: (name: string) => Promise<void>
@@ -94,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const { data } = await api.post("/auth/login", { email, password })
             await SecureStore.setItemAsync("auth_token", data.data.token)
             setUser(data.data.user)
+            return data
         }
         catch (error) {
             throw error

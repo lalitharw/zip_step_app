@@ -33,8 +33,8 @@ export default function Profile() {
         <GradientBackground>
             <SafeAreaView style={{ flex: 1 }}>
                 <YStack padding={20} paddingVertical={40} flex={1}>
-                    <YStack alignItems="center" gap={"$3"}>
-                        <ProfileAvatar/>
+                    <YStack alignItems="center" gap={"$"}>
+                        <ProfileAvatar date="12"/>
                         <Text fontSize={20} fontWeight={500} color={"white"}>{user?.name}</Text>
                         <Button onPress={() => router.push("/editProfile")} borderRadius={"$10"} paddingHorizontal={30}><HugeiconsIcon icon={Edit04Icon} />Edit Profile</Button>
                         <Separator my={14} borderColor={'#22221ffd'} width={"100%"} borderWidth={.5} />

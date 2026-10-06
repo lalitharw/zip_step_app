@@ -3,7 +3,7 @@ import Toast from 'react-native-toast-message';
 type Props = {
     title?: string;
     description?: string;
-    type: "success" | "error"
+    type?: "success" | "error"
 };
 
 

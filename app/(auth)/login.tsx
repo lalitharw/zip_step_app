@@ -2,164 +2,74 @@ import GradientBackground from "@/components/GradientBackground";
 import InputComponent from "@/components/Input";
 import ErrorModal from "@/components/modals/ErrorModal";
 import { useAuth } from "@/context/AuthContext";
-import api from "@/utils/api";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import {
-    Keyboard, KeyboardAvoidingView,
-    Platform,
-    ScrollView
-} from "react-native";
-import {
-    Button,
-    H4,
-    Image,
-    Overlay,
-    Spinner,
-    Text,
-    XStack,
-    YStack,
-} from "tamagui";
+import { useState } from "react";
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { Button, H4, Image, Overlay, Spinner, Text, XStack, YStack, } from "tamagui";
+import * as yup from "yup";
+
+const loginSchema = yup.object({
+    email: yup.string().required("Email is required").email("Enter a valid email"),
+    password: yup.string().required("Password is required").min(8).max(15)
+})
 
 export default function Login() {
 
     const { login, googleLogin } = useAuth();
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-
-    const [emailError, setEmailError] = useState("");
-    const [passwordError, setPasswordError] = useState("");
-
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
-    const [checkingEmail, setCheckingEmail] = useState(false);
-
+    const [errors, setErrors] = useState<{
+        email?: string,
+        password?: string
+    }>({})
     const [loginError, setLoginError] = useState<string | null>(null);
 
-
-
-
-    const isValidEmail = (value: string) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(value.trim());
-    };
-
-
-    useEffect(() => {
-        const trimmedEmail = email.trim();
-
-
-        if (!trimmedEmail) {
-            return;
-        }
-
-
-        if (!isValidEmail(trimmedEmail)) {
-            setEmailError("Please enter a valid email address.");
-        }
-
-        const timeout = setTimeout(async () => {
-            try {
-                setCheckingEmail(true);
-
-                const response = await api.post("/auth/check-email", {
-                    email: trimmedEmail,
-                });
-
-                // console.log("Email check:", response.data.data);
-
-
-                const exists = response.data?.data?.exists;
-
-                if (exists === false) {
-                    setEmailError(
-                        "No account found with this email. Please sign up."
-                    );
-                } else {
-                    setEmailError("");
-                }
-            } catch (error: any) {
-                console.log(
-                    "Email Check Failed:",
-                    error?.response?.data
-                );
-            } finally {
-                setCheckingEmail(false);
-            }
-        }, 400);
-
-        return () => clearTimeout(timeout);
-    }, [email]);
-
-
-    const validateLogin = () => {
-        let valid = true;
-
-        setEmailError("");
-        setPasswordError("");
-
-
-        if (!email.trim()) {
-            setEmailError("Email is required.");
-            valid = false;
-        }
-
-
-        else if (!isValidEmail(email)) {
-            setEmailError("Please enter a valid email address.");
-            valid = false;
-        }
-
-
-        if (!password) {
-            setPasswordError("Password is required.");
-            valid = false;
-        }
-
-        return valid;
-    };
-
-
-    const handleEmailChange = (value: string) => {
-        setEmail(value);
-
-
-        setEmailError("");
-    };
-
-
-    const handlePasswordChange = (value: string) => {
-        setPassword(value);
-
-        setPasswordError("");
-    };
-
-
     async function handleLogin() {
-        if (!validateLogin()) {
-            return;
-        }
-
-        if (checkingEmail) {
-            return;
-        }
-
-        setLoading(true);
-
         try {
+            setLoading(true);
             Keyboard.dismiss()
-            await login(email.trim(), password);
+            await loginSchema.validate(
+                {
+                    email,
+                    password
+                },
+                {
+                    abortEarly: false
+                }
+            )
 
-            router.replace("/(tabs)");
-        } catch (err: any) {
-            console.log("Login error:", err);
+            setErrors({});
 
-            const message =
-                err?.response?.data?.message ||
-                "Something went wrong. Please try again.";
+            const res = await login(email, password)
+            console.log("response: ", res)
+            if (res.success === true) {
+                router.replace("/(tabs)");
 
-            setLoginError(message);
+            }
+
+        } catch (error:any) {
+            if (error instanceof yup.ValidationError) {
+                const newErrors: {
+                    email?: string,
+                    password?: string
+                } = {}
+
+                error.inner.forEach((item) => {
+                    if (item.path === "email") {
+                        newErrors.email = item.message
+                    }
+                    if (item.path === "password") {
+                        newErrors.password = item.message
+                    }
+                })
+                setErrors(newErrors)
+            }
+            else {
+                setLoginError(error?.response?.data?.message || "Something  went wrong! Please try again later.")
+            }
         } finally {
             setLoading(false);
         }
@@ -184,15 +94,6 @@ export default function Login() {
             setGoogleLoading(false);
         }
     }
-
-
-    const buttonDisabled =
-        loading ||
-        googleLoading ||
-        checkingEmail ||
-        !email.trim() ||
-        !password ||
-        !isValidEmail(email);
 
     return (
         <GradientBackground>
@@ -262,12 +163,10 @@ export default function Login() {
                                 <InputComponent
                                     name="Email"
                                     value={email}
-                                    setValue={handleEmailChange}
-                                    error={emailError}
+                                    setValue={setEmail}
+                                    error={errors.email}
                                     placeholder="example@gmail.com"
                                     extraOptions={{
-                                        onChangeText:
-                                            handleEmailChange,
                                         keyboardType:
                                             "email-address",
                                         autoCapitalize: "none",
@@ -279,14 +178,12 @@ export default function Login() {
                                 <InputComponent
                                     name="Password"
                                     value={password}
-                                    setValue={handlePasswordChange}
-                                    error={passwordError}
+                                    setValue={setPassword}
+                                    error={errors.password}
                                     placeholder="••••••••"
                                     extraOptions={{
                                         secureTextEntry: true,
-                                        returnKeyType: "done",
-                                        onChangeText:
-                                            handlePasswordChange,
+                                        returnKeyType: "done"
                                     }}
                                 />
                             </YStack>
@@ -304,6 +201,8 @@ export default function Login() {
                                     fontSize="$2"
                                     color="#edede9"
                                     opacity={0.8}
+                                    fontWeight={"bold"}
+                                    textDecorationLine="underline"
                                     pressStyle={{
                                         opacity: 0.5,
                                     }}
@@ -317,9 +216,9 @@ export default function Login() {
                                 width="100%"
                                 height={52}
                                 onPress={handleLogin}
-                                disabled={buttonDisabled}
-                                backgroundColor={buttonDisabled ? "#e5e7eb" : "#edede9"}
-                                opacity={buttonDisabled ? 0.6 : 1}
+                                disabled={loading}
+                                backgroundColor={"#edede9"}
+                                opacity={1}
                                 pressStyle={{
                                     scale: 0.98,
                                     opacity: 0.9,
@@ -332,7 +231,7 @@ export default function Login() {
                                     />
                                 ) : (
                                     <Text
-                                        color={buttonDisabled ? "#000104c6" : "#111"}
+                                        color={"#111"}
                                         fontSize="$3"
                                         fontWeight="700"
                                     >
