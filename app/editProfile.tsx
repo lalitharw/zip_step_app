@@ -1,9 +1,9 @@
-import { AlertDialog } from "@/components/AlertDialog";
 import GradientBackground from "@/components/GradientBackground";
 import InputComponent from "@/components/Input";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import { Avatar, Button, Spinner, XStack, YStack } from "tamagui";
 
 export default function editProfile() {
@@ -14,23 +14,27 @@ export default function editProfile() {
 
     const handleProfileUpdate = async () => {
         if (!username) {
-            AlertDialog({ title: "Error", description: "Name Field is required", type: "error" })
+            // AlertDialog({ title: "Error", description: "Name Field is required", type: "error" })
             return
         }
         try {
             setIsLoading(true)
             await updateProfile(username)
-            AlertDialog({
-                title: "Success",
-                description: "Profile Updated Successfully",
-                type: "success"
-            })
+            // AlertDialog({
+            //     title: "Success",
+            //     description: "Profile Updated Successfully",
+            //     type: "success"
+            // })
         }
         catch (error) {
-            AlertDialog({
-                title: "Something went wrong",
-                description: "Please try again later!",
-                type: "error"
+            // AlertDialog({
+            //     title: "Something went wrong",
+            //     description: "Please try again later!",
+            //     type: "error"
+            // })
+            Toast.show({
+                type: "error",
+
             })
         }
         finally {

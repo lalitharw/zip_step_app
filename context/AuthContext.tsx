@@ -16,9 +16,10 @@ type AuthContextType = {
     user: User | null;
     isLoading: boolean;
     googleLogin: () => Promise<User>
-    login: (email: string, password: string) => Promise<any>
+    login: (email: string) => Promise<any>
     register: (email: string, password: string, name: string) => Promise<void>
     logout: () => Promise<void>,
+    setPassword: (password: string) => Promise<any>
     updateProfile: (name: string) => Promise<void>
 }
 
@@ -89,11 +90,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
 
-    async function login(email: string, password: string) {
+    async function login(email: string) {
         try {
-            const { data } = await api.post("/auth/login", { email, password })
+            const { data } = await api.post("/auth/login", { email })
+            console.log(data)
             await SecureStore.setItemAsync("auth_token", data.data.token)
             setUser(data.data.user)
+            return data
+        }
+        catch (error) {
+            throw error
+        }
+    }
+
+    async function setPassword(password: string) {
+        try {
+            const { data } = await api.post("/users/set-password", { password })
             return data
         }
         catch (error) {
@@ -142,15 +154,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(data)
         }
         catch (err) {
-            await SecureStore.deleteItemAsync("auth_token")
-            setUser(null)
+            throw err
         }
         finally {
             setLoading(false)
         }
     }
     return (
-        <AuthContext.Provider value={{ user, isLoading, register, login, logout, updateProfile, googleLogin }}>
+        <AuthContext.Provider value={{ user, isLoading, register, login, logout, updateProfile, googleLogin, setPassword }}>
             {children}
         </AuthContext.Provider>
     )

@@ -9,7 +9,7 @@ export default function TabLayout() {
     const { user, isLoading } = useAuth()
     if (isLoading) return null
 
-    if (!user) {
+    if (!user?.name) {
         return <Redirect href={"/(auth)/login"} />
     }
     return (
@@ -54,7 +54,9 @@ export default function TabLayout() {
                         />
                     ),
                 }} />
+
             </Tabs>
+
         </SafeAreaProvider>
     )
 }

@@ -7,8 +7,8 @@ import InputComponent from "@/components/Input";
 import { router } from "expo-router";
 import { useState } from "react";
 
-import { AlertDialog } from "@/components/AlertDialog";
 import SuccessModal from "@/components/modals/SuccessModal";
+import Toast from "react-native-toast-message";
 import { Keyboard } from "react-native";
 import { Button, H4, Spinner, Text, XStack, YStack } from "tamagui";
 
@@ -29,7 +29,6 @@ export default function ForgotPassword() {
 
     const handleForgotPassword = async () => {
         try {
-            setLoading(true)
             Keyboard.dismiss()
             await forgotPasswordSchema.validate(
                 {
@@ -39,6 +38,8 @@ export default function ForgotPassword() {
                     abortEarly: false,
                 }
             );
+
+            setLoading(true)
 
             setErrors({});
 
@@ -65,8 +66,10 @@ export default function ForgotPassword() {
                 setErrors(newErrors);
             }
             else {
-
-                AlertDialog({ title: "Error", description: "Something went wrong! Try Again Later", type: "error" })
+                Toast.show({
+                    type:"error"
+                })
+                // AlertDialog({ title: "Error", description: "Something went wrong! Try Again Later", type: "error" })
             }
         }
         finally {
@@ -182,7 +185,8 @@ export default function ForgotPassword() {
                 </YStack>
             </YStack>
 
-            <SuccessModal visible={!!successMessage} message={successMessage ?? ""} onClose={() => {setSuccessMessage(null)
+            <SuccessModal visible={!!successMessage} message={successMessage ?? ""} onClose={() => {
+                setSuccessMessage(null)
                 router.replace("/(auth)/login")
             }} />
 

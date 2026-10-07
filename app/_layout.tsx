@@ -1,3 +1,4 @@
+import { toastConfig } from "@/utils/toast";
 import { AuthProvider } from "@/context/AuthContext";
 import { initDatabase } from "@/database/initDatabase";
 import { setUpNotificationChannel } from "@/services/notificationService";
@@ -28,7 +29,7 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="(tabs)" />
           </Stack>
-          <Toast />
+          <Toast config={toastConfig} />
         </AuthProvider>
       </TamaguiProvider>
     </SafeAreaProvider>

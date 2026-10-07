@@ -11,9 +11,9 @@ type Props = {
 
 export default function InputComponent({ name, placeholder, error, value, setValue, extraOptions }: Props) {
     return (
-        <View>
-            {name && <Text marginBottom={5} color={error ? "$red10" : "white"}>{name}</Text>}
-            <Input value={value} color={"#edede967"}  borderColor={error ? "$red10" : "rgb(197, 176, 176)"} onChangeText={setValue} width={"100%"} backgroundColor={"transparent"} placeholderTextColor="#edede918" placeholder={placeholder} size={"$4"} borderWidth={0.10} {...extraOptions} />
+        <View width={"100%"}>
+            {name && <Text marginBottom={5} color={"white"}>{name}</Text>}
+            <Input value={value} color={"white"} borderWidth={1} borderColor={error ? "$red10" : "rgb(197, 176, 176)"} onChangeText={setValue} width={"100%"} backgroundColor={"transparent"} placeholderTextColor="#edede918" placeholder={placeholder} size={"$5"}  {...extraOptions} />
             {error && (
                 <Text
                     color="$red10"
