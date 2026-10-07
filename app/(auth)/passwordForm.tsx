@@ -49,7 +49,7 @@ export default function passwordForm() {
                     router.replace("/(tabs)")
                 }
                 else {
-                    router.replace("/(tabs)/history")
+                    router.replace("/(auth)/nameForm")
                 }
             }
         }

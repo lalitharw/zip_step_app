@@ -17,9 +17,10 @@ type AuthContextType = {
     isLoading: boolean;
     googleLogin: () => Promise<User>
     checkEmail: (email: string) => Promise<any>
-    login: ({email, password}:{email:string, password:string}) => Promise<any>
+    login: ({ email, password }: { email: string, password: string }) => Promise<any>
     register: (email: string, password: string, name: string) => Promise<void>
     logout: () => Promise<void>,
+    setName: (name: string) => Promise<any>
     setPassword: (password: string) => Promise<any>
     updateProfile: (name: string) => Promise<void>
 }
@@ -91,9 +92,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
 
-    async function login({email,password}:{email:string,password:string}) {
+    async function login({ email, password }: { email: string, password: string }) {
         try {
-            const { data } = await api.post("/auth/login", { email,password })
+            const { data } = await api.post("/auth/login", { email, password })
             await SecureStore.setItemAsync("auth_token", data.data.token)
             setUser(data.data.user)
             return data
@@ -143,8 +144,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     }
 
-    async function checkEmail(email: string){
-        const {data} = await api.post("/auth/check-email",{
+    async function checkEmail(email: string) {
+        const { data } = await api.post("/auth/check-email", {
             email
         })
         return data
@@ -167,8 +168,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setLoading(false)
         }
     }
+
+    async function setName(name: string) {
+       
+            const { data } = await api.post("/users/set-name", { name })
+            console.log("Set Name: ", data)
+            return data
+    }
+    
     return (
-        <AuthContext.Provider value={{ user, isLoading, register, login, logout, updateProfile, googleLogin, setPassword, checkEmail }}>
+        <AuthContext.Provider value={{ user, isLoading, register, login, logout, updateProfile, googleLogin, setPassword, checkEmail, setName }}>
             {children}
         </AuthContext.Provider>
     )
