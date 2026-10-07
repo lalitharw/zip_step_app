@@ -1,25 +1,26 @@
-import { setPasswordAuth } from "@/api/authenticationApi";
 import BackButton from "@/components/buttons/BackButton";
 import GradientBackground from "@/components/GradientBackground";
 import InputComponent from "@/components/Input";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
-import { Redirect, router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Keyboard } from "react-native";
+import Toast from "react-native-toast-message";
 import { Button, Overlay, Spinner, Text, View, XStack, YStack } from "tamagui";
 import * as yup from "yup";
 
 const passwordSchema = yup.object({
-    password: yup.string().required("Password is required")
+    password: yup.string().required("Password is required").min(8)
 })
 
 export default function passwordForm() {
-    const { user } = useAuth()
+    const { login } = useAuth()
 
-    if (!user) {
-        return <Redirect href={"/(auth)/login"} />
-    }
+    const { email, exists } = useLocalSearchParams<{
+        email: string,
+        exists: string;
+    }>();
     const [password, setPassword] = useState<string>("");
     const [error, setError] = useState<string>("")
     const [loading, setLoading] = useState<boolean>(false)
@@ -39,20 +40,36 @@ export default function passwordForm() {
             setError("")
             setLoading(true)
 
-            const res = await setPasswordAuth(password)
+            const res = await login({ email, password })
+
+            console.log(res)
 
             if (res.success === true) {
-                router.replace("/(tabs)")
+                if (res.data.user.name) {
+                    router.replace("/(tabs)")
+                }
+                else {
+                    router.replace("/(tabs)/history")
+                }
             }
         }
 
-        catch (error) {
+        catch (error: any) {
+            console.log(error);
+
             if (error instanceof yup.ValidationError) {
                 error.inner.forEach((item) => {
-                    if (item.path == "password") {
-                        setError(item.message)
+                    if (item.path === "password") {
+                        setError(item.message);
                     }
-                })
+                });
+            } 
+            else {
+                Toast.show({
+                    text1: error.response.data.message ?? "Something went wrong. Please try again.",
+                    type: "error",
+                    position: "bottom",
+                });
             }
         }
         finally {
@@ -104,6 +121,7 @@ export default function passwordForm() {
                     borderRadius="$4"
                     width="100%"
                     height={"$4"}
+                    disabled={loading}
                     onPress={handleEmail}
                     backgroundColor="#edede9"
                     opacity={1}
@@ -130,9 +148,13 @@ export default function passwordForm() {
                 </Button>
 
                 {
-                    user.name ??
+                    (exists === "true") &&
                     <View>
-                        <Text color={colors.primaryWhite}>Forgot Password?</Text>
+                        <Text onPress={() => router.push({
+                            pathname:"/(auth)/forgoutPassword",params:{
+                                email
+                            }
+                        })} color={colors.primaryWhite}>Forgot Password?</Text>
                     </View>
                 }
                 {/* <Text color={colors.primaryWhite}>Forgot Password?</Text> */}

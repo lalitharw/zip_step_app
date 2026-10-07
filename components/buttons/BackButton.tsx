@@ -1,5 +1,4 @@
 import { colors } from '@/constants/theme';
-import { useAuth } from '@/context/AuthContext';
 import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { router } from 'expo-router';
@@ -8,15 +7,13 @@ import { View } from 'tamagui';
 export default function BackButton() {
 
     const handleGoBack = () => {
-        const { user } = useAuth()
         if (router.canGoBack()) {
             router.back()
         }
         else {
-            if (!user?.name) {
-                router.replace("/")
-            }
+            router.replace("/")
         }
+
     }
 
     return (

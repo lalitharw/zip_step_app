@@ -1,5 +1,4 @@
 import GradientBackground from "@/components/GradientBackground";
-import ErrorModal from "@/components/modals/ErrorModal";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { router } from "expo-router";
@@ -14,12 +13,12 @@ export default function Login() {
 
     const { googleLogin } = useAuth();
 
-   
-    const [googleLoading, setGoogleLoading] = useState(false);
-    const [loginError,setLoginError] = useState<string | null>(null)
-       
 
-   
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const [loginError, setLoginError] = useState<string | null>(null)
+
+
+
 
 
     async function handleGoogleLogin() {
@@ -32,11 +31,11 @@ export default function Login() {
 
             router.replace("/(tabs)");
         } catch (error: any) {
-           Toast.show({
-            type:"error",
-            position:"bottom"
-           })
-            
+            Toast.show({
+                type: "error",
+                position: "bottom"
+            })
+
         } finally {
             setGoogleLoading(false);
         }
@@ -52,118 +51,117 @@ export default function Login() {
                         : "height"
                 }
             >
-               
 
-                    <YStack paddingHorizontal={25} flex={1}
-                        justifyContent="center"
-                        gap="$5"
-                        maxWidth={500}
+
+                <YStack paddingHorizontal={25} flex={1}
+                    justifyContent="center"
+                    gap="$5"
+                    maxWidth={500}
+                    width="100%"
+                    alignItems="center"
+                >
+                    <XStack paddingHorizontal={8} paddingVertical={4}>
+                        <Text fontSize={"$8"} textAlign="center" fontWeight={500} color={colors.primaryWhite}>Sign Up or log in to start exploring</Text>
+                    </XStack>
+
+                    <Button
+                        onPress={handleGoogleLogin}
                         width="100%"
-                        alignItems="center"
+                        height={52}
+                        backgroundColor="white"
+                        borderRadius="$4"
+                        borderWidth={0}
+                        disabled={googleLoading}
+                        pressStyle={{
+                            scale: 0.98,
+                            opacity: 0.9,
+                        }}
                     >
-                        <XStack paddingHorizontal={8} paddingVertical={4}>
-                            <Text fontSize={"$8"} textAlign="center" fontWeight={500} color={colors.primaryWhite}>Sign Up or log in to start exploring</Text>
-                        </XStack>
-
-                        <Button
-                            onPress={handleGoogleLogin}
-                            width="100%"
-                            height={52}
-                            backgroundColor="white"
-                            borderRadius="$4"
-                            borderWidth={0}
-                            disabled={googleLoading}
-                            pressStyle={{
-                                scale: 0.98,
-                                opacity: 0.9,
-                            }}
-                        >
-                            <XStack
-                                alignItems="center"
-                                justifyContent="center"
-                                gap="$2"
-                                width="100%"
-                            >
-                                {googleLoading ? (
-                                    <Spinner
-                                        size="small"
-                                        color="#111"
-                                    />
-                                ) : (
-                                    <XStack
-                                        alignItems="center"
-                                        gap={10}
-                                    >
-                                        <Image width={15} height={15} src={require("../../assets/icons/google.png")} />
-
-                                        <Text fontWeight={"bold"}>
-                                            Continue with Google
-                                        </Text>
-                                    </XStack>
-                                )}
-                            </XStack>
-                        </Button>
-
-
-
                         <XStack
                             alignItems="center"
-                            gap="$3"
-                            marginVertical={"$1"}
-                            opacity={0.5}
-                        >
-                            <YStack
-                                flex={1}
-                                height={1}
-                                backgroundColor="#edede93e"
-                            />
-
-                            <Text
-                                color="#edede9"
-                                fontSize="$4"
-                            >
-                                or
-                            </Text>
-
-                            <YStack
-                                flex={1}
-                                height={1}
-                                backgroundColor="#edede93e"
-                            />
-                        </XStack>
-
-                        <Button
-                            borderRadius="$4"
+                            justifyContent="center"
+                            gap="$2"
                             width="100%"
-                            height={52}
-                            onPress={() => router.replace("/(auth)/emailForm")}
-                          
-                            backgroundColor={"#edede9"}
-                            opacity={1}
-                            pressStyle={{
-                                scale: 0.98,
-                                opacity: 0.9,
-                            }}
                         >
-                            
-                                <Text
-                                    color={"#111"}
-
-                                    fontWeight="bold"
+                            {googleLoading ? (
+                                <Spinner
+                                    size="small"
+                                    color="#111"
+                                />
+                            ) : (
+                                <XStack
+                                    alignItems="center"
+                                    gap={10}
                                 >
-                                    Continue with email
-                                </Text>
-                           
-                        </Button>
+                                    <Image width={15} height={15} src={require("../../assets/icons/google.png")} />
+
+                                    <Text fontWeight={"bold"}>
+                                        Continue with Google
+                                    </Text>
+                                </XStack>
+                            )}
+                        </XStack>
+                    </Button>
 
 
 
-                        <View>
-                            <Text fontSize={11} textAlign="center" color={"#edede996"}>By continuing to use StrideFlow, you agree to our Terms of Service and Privacy Policy. Personal data added to StrideFlow is public by default refer to our </Text>
-                        </View>
-                    </YStack>
+                    <XStack
+                        alignItems="center"
+                        gap="$3"
+                        marginVertical={"$1"}
+                        opacity={0.5}
+                    >
+                        <YStack
+                            flex={1}
+                            height={1}
+                            backgroundColor="#edede93e"
+                        />
 
-               
+                        <Text
+                            color="#edede9"
+                            fontSize="$4"
+                        >
+                            or
+                        </Text>
+
+                        <YStack
+                            flex={1}
+                            height={1}
+                            backgroundColor="#edede93e"
+                        />
+                    </XStack>
+
+                    <Button
+                        borderRadius="$4"
+                        width="100%"
+                        height={52}
+                        onPress={() => router.push("/(auth)/emailForm")}
+                        backgroundColor={"#edede9"}
+                        opacity={1}
+                        pressStyle={{
+                            scale: 0.98,
+                            opacity: 0.9,
+                        }}
+                    >
+
+                        <Text
+                            color={"#111"}
+
+                            fontWeight="bold"
+                        >
+                            Continue with email
+                        </Text>
+
+                    </Button>
+
+
+
+                    <View>
+                        <Text fontSize={11} textAlign="center" color={"#edede996"}>By continuing to use StrideFlow, you agree to our Terms of Service and Privacy Policy. Personal data added to StrideFlow is public by default refer to our </Text>
+                    </View>
+                </YStack>
+
+
 
 
             </KeyboardAvoidingView>

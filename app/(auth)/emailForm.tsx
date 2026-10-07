@@ -1,11 +1,13 @@
 import BackButton from "@/components/buttons/BackButton";
 import GradientBackground from "@/components/GradientBackground";
 import InputComponent from "@/components/Input";
+import GoogleLoginModal from "@/components/modals/GoogleLoginModal";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Keyboard } from "react-native";
+import Toast from "react-native-toast-message";
 import { Button, Overlay, Spinner, Text, XStack, YStack } from "tamagui";
 import * as yup from "yup";
 
@@ -14,10 +16,11 @@ const emailSchema = yup.object({
 })
 
 export default function emailForm() {
-    const { login } = useAuth()
+    const { checkEmail } = useAuth()
     const [email, setEmail] = useState<string>("");
     const [error, setError] = useState<string>("")
     const [loading, setLoading] = useState<boolean>(false)
+    const [hasGoogleLogin, setHasGoogleLogin] = useState<boolean>(false)
 
     const handleEmail = async () => {
         try {
@@ -32,16 +35,26 @@ export default function emailForm() {
             )
             setLoading(true)
 
-            const res = await login(email)
-
-            if (res.success === true) {
-                router.replace("/(auth)/passwordForm")
-            }
-
-            setError("")
-
+            const res = await checkEmail(email)
             console.log(res)
 
+            if (res.success === true) {
+                if (res.data.has_google) {
+                    setHasGoogleLogin(true)
+                    return
+                }
+
+                
+                    router.push({
+                        pathname:"/(auth)/passwordForm",
+                        params:{
+                            email,
+                            exists: res.data.exists
+                        }
+                    })
+                    return 
+              
+            }
         }
 
         catch (error) {
@@ -50,6 +63,12 @@ export default function emailForm() {
                     if (item.path == "email") {
                         setError(item.message)
                     }
+                })
+            }
+            else{
+                Toast.show({
+                    type:"error",
+                    position:"bottom"
                 })
             }
         }
@@ -104,6 +123,7 @@ export default function emailForm() {
                     borderRadius="$4"
                     width="100%"
                     height={"$4"}
+                    disabled={loading}
                     onPress={handleEmail}
                     backgroundColor="#edede9"
                     opacity={1}
@@ -132,6 +152,7 @@ export default function emailForm() {
 
 
             {loading && <Overlay />}
+            {hasGoogleLogin && <GoogleLoginModal visible={hasGoogleLogin} />}
         </GradientBackground>
     )
 }
