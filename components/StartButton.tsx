@@ -53,9 +53,9 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
                 }
             </Button>
 
-            {
+            {/* {
                 __DEV__ && <Button marginTop={20} onPress={() => shareLog()}>Share</Button>
-            }
+            } */}
         </>
     )
 }

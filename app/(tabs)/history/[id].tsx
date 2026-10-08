@@ -1,3 +1,4 @@
+import BackButton from "@/components/buttons/BackButton";
 import Divider from "@/components/Divider";
 import GradientBackground from "@/components/GradientBackground";
 import ActivityCardDetailSkeleton from "@/components/skeleton_loading/ActivityCardDetailSkeleton";
@@ -109,6 +110,7 @@ export default function ActivityDetail() {
         <GradientBackground>
             <View flex={1}>
                 <View position="relative" height={420} borderBottomLeftRadius={28} borderBottomRightRadius={28} overflow="hidden">
+                    <BackButton top={50}/>
                     <Map
                         style={{ flex: 1 }}
                         mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${MAPTILER_API_KEY}`}
@@ -149,13 +151,13 @@ export default function ActivityDetail() {
 
                     </Map>
                     <View position="absolute" right={20} bottom={20}>
-                        {
+                        {/* {
                             (__DEV__) && (
                                 <>
                                     <Button onPress={() => setShowRaw(value => !value)}>Raw: {showRaw ? "true" : "false"}</Button>
                                 </>
                             )
-                        }
+                        } */}
                         <ReplayRouteButton cameraRef={cameraRef} locationPoints={locationPoints} />
                     </View>
                 </View>

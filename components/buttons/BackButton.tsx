@@ -4,7 +4,12 @@ import { HugeiconsIcon } from '@hugeicons/react-native';
 import { router } from 'expo-router';
 import { View } from 'tamagui';
 
-export default function BackButton() {
+type backButtonProps = {
+    top?: null | number,
+    left?: null | number
+}
+
+export default function BackButton({ top = 80, left = 15 }: backButtonProps) {
 
     const handleGoBack = () => {
         if (router.canGoBack()) {
@@ -21,9 +26,10 @@ export default function BackButton() {
         <View
             onPress={handleGoBack}
             position="absolute"
-            top={80}
-            left={20}
+            top={top}
+            left={left}
             height={48}
+            zIndex={1000}
             width={48}
             backgroundColor="#3a343494"
             borderRadius={"50%"}
