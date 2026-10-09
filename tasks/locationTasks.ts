@@ -7,14 +7,17 @@ import { kalmanFilter } from "@/utils/gps/filtering/kalmanFilter";
 import { DEFAULT_MAX_SPEED, MAX_ACCURACY_M, MAX_FIRST_POINT_ACCURACY_M, MAX_SPEED_BY_ACTIVITY } from "@/utils/gps/gpsConfig";
 import { validateLocationPoint } from "@/utils/gps/validation/validateLocationPoints";
 import logger from "@/utils/logging/logger";
-import { getLatestRelativeLatitude } from "@/utils/sensors/barometer";
+import { getCachedUser } from "@/utils/userStorage";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 
 export const LOCATION_TASK_NAME = "stride_flow_location_task";
 
+
+
 const gpsFilter = new kalmanFilter(3)
 let filterActivityId: number | null = null
+
 
 TaskManager.defineTask(
     LOCATION_TASK_NAME,
@@ -33,6 +36,9 @@ TaskManager.defineTask(
             locations: Location.LocationObject[];
         };
 
+
+        const cachedUser = await getCachedUser()
+        const userId = cachedUser?.id ?? null
 
         const activity_id = await getCurrentActivityId()
         if (activity_id === null) {
@@ -71,7 +77,7 @@ TaskManager.defineTask(
             } = location.coords;
 
 
-            logger.info("GPS","",location.coords)
+            logger.info("GPS", "", location.coords)
 
 
             // accuracy check
@@ -95,6 +101,7 @@ TaskManager.defineTask(
                     heading: heading ?? 0,
                     raw_latitude: latitude,
                     raw_longitude: longitude,
+                    user_id: userId
                 })
 
                 lastLocationPoint = {
@@ -133,6 +140,7 @@ TaskManager.defineTask(
                 heading: heading ?? 0,
                 raw_latitude: latitude,
                 raw_longitude: longitude,
+                user_id: userId
             })
 
             lastLocationPoint = {

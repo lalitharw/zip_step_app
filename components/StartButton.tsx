@@ -1,3 +1,4 @@
+import { useAuth } from '@/context/AuthContext';
 import { startActivity } from '@/services/activity/activityService';
 import { useActivityStatsStore } from '@/store/ActivityStatsStore';
 import { clearLog } from '@/utils/logging/fileLogger';
@@ -15,19 +16,19 @@ type StartButtonProps = {
 }
 
 export default function StartButton({ lastLoadedId }: StartButtonProps) {
+    const {user} = useAuth()
     const [isLoading, setLoading] = useState<boolean>(false)
     let accelerometer: ReturnType<typeof subscribeAccelerometer> | null = null
 
     const handleStartActivity = async () => {
         try {
             stopAccelerometer()
-            subscribeBarometer()
             accelerometer = subscribeAccelerometer()
             setLoading(true)
             useActivityStatsStore.getState().resetStats()
             lastLoadedId.current = 0
             await clearLog()
-            await startActivity()
+            await startActivity(user?.id)
         }
         catch (error) {
             console.log("Something went wrong: ", error)

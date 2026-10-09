@@ -1,5 +1,6 @@
 import api from "@/utils/api";
 import logger from "@/utils/logging/logger";
+import { clearCachedUser, getCachedUser, saveCachedUser } from "@/utils/userStorage";
 import { getAuth, GoogleAuthProvider, signInWithCredential } from "@react-native-firebase/auth";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as SecureStore from "expo-secure-store";
@@ -78,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             )
 
             setUser(data.data.user)
+            await saveCachedUser(data.data.user)
             return data.data.user
 
         } catch (error) {
@@ -97,6 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const { data } = await api.post("/auth/login", { email, password })
             await SecureStore.setItemAsync("auth_token", data.data.token)
             setUser(data.data.user)
+            await saveCachedUser(data.data.user)
             return data
         }
         catch (error) {
@@ -120,6 +123,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
         await SecureStore.setItemAsync("auth_token", data.data.token)
         setUser(data.data.user)
+        await saveCachedUser(data.data.user)
+
     }
 
     async function logout() {
@@ -130,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         finally {
             await SecureStore.deleteItemAsync("auth_token")
             setUser(null);
+            await clearCachedUser()
         }
     }
 
@@ -140,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (data && data.data.user) {
             setUser(data.data.user)
+            await saveCachedUser(data.data.user)
         }
 
     }
@@ -156,10 +163,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const token = await SecureStore.getItemAsync("auth_token")
             if (!token) {
                 setLoading(false)
+                setUser(null)
                 return
             }
-            const { data } = await api.get("/users")
-            setUser(data)
+            const cachedUser = await getCachedUser()
+            if (cachedUser) {
+                setUser(cachedUser)
+            }
+            try {
+                const { data } = await api.get("/users")
+                const freshUser = data.data.user
+                setUser(freshUser)
+                await saveCachedUser(freshUser)
+            }
+            catch (error) {
+                logger.warn("AUTH", "Could not refresh user profile", error);
+            }
         }
         catch (err) {
             throw err
@@ -170,12 +189,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     async function setName(name: string) {
-       
-            const { data } = await api.post("/users/set-name", { name })
-            console.log("Set Name: ", data)
-            return data
+        const { data } = await api.post("/users/set-name", { name })
+        const updatedUser = data.data.user
+        setUser(updatedUser)
+        await saveCachedUser(updatedUser)
+        return data
     }
-    
+
     return (
         <AuthContext.Provider value={{ user, isLoading, register, login, logout, updateProfile, googleLogin, setPassword, checkEmail, setName }}>
             {children}

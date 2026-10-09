@@ -9,6 +9,7 @@ type ActivityInput = {
 export type Activity = {
     id: number,
     server_id: number | null,
+    user_id: number | null,
     status: string,
     started_at: string,
     stopped_at: string | null,
@@ -26,34 +27,34 @@ export type Activity = {
 }
 
 
-export async function createActivity() {
+export async function createActivity(userId: number | null) {
     const result = await db.runAsync(`
             INSERT INTO activities
-            (started_at,client_id)
-            VALUES (?,?)
+            (started_at,client_id,user_id)
+            VALUES (?,?,?)
         `, new Date().toISOString(),
-        Crypto.randomUUID()
+        Crypto.randomUUID(),userId
     )
 
     return result.lastInsertRowId
 }
 
 
-export async function getAllActivity(): Promise<Activity[] | null> {
-    return db.getAllAsync<Activity>(`
-            SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced,
-            distance,
-            duration,
-            average_speed,
-            average_pace,
-            elevation_gain,
-            current_elevation,
-            max_speed
-            FROM activities ORDER BY id DESC`)
-}
+// export async function getAllActivity(): Promise<Activity[] | null> {
+//     return db.getAllAsync<Activity>(`
+//             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced,
+//             distance,
+//             duration,
+//             average_speed,
+//             average_pace,
+//             elevation_gain,
+//             current_elevation,
+//             max_speed
+//             FROM activities ORDER BY id DESC`)
+// }
 
 
-export async function getActivity(activityId: number | string): Promise<Activity | null> {
+export async function getActivity(activityId: number): Promise<Activity | null> {
     return db.getFirstAsync<Activity>(`
             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced, 
             distance, duration, average_speed, average_pace, elevation_gain, max_speed
@@ -166,30 +167,19 @@ export const updateActivityStatusToResume = async (activityId: number) => {
 }
 
 
-export const getAllActivitiesOnlyIfLocationPointIsPresent = async () => {
+export const getAllActivitiesOnlyIfLocationPointIsPresent = async (userId: number) => {
     return await db.getAllAsync<Activity>(
         `
         SELECT a.* FROM activities a
         WHERE (SELECT COUNT(*) FROM location_points lp WHERE lp.activity_id = a.id) >= 2
-        AND a.status = 'completed'
-        ORDER BY a.id DESC
-        `
+        AND a.status = 'completed' AND a.user_id = ?
+        ORDER BY a.id DESC 
+        `,
+        userId
     );
 };
 
 
-// export const getActivityWithLocationPoints = async (activityId: number|string) => {
-//     const activity = await db.getFirstAsync<Activity>(`
-//         SELECT * FROM activities WHERE id = ?`, activityId)
-
-//     const location_points = await db.getAllAsync<LocationPoint>(
-//         `SELECT * FROM location_points WHERE activity_id = ? ORDER BY id ASC`, activityId
-//     )
-
-//     return {
-//         activity, location_points
-//     }
-// }
 
 
 export const updateImagePath = async (activityId: number, imagePath: string) => {

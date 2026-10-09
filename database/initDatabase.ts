@@ -6,6 +6,7 @@ export function initDatabase() {
     db.execAsync(`
         CREATE TABLE IF NOT EXISTS activities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
             server_id INTEGER NULL,
             client_id TEXT NOT NULL UNIQUE,
             status TEXT NOT NULL DEFAULT 'running'
@@ -30,6 +31,7 @@ export function initDatabase() {
     db.execAsync(`
          CREATE TABLE IF NOT EXISTS location_points (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
             activity_id INTEGER NOT NULL,
             client_id TEXT NOT NULL UNIQUE,
             latitude REAL NOT NULL,
@@ -49,6 +51,7 @@ export function initDatabase() {
     db.execAsync(`
         CREATE TABLE IF NOT EXISTS activity_pauses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
             activity_id INTEGER NOT NULL,
             client_id TEXT NOT NULL UNIQUE,
             pause_at TEXT NULL,

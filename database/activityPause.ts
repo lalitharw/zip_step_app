@@ -27,12 +27,12 @@ export async function getActivityPause(activityId: number): Promise<activityPaus
 }
 
 
-export async function storePauseAt(activityId: number): Promise<number> {
+export async function storePauseAt({activityId,userId}:{activityId: number,userId:number}): Promise<number> {
     try {
         const result = await db.runAsync(`
                 INSERT INTO activity_pauses (client_id, pause_at,activity_id)
-                VALUES(?,?,?)
-            `, Crypto.randomUUID(), new Date().toISOString(), activityId)
+                VALUES(?,?,?,?)
+            `, Crypto.randomUUID(), new Date().toISOString(), activityId,userId)
         return result.lastInsertRowId
     }
     catch (error) {

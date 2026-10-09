@@ -1,73 +1,42 @@
-import {
-    completeActivity,
-    createActivity,
-    getActivity,
-    updateActivityStats,
-    updateImagePath,
-} from "@/database/activities"
-
+import {completeActivity,createActivity,getActivity,updateActivityStats,updateImagePath} from "@/database/activities"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { useActivityStatsStore } from "@/store/ActivityStatsStore"
 import { useActivityStore } from "@/store/ActivityStore"
 import { useLocationStore } from "@/store/locationStore"
-
-import {
-    deleteCurrentActivityId,
-    getCurrentActivityId,
-    setCurrentActivityId,
-} from "@/utils/activity"
-
+import {deleteCurrentActivityId,getCurrentActivityId,setCurrentActivityId,} from "@/utils/activity"
 import { deleteCurrentPauseActivityId } from "@/utils/activityPause"
-
 import { ensureBatteryOptimizationIgnored } from "@/utils/battery/batteryOptimization"
-
-import {
-    getCurrentLocation,
-    requestLocationPermission,
-    startLocationTracking,
-    stopLocationTracking,
-    stopWatchingLocation,
-} from "../locationService"
-
-import {
-    stopAccelerometer,
-    subscribeAccelerometer,
-} from "@/utils/sensors/accelerometer"
-
+import {getCurrentLocation,requestLocationPermission,startLocationTracking,stopLocationTracking,stopWatchingLocation} from "../locationService"
+import {stopAccelerometer,subscribeAccelerometer,} from "@/utils/sensors/accelerometer"
 import { motionDectector } from "@/utils/sensors/motionDetector"
 import { stopBarometer } from "@/utils/sensors/barometer"
 
-
-export const startActivity = async () => {
+export const startActivity = async (userId: number) => {
+   
     try {
-        // Clear previous route
-        useLocationStore.getState().clearRoute()
+        useLocationStore.getState().clearRoute()        
 
-        // Request location permission
         const permissionGranted = await requestLocationPermission()
 
         if (!permissionGranted) {
             throw new Error("Location permission was not granted")
         }
 
-        // Ensure background tracking is allowed
         await ensureBatteryOptimizationIgnored()
 
-        // Create activity in database
-        const activity = await createActivity()
+        const activity = await createActivity(userId)
+       
 
         if (!activity) {
             throw new Error("Failed to create activity")
         }
 
-        // Save current activity ID
         await setCurrentActivityId(activity)
 
         useActivityStore
             .getState()
             .setActivityId(activity)
 
-        // Start GPS tracking
         const trackingStarted = await startLocationTracking()
 
         if (!trackingStarted) {
@@ -84,13 +53,10 @@ export const startActivity = async () => {
 
         stopWatchingLocation()
 
-        // Reset motion detector for new activity
         motionDectector.reset()
 
-        // Start accelerometer
         subscribeAccelerometer()
 
-        // Mark activity as recording
         useLocationStore
             .getState()
             .setIsRecording(true)
@@ -98,14 +64,8 @@ export const startActivity = async () => {
         return activity
 
     } catch (error) {
-        // Make sure the sensor is not left running
         stopAccelerometer()
-
-        // Reset motion detector
         motionDectector.reset()
-
-        console.error("Start Activity Error: ", error)
-
         throw error
     }
 }

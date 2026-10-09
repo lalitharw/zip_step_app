@@ -2,23 +2,25 @@ import ActivityCard from "@/components/ActivityCard"
 import GradientBackground from "@/components/GradientBackground"
 import ActivityCardHistorySkeleton from "@/components/skeleton_loading/ActivityCardHistorySkeleton"
 import { colors } from "@/constants/theme"
+import { useAuth } from "@/context/AuthContext"
 import { Activity, getAllActivitiesOnlyIfLocationPointIsPresent } from "@/database/activities"
 import { router } from "expo-router"
 import LottieView from "lottie-react-native"
 import { useCallback, useEffect, useState } from "react"
 import { FlatList, RefreshControl } from "react-native"
-import { Text, View, YStack } from "tamagui"
+import { ScrollView, Text, View, YStack } from "tamagui"
 
 
 export default function index() {
     const [activities, setActivities] = useState<Activity[] | null>([])
     const [loading, setLoading] = useState<boolean>(false)
     const [refreshing, setRefreshing] = useState<boolean>(false)
+    const { user } = useAuth()
 
     const loadActivities = async () => {
         try {
             setLoading(true)
-            const data = await getAllActivitiesOnlyIfLocationPointIsPresent()
+            const data = await getAllActivitiesOnlyIfLocationPointIsPresent(user.id)
             setActivities(data)
         }
         catch (error) {
@@ -63,7 +65,7 @@ export default function index() {
 
 
                 {
-                    activities && activities?.length > 1 ?
+                    activities && activities?.length > 0 ?
                         (
                             <FlatList
                                 data={activities}
@@ -74,14 +76,25 @@ export default function index() {
                                 refreshControl={<RefreshControl refreshing={refreshing} progressBackgroundColor={"black"} colors={["grey"]} onRefresh={onRefresh} />}
                                 showsVerticalScrollIndicator={false}
                             />
-                        ) :
-                        (<YStack gap={"$3"} flex={1} justifyContent="center" alignItems="center">
-                            <LottieView style={{ width: 300, height: 300 }} source={require("../../../assets/animation/empty_data.json")} loop autoPlay />
-                            <Text fontSize={"$8"} fontWeight={500} color={colors.primaryWhite}>No Data Found</Text>
-                            <Text fontSize={"$3"} onPress={() => router.push({
-                                pathname: "/(tabs)"
-                            })} textDecorationLine="underline" color={colors.primaryWhite}>Create Activity</Text>
-                        </YStack>)
+                        )
+                        :
+                        (
+                            <ScrollView contentContainerStyle={{
+                                flexGrow: 1,
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}
+                            refreshControl={<RefreshControl refreshing={refreshing} progressBackgroundColor={"black"} colors={["grey"]} onRefresh={onRefresh}/>}
+                            >
+                                <YStack gap={"$3"} flex={1} justifyContent="center" alignItems="center">
+                                    <LottieView style={{ width: 300, height: 300 }} source={require("../../../assets/animation/empty_data.json")} loop autoPlay />
+                                    <Text fontSize={"$8"} fontWeight={500} color={colors.primaryWhite}>No Data Found</Text>
+                                    <Text fontSize={"$3"} onPress={() => router.push({
+                                        pathname: "/(tabs)"
+                                    })} textDecorationLine="underline" color={colors.primaryWhite}>Create Activity</Text>
+                                </YStack>
+                            </ScrollView>
+                        )
                 }
 
 
