@@ -23,6 +23,48 @@ export async function requestLocationPermission() {
     return true
 }
 
+export async function requestForegroundLocationPermission() {
+    const gpsActivated = await Location.hasServicesEnabledAsync()
+    if (!gpsActivated) {
+        throw new Error("Please enable GPS to continue")
+    }
+    const current = await Location.requestForegroundPermissionsAsync()
+
+    const permission = current.granted ? current : await Location.requestForegroundPermissionsAsync()
+
+    if (!permission.granted) {
+        throw new Error("Foreground Location Permission Denied")
+    }
+
+    return true
+}
+
+export async function requestBackgroundLocationPermission() {
+    const foreground = await Location.getForegroundPermissionsAsync()
+
+    if (!foreground.granted) {
+        throw new Error("Foreground location permission is required first")
+    }
+
+    const current = await Location.getBackgroundPermissionsAsync()
+
+    if (current.granted) {
+        return true
+    }
+
+    const background = await Location.requestBackgroundPermissionsAsync()
+
+    if (!background.granted) {
+        throw new Error("Background location permission denied. Enable it in Settings to track runs in the background")
+        // throw new Error(
+        //     `Background location denied: ${background.status}. ` +
+        //     `Can ask again: ${background.canAskAgain}`
+        // );
+    }
+
+    return true
+}
+
 export async function getCurrentLocation() {
     console.log("Watching current Location")
     if (locationSubscription) {
