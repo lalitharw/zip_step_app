@@ -33,7 +33,7 @@ export async function createActivity(userId: number | null) {
             (started_at,client_id,user_id)
             VALUES (?,?,?)
         `, new Date().toISOString(),
-        Crypto.randomUUID(),userId
+        Crypto.randomUUID(), userId
     )
 
     return result.lastInsertRowId
@@ -54,7 +54,7 @@ export async function createActivity(userId: number | null) {
 // }
 
 
-export async function getActivity(activityId: number): Promise<Activity | null> {
+export async function getActivity(activityId: number | string): Promise<Activity | null> {
     return db.getFirstAsync<Activity>(`
             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced, 
             distance, duration, average_speed, average_pace, elevation_gain, max_speed

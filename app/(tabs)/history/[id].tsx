@@ -13,7 +13,7 @@ import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
 import { Camera, CameraRef, GeoJSONSource, Layer, Map } from "@maplibre/maplibre-react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button, ScrollView, Text, View } from "tamagui";
+import { ScrollView, Text, View } from "tamagui";
 
 
 export default function ActivityDetail() {
@@ -22,7 +22,6 @@ export default function ActivityDetail() {
     const cameraRef = useRef<CameraRef>(null)
     const [activity, setActivity] = useState<Activity | null>(null)
     const [loading, setLoading] = useState<boolean>(false)
-    const [showRaw, setShowRaw] = useState<boolean>(false)
 
     const isReplaying = useReplayRouteStore((state) => state.isReplaying)
     const replayCoordinates = useReplayRouteStore((state) => state.replayRoute)
@@ -55,7 +54,7 @@ export default function ActivityDetail() {
 
 
 
-    const routeGeoJSON = {
+    const routeGeoJSON = useMemo(() => ({
         type: "Feature" as const,
         properties: {},
         geometry: {
@@ -65,34 +64,44 @@ export default function ActivityDetail() {
                 point.latitude
             ])
         },
-    };
+    }), [locationPoints])
 
 
-    const rawRouteGeoJSON = useMemo(() => ({
-        type: "Feature" as const,
-        properties: {},
-        geometry: {
-            type: "LineString" as const,
-            coordinates: locationPoints.filter(point => {
-                return point.raw_latitude !== null && point.raw_longitude !== null
-            }).
-                map((point) => [
-                    point.raw_longitude,
-                    point.raw_latitude
-                ])
-        },
-    }), [locationPoints]);
+    const routeBounds = useMemo(() => {
+        if (locationPoints.length === 0) return null
+
+        const longitudes = locationPoints.map((p) => p.longitude)
+        const latitudes = locationPoints.map((p) => p.latitude)
+        //  { top: 30, right: 30, bottom: 30, left: 30 },
+        return [
+            Math.min(...longitudes),
+            Math.min(...latitudes),
+            Math.max(...longitudes),
+            Math.max(...latitudes)
+        ]
+    }, [locationPoints])
 
 
 
-    const replayRouteGeoJSON = {
-        type: "Feature" as const,
-        properties: {},
-        geometry: {
-            type: "LineString" as const,
-            coordinates: replayCoordinates
-        },
-    };
+    const replayRouteGeoJSON = useMemo(() => (
+        {
+            type: "Feature" as const,
+            properties: {},
+            geometry: {
+                type: "LineString" as const,
+                coordinates: replayCoordinates
+            },
+        }
+    ), [replayCoordinates])
+
+    // const replayRouteGeoJSON = {
+    //     type: "Feature" as const,
+    //     properties: {},
+    //     geometry: {
+    //         type: "LineString" as const,
+    //         coordinates: replayCoordinates
+    //     },
+    // };
 
 
 
@@ -110,7 +119,7 @@ export default function ActivityDetail() {
         <GradientBackground>
             <View flex={1}>
                 <View position="relative" height={420} borderBottomLeftRadius={28} borderBottomRightRadius={28} overflow="hidden">
-                    <BackButton top={50}/>
+                    <BackButton top={50} />
                     <Map
                         style={{ flex: 1 }}
                         mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${MAPTILER_API_KEY}`}
@@ -120,10 +129,10 @@ export default function ActivityDetail() {
                     >
                         {(!isReplaying && locationPoints.length > 0) && (
                             <>
-                                <Camera center={[locationPoints[0].longitude, locationPoints[0].latitude]} zoom={18} />
+                                <Camera ref={cameraRef} center={[locationPoints[0].longitude, locationPoints[0].latitude]} zoom={16} />
 
 
-                                <GeoJSONSource id="raw-route" data={showRaw  ? rawRouteGeoJSON : routeGeoJSON}>
+                                <GeoJSONSource id="raw-route" data={routeGeoJSON}>
                                     <Layer
                                         type="line"
                                         id="raw-route-line"
@@ -136,7 +145,7 @@ export default function ActivityDetail() {
 
                         {(isReplaying && replayCoordinates.length >= 2) && (
                             <>
-                                <Camera ref={cameraRef} zoom={18} />
+                                <Camera ref={cameraRef} zoom={17} />
                                 <GeoJSONSource id="replay-route" data={replayRouteGeoJSON}>
                                     <Layer
                                         type="line"
