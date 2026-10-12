@@ -27,7 +27,6 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
     const startWorkout = async () => {
         stopAccelerometer()
         subscribeAccelerometer()
-
         useActivityStatsStore.getState().resetStats()
         lastLoadedId.current = 0
         if (user !== null) {

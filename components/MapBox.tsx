@@ -104,12 +104,7 @@ export default function MapBox() {
         }
         const updateTimer = async () => {
             try {
-                if (!activityId) {
-                    throw new Error("Activity ID Not found")
-                }
-
                 const time = await getActivityElapsedTime(activityId)
-
 
                 if (time !== null) {
                     setStats({

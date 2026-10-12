@@ -1,4 +1,6 @@
 export function formatTime(milliseconds: number) {
+    if (!Number.isFinite(milliseconds)) return "00:00:00"
+    
     const totalSeconds = Math.floor(milliseconds / 1000);
 
     const hours = Math.floor(totalSeconds / 3600);
