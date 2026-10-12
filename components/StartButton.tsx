@@ -2,6 +2,7 @@ import { useAuth } from '@/context/AuthContext';
 import { startActivity } from '@/services/activity/activityService';
 import { requestBackgroundLocationPermission, requestForegroundLocationPermission } from '@/services/locationService';
 import { useActivityStatsStore } from '@/store/ActivityStatsStore';
+import { ensureBatteryOptimizationIgnored } from '@/utils/battery/batteryOptimization';
 import { stopAccelerometer, subscribeAccelerometer } from '@/utils/sensors/accelerometer';
 import { PlayIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
@@ -21,7 +22,7 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
     const [isLoading, setLoading] = useState<boolean>(false)
     const [showBackgroundDisclosure, setShowBackgroundDisclosure] = useState<boolean>(false)
     const [permissionDeniedPermanently, setPermissionDeniedPermanently] = useState<boolean>(false)
-    
+
 
     const startWorkout = async () => {
         stopAccelerometer()
@@ -29,62 +30,80 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
 
         useActivityStatsStore.getState().resetStats()
         lastLoadedId.current = 0
-
-        await startActivity(user?.id)
+        if (user !== null) {
+            await startActivity(user?.id)
+        }
     }
 
 
     const handleStartActivity = async () => {
         try {
-            setLoading(true)
-            await requestForegroundLocationPermission()
-            const background = await Location.getBackgroundPermissionsAsync()
+            setLoading(true);
+
+            await requestForegroundLocationPermission();
+
+            const background =
+                await Location.getBackgroundPermissionsAsync();
+
+
             if (background.granted) {
-                await startWorkout()
+                setPermissionDeniedPermanently(false);
+                await ensureBatteryOptimizationIgnored()
+                await startWorkout();
+                return;
             }
-            else {
-                setShowBackgroundDisclosure(true)
-            }
-        }
-        catch (error) {
+
+            setPermissionDeniedPermanently(!background.canAskAgain);
+            setShowBackgroundDisclosure(true);
+            return;
+
+        } catch (error) {
+            console.error("Unable to start activity:", error);
+
             Toast.show({
                 type: "error",
-                position: "bottom"
-            })
+                position: "top",
+                text1: "Unable to start workout",
+                text2:
+                    error instanceof Error
+                        ? error.message
+                        : "Please check your location settings and try again.",
+            });
+        } finally {
+            setLoading(false);
         }
-        finally {
-            setLoading(false)
-        }
-    }
+    };
 
     const handleDisclosureContinue = async () => {
         try {
-            setShowBackgroundDisclosure(true)
-            await requestBackgroundLocationPermission()
-            await startWorkout()
-        }
-        catch (error) {
-            
-            const permission = await Location.getBackgroundPermissionsAsync()
+            setLoading(true);
+            setShowBackgroundDisclosure(false);
+
+            await requestBackgroundLocationPermission();
+
+            setPermissionDeniedPermanently(false);
+            await startWorkout();
+        } catch (error) {
+            console.error("Background location permission error:", error);
+
+            const permission =
+                await Location.getBackgroundPermissionsAsync();
 
             if (!permission.granted && !permission.canAskAgain) {
-                setPermissionDeniedPermanently(true)
-                setShowBackgroundDisclosure(true)
+                setPermissionDeniedPermanently(true);
+                setShowBackgroundDisclosure(true);
+            } else {
+                Toast.show({
+                    type: "error",
+                    position: "top",
+                    text1: "Background location permission denied",
+                    text2: "Please allow background location to track your workout.",
+                });
             }
-
-            // Toast.show({
-            //     type: "error",
-            //     position: "top",
-            //     text1: "Background location permission denied",
-            //     text2: !permission.canAskAgain
-            //         ? "Please enable it in Settings to continue."
-            //         : "Please grant permission to record workouts in the background.",
-            // });
+        } finally {
+            setLoading(false);
         }
-        finally {
-            setLoading(false)
-        }
-    }
+    };
 
     return (
         <>

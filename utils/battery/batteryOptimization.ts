@@ -18,8 +18,9 @@ export async function ensureBatteryOptimizationIgnored() {
         })
     }
     catch (error) {
-        await IntentLauncher.startActivityAsync(IntentLauncher.ActivityAction.APPLICATION_DETAILS_SETTINGS,
-            { data: "package:com.anonymous.stride_flow_app" }
-        )
+        console.log(error)
+        // await IntentLauncher.startActivityAsync(IntentLauncher.ActivityAction.APPLICATION_DETAILS_SETTINGS,
+        //     { data: "package:com.anonymous.stride_flow_app" }
+        // )
     }
 }

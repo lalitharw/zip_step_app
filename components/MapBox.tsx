@@ -8,11 +8,12 @@ import { useActivityStore } from "@/store/ActivityStore";
 import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
-import { calculateActivityDistance, calculateActivityMaxSpeed, calculateAveragePace, calculateAverageSpeed, calculateElevation } from "@/utils/activityStats";
+import { calculateAveragePace, calculateAverageSpeed, calculateDistance, calculateMaxSpeed, fetchAndCalculateElevation } from "@/utils/calculateActivityStats";
 import { Camera, GeoJSONSource, Layer, Map, MapRef, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
 import { AnimatePresence } from "moti";
 import { useEffect, useRef, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "tamagui";
 import ActivityStats from "./ActivityStats";
 import GpsOffModal from "./modals/GpsOffModal";
@@ -23,6 +24,7 @@ import StartButton from "./StartButton";
 import StopButton from "./StopButton";
 
 export default function MapBox() {
+    const insets = useSafeAreaInsets()
     const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
     const isRecording = useLocationStore(
         (state) => state.isRecording
@@ -245,10 +247,10 @@ export default function MapBox() {
                 }
 
                 try {
-                    calculateActivityDistance()
-                    calculateActivityMaxSpeed()
+                    calculateDistance()
+                    calculateMaxSpeed()
                     calculateAveragePace()
-                    calculateElevation()
+                    fetchAndCalculateElevation()
                     calculateAverageSpeed()
 
                 }
@@ -390,7 +392,7 @@ export default function MapBox() {
 
             {
                 isRecording && (
-                    <View position="absolute" bottom={30} left={"15%"}>
+                    <View position="absolute" bottom={insets.bottom + 20} left={"15%"}>
                         {
                             isPaused ? <ResumeButton /> : <PauseButton />
                         }
@@ -398,7 +400,7 @@ export default function MapBox() {
                 )
             }
 
-            <View position="absolute" bottom={20} left={0} right={0} alignItems="center">
+            <View position="absolute" bottom={insets.bottom + 10} left={0} right={0} alignItems="center">
                 {
                     isRecording ? (
                         <StopButton mapRef={mapRef} />

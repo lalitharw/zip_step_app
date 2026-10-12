@@ -1,6 +1,5 @@
 import { colors } from "@/constants/theme";
-import { LocationOffline01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react-native";
+import LottieView from "lottie-react-native";
 import { Linking, Modal } from "react-native";
 import { Button, Text, View, XStack } from "tamagui";
 
@@ -31,41 +30,61 @@ export default function LocationPermissionModal({ isVisible, onClose, onContinue
                         justifyContent="center"
                         marginBottom="$4"
                     >
-                        <Text fontSize={26}>
-                            <HugeiconsIcon
-                                icon={LocationOffline01Icon}
-                                size={40}
-                                color={colors.primaryWhite}
-                                strokeWidth={1.5}
-                            /></Text>
+
+                        <LottieView style={{ width: 100, height: 100 }} loop={true} autoPlay={true} source={require("../../assets/animation/location.json")} />
                     </View>
                     <Text
                         color={colors.primaryWhite}
                         fontSize={20}
                         fontWeight="700"
-                        textAlign="center">Keep your run on track
+                        textAlign="center">Location Access
                     </Text>
-                    <Text
-                        color="$color11"
-                        fontSize={14}
-                        textAlign="center"
-                        marginTop="$2"
-                        lineHeight={20}>
-                        StrideFlow collects location data to record
-                        your running route, distance and pace during
-                        active workouts, even when the app is in the
-                        background or your screen is locked.
-
-                        Your location is used for workout tracking
-                        and related activity features.
-                    </Text>
-                    <XStack marginTop={"$3"} gap={"$2"}>
+                    {permissionDeniedPermanently ? (
+                        <Text
+                            color="$color11"
+                            fontSize={14}
+                            textAlign="left"
+                            marginTop="$2"
+                            lineHeight={22}
+                        >
+                            To track workouts in the background:
+                            {"\n\n"}1. Tap Go to Settings below.
+                            {"\n"}2. Open Permissions → Location.
+                            {"\n"}3. Select Allow all the time.
+                            {"\n"}4. Return to StrideFlow and start your workout again.
+                        </Text>
+                    ) : (
+                        <>
+                        
+                        <Text
+                            color="$color11"
+                            fontSize={14}
+                            textAlign="center"
+                            marginTop="$2"
+                            lineHeight={20}
+                        >
+                            StrideFlow needs location access to track your route,
+                            distance, and pace, even when your phone is locked.
+                        </Text>
+                        <Text
+                            color="$color11"
+                            fontSize={14}
+                            textAlign="center"
+                            marginTop="$2"
+                            lineHeight={20}
+                        >
+                            You must select "Always Allow" on the next screen for strideFlow to work.
+                        </Text>
+                        </>
+                    )}
+                    <XStack alignItems="center" marginTop={"$3"} gap={"$5"}>
                         {
                             permissionDeniedPermanently ?
                                 (
                                     <Button size={"$3"} onPress={() => {
                                         onClose()
-                                        Linking.openSettings()}}>
+                                        Linking.openSettings()
+                                    }}>
                                         Go to Settings
                                     </Button>
                                 ) :
@@ -76,9 +95,9 @@ export default function LocationPermissionModal({ isVisible, onClose, onContinue
                                 )
                         }
 
-                        <Button size={"$3"} onPress={onClose}>
-                            Not Now
-                        </Button>
+                        <Text color={colors.primaryWhite} onPress={onClose}>
+                            Maybe Later
+                        </Text>
                     </XStack>
                 </View>
 

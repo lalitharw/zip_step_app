@@ -3,15 +3,20 @@ import { storePauseAt, storeResumeAt } from "@/database/activityPause"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { getCurrentActivityId } from "@/utils/activity"
 import { getCurrentPauseActivityId, setPauseActivityId } from "@/utils/activityPause"
+import { getCachedUser } from "@/utils/userStorage"
 
 export const storePauseActivity = async () => {
+    const user = await getCachedUser()
     try {
-        console.log("Calling Pause Activity")
+
         const activityId = await getCurrentActivityId()
         if (!activityId) {
             throw new Error("Activity ID not found")
         }
-        const res = await storePauseAt(activityId)
+        const res = await storePauseAt({
+            activityId: activityId,
+            userId: user.id
+        })
         await setPauseActivityId(res)
         await updateActivityStatusToPause(activityId)
         useActivityPauseStore.getState().setIsActivityPaused(true)

@@ -51,6 +51,7 @@
     "expo-system-ui": "~6.0.9",
     "expo-task-manager": "~14.0.9",
     "expo-web-browser": "~15.0.11",
+    "haversine-distance": "^1.2.4",
     "lottie-react-native": "~7.3.1",
     "moti": "^0.30.0",
     "react": "19.1.0",
