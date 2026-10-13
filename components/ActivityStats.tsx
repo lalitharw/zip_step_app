@@ -1,5 +1,4 @@
 import { colors } from "@/constants/theme";
-import { useActivityTimer } from "@/hooks/useActivityTimer";
 import { useActivityPauseStore } from "@/store/ActivityPauseStore";
 import { useActivityStatsStore } from "@/store/ActivityStatsStore";
 import { useLocationStore } from "@/store/locationStore";

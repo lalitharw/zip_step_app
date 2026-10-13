@@ -23,6 +23,7 @@ type LocationState = {
     clearRoute: () => void
 
     setRouteCoordinate: (coordinates: Coordinates[]) => void
+    deleteRouteCoordinate: () => void,
 
     isGpsOff: boolean
     setIsGpsOff: (value: boolean) => void
@@ -64,6 +65,12 @@ export const useLocationStore = create<LocationState>((set) => ({
     setRouteCoordinate(coordinates) {
         set({
             routeCoordinates: coordinates
+        })
+    },
+
+    deleteRouteCoordinate() {
+        set({
+            routeCoordinates:[]
         })
     },
 

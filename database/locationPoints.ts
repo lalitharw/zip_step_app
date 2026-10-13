@@ -29,7 +29,9 @@ export type LocationPoint = {
     synced: number,
     raw_latitude: number,
     raw_longitude: number,
-    user_id: number
+    user_id: number,
+    elevation_gain: number,
+    elevation_loss: number
 }
 
 export async function saveLocationPoint(point: LocationPointInput): Promise<void> {

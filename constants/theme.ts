@@ -2,7 +2,11 @@ export const colors = {
   primaryBlack: "#111214",
   primaryWhite: "#edede9",
   secondaryWhite: "#edede967",
-  lessOpacityBlack: "#11121481"
+  lessOpacityBlack: "#11121481",
+  ACCENT: "#1397c3",
+  SHEET_BG: "#0F1318",
+  TILE_BG: "rgba(255,255,255,0.05)",
+  TILE_BORDER: "rgba(255,255,255,0.07)"
 };
 
 export const spacing = {

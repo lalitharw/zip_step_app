@@ -43,9 +43,10 @@ export default function ActivityCardHistorySkeleton() {
                 />
 
             </View>
-
-            <View flexDirection="row" justifyContent="space-between" paddingVertical={10}>
+            
+            <View flexDirection="row" gap={"$3"} justifyContent="space-between" paddingVertical={10}>
                 <MotiView
+                    
                     from={{ opacity: 0.4 }}
                     animate={{ opacity: 0.8 }}
                     transition={{
@@ -54,7 +55,7 @@ export default function ActivityCardHistorySkeleton() {
                         loop: true,
                     }}
                     style={{
-                        width: 150,
+                        flex: 1,
                         height: 30,
                         borderRadius: 4,
                         backgroundColor: "#333",
@@ -69,14 +70,14 @@ export default function ActivityCardHistorySkeleton() {
                         loop: true,
                     }}
                     style={{
-                        width: 150,
+                        flex: 1,
                         height: 30,
                         borderRadius: 4,
                         backgroundColor: "#333",
                     }}
                 />
             </View>
-            <View flexDirection="row" justifyContent="space-between" paddingVertical={10}>
+            <View flexDirection="row" gap={"$3"} justifyContent="space-between" paddingVertical={10}>
                 <MotiView
                     from={{ opacity: 0.4 }}
                     animate={{ opacity: 0.8 }}
@@ -86,7 +87,7 @@ export default function ActivityCardHistorySkeleton() {
                         loop: true,
                     }}
                     style={{
-                        width: 150,
+                        flex: 1,
                         height: 30,
                         borderRadius: 4,
                         backgroundColor: "#333",
@@ -101,7 +102,7 @@ export default function ActivityCardHistorySkeleton() {
                         loop: true,
                     }}
                     style={{
-                        width: 150,
+                        flex: 1,
                         height: 30,
                         borderRadius: 4,
                         backgroundColor: "#333",

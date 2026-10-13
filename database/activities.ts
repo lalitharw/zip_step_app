@@ -22,6 +22,7 @@ export type Activity = {
     average_speed: number | null,
     average_pace: number | null,
     elevation_gain: number | null,
+    elevation_loss: number | null,
     current_elevation: number | null,
     max_speed: number | null,
 }

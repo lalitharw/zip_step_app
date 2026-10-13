@@ -19,6 +19,7 @@ export const resetActivity = async () => {
     useLocationStore.getState().setIsRecording(false)
     useActivityPauseStore.getState().setIsActivityPaused(false)
     useActivityStore.getState().deleteMapPath()
+    useLocationStore.getState().deleteRouteCoordinate()
 }
 
 export const finishActivity = async (mapRef: Parameters<typeof mapSnapShot>[0]) => {
