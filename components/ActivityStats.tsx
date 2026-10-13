@@ -1,4 +1,5 @@
 import { colors } from "@/constants/theme";
+import { useActivityTimer } from "@/hooks/useActivityTimer";
 import { useActivityPauseStore } from "@/store/ActivityPauseStore";
 import { useActivityStatsStore } from "@/store/ActivityStatsStore";
 import { useLocationStore } from "@/store/locationStore";
@@ -10,7 +11,7 @@ import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, XStack, YStack } from "tamagui";
 
-const LIVE = "#FF4D4F"; 
+const LIVE = "#FF4D4F";
 const LINE = "rgba(255,255,255,0.14)";
 const TABULAR = { fontVariant: ["tabular-nums" as const] };
 
@@ -26,7 +27,7 @@ function LiveDot({ active }: { active: boolean }) {
                 <MotiView
                     from={{ opacity: 0.6, scale: 1 }}
                     animate={{ opacity: 0, scale: 2.4 }}
-                    transition={{ type: "timing", duration: 300, loop:true }}
+                    transition={{ type: "timing", duration: 300, loop: true }}
                     style={{
                         position: "absolute",
                         width: 10,
@@ -88,7 +89,7 @@ export default function ActivityStats() {
     const insets = useSafeAreaInsets();
 
     return (
-        
+
         <View
             position="absolute"
             top={insets.top + 8}
@@ -117,15 +118,12 @@ export default function ActivityStats() {
                     shadowOffset={{ width: 0, height: 6 }}
                     elevation={10}
                 >
-                  
                     <XStack alignItems="center" gap={8} marginBottom={6}>
                         <LiveDot active={(isRecording && !isPaused)} />
                         <Text color={colors.secondaryWhite} fontSize={13}>
                             {(isRecording && !isPaused) ? "Recording" : "Paused"}
                         </Text>
                     </XStack>
-
-                    
                     <XStack alignItems="center" gap={16}>
                         <YStack flex={1.2}>
                             <XStack alignItems="flex-end" gap={6}>
@@ -159,7 +157,7 @@ export default function ActivityStats() {
                         </YStack>
                     </XStack>
 
-                   
+
                     <AnimatePresence>
                         {expanded && (
                             <MotiView
@@ -184,13 +182,13 @@ export default function ActivityStats() {
                                     <Stat label="Elev. gain" value={meters(stats.elevationGain)} unit="m" />
                                     <VLine />
                                     <Stat label="Elev. loss" value={meters(stats.elevationLoss)} unit="m" />
-                                    
+
                                 </XStack>
                             </MotiView>
                         )}
                     </AnimatePresence>
 
-                    
+
                     <YStack
                         onPress={() => setExpanded((v) => !v)}
                         pressStyle={{ opacity: 0.6 }}

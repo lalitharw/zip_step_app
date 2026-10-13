@@ -1,20 +1,20 @@
-import {completeActivity,createActivity,getActivity,updateActivityStats,updateImagePath} from "@/database/activities"
+import { completeActivity, createActivity, getActivity, updateActivityStats, updateImagePath } from "@/database/activities"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { useActivityStatsStore } from "@/store/ActivityStatsStore"
 import { useActivityStore } from "@/store/ActivityStore"
 import { useLocationStore } from "@/store/locationStore"
-import {deleteCurrentActivityId,getCurrentActivityId,setCurrentActivityId,} from "@/utils/activity"
+import { deleteCurrentActivityId, getCurrentActivityId, setCurrentActivityId, } from "@/utils/activity"
 import { deleteCurrentPauseActivityId } from "@/utils/activityPause"
 import { ensureBatteryOptimizationIgnored } from "@/utils/battery/batteryOptimization"
-import {getCurrentLocation,requestLocationPermission,startLocationTracking,stopLocationTracking,stopWatchingLocation} from "../locationService"
-import {stopAccelerometer,subscribeAccelerometer,} from "@/utils/sensors/accelerometer"
-import { motionDectector } from "@/utils/sensors/motionDetector"
+import { stopAccelerometer, subscribeAccelerometer, } from "@/utils/sensors/accelerometer"
 import { stopBarometer } from "@/utils/sensors/barometer"
+import { motionDectector } from "@/utils/sensors/motionDetector"
+import { getCurrentLocation, requestLocationPermission, startLocationTracking, stopLocationTracking, stopWatchingLocation } from "../locationService"
 
 export const startActivity = async (userId: number) => {
-   
+
     try {
-        useLocationStore.getState().clearRoute()        
+        useLocationStore.getState().clearRoute()
 
         const permissionGranted = await requestLocationPermission()
 
@@ -25,7 +25,7 @@ export const startActivity = async (userId: number) => {
         await ensureBatteryOptimizationIgnored()
 
         const activity = await createActivity(userId)
-       
+
 
         if (!activity) {
             throw new Error("Failed to create activity")
@@ -73,8 +73,11 @@ export const startActivity = async (userId: number) => {
 
 export const stopActivity = async () => {
     try {
+
+        console.log("Stop Activity")
         // Get current activity ID
         const activityId = await getCurrentActivityId()
+
 
         if (!activityId) {
             throw new Error("Activity Id not found")
@@ -87,7 +90,7 @@ export const stopActivity = async () => {
         motionDectector.reset()
 
         stopBarometer()
-        
+
 
         // Stop GPS tracking
         await stopLocationTracking()
@@ -170,6 +173,7 @@ export const checkIfActivityIsRunning = async () => {
     try {
         const activityId = await getCurrentActivityId()
 
+
         if (!activityId) {
             return
         }
@@ -182,16 +186,19 @@ export const checkIfActivityIsRunning = async () => {
 
         if (activity.status === "running") {
 
+            useLocationStore.getState().setIsRecording(true)
+
             useLocationStore
                 .getState()
                 .setShowResumeModal(true)
+
 
             useActivityPauseStore
                 .getState()
                 .setIsActivityPaused(false)
 
         } else if (activity.status === "paused") {
-
+            useLocationStore.getState().setIsRecording(true)
             useActivityPauseStore
                 .getState()
                 .setIsActivityPaused(true)

@@ -1,9 +1,10 @@
 import { updateImagePath } from "@/database/activities"
 import { useActivityStore } from "@/store/ActivityStore"
+import { getCurrentActivityId } from "../activity"
 
 export const saveMapSnapShot = async () => {
     try{
-        const activityId = useActivityStore.getState().activityId
+        const activityId = await getCurrentActivityId()
         if(!activityId){
             throw new Error("Activity ID not found")
         }
