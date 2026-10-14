@@ -1,6 +1,7 @@
 import { resetActivity } from '@/services/activity/activityLifeCycle';
 import { stopActivity } from '@/services/activity/activityService';
 import { stopLocationTracking } from '@/services/locationService';
+import { useLocationStore } from '@/store/locationStore';
 import { getCurrentActivityId } from '@/utils/activity';
 import { saveMapSnapShot } from '@/utils/maps/saveMapSnapShot';
 import { mapSnapShot } from '@/utils/mapSnapShot';
@@ -8,7 +9,7 @@ import { StopIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Button, Spinner } from "tamagui";
+import { Button, Spinner, Text, YStack } from "tamagui";
 
 
 type StopButtonProps = {
@@ -17,7 +18,15 @@ type StopButtonProps = {
 
 export default function StopButton({ mapRef }: StopButtonProps) {
     const [isLoading, setLoading] = useState<boolean>(false)
+    const locationStore = useLocationStore()
     const handleStopTracking = async () => {
+
+        if(locationStore.routeCoordinates.length < 5){
+            console.log(locationStore.routeCoordinates.length)
+            locationStore.setShowActivityPointModal(true)
+            return
+        }
+
         try {
             const activityId = await getCurrentActivityId();
             await stopLocationTracking()
@@ -27,7 +36,9 @@ export default function StopButton({ mapRef }: StopButtonProps) {
             await stopActivity()
             await resetActivity()
 
-            if(activityId){
+
+
+            if (activityId) {
                 router.push(`/(tabs)/history/${activityId}`)
             }
 
@@ -49,9 +60,13 @@ export default function StopButton({ mapRef }: StopButtonProps) {
                         color="$green10"
                     />
                     :
-                    <HugeiconsIcon
-                        icon={StopIcon}
-                    />
+                    <YStack alignItems='center'>
+
+                        <HugeiconsIcon
+                            icon={StopIcon}
+                        />
+                        <Text>Finish</Text>
+                    </YStack>
             }
         </Button>
     )

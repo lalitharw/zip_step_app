@@ -1,67 +1,44 @@
-
-import { useActivityStatsStore } from "@/store/ActivityStatsStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
-import { useEffect, useState } from "react";
-import { useStopwatch } from "react-timer-hook";
+import { useEffect, useRef, useState } from "react";
 
 type ActivityTimerProps = {
     isRecording: boolean;
     isPaused: boolean;
 };
 
-export const useActivityTimer = ({
-    isRecording,
-    isPaused,
-}: ActivityTimerProps) => {
-    const { start, pause, reset, totalMilliseconds } = useStopwatch({
-        autoStart: false,
-        interval: 1000,
-    });
-
-    const [isRestored,setIsRestored] = useState<boolean>(false)
-
+export const useActivityTimer = ({ isRecording, isPaused }: ActivityTimerProps) => {
+    const [baseElapsed, setBaseElapsed] = useState(0);   // restored/accumulated ms
+    const [now, setNow] = useState(Date.now());
+    const runStartRef = useRef<number | null>(null);
+    const [isRestored, setIsRestored] = useState(false);
 
     useEffect(() => {
+        (async () => {
+            try {
+                const id = await getCurrentActivityId();
+                if (id) setBaseElapsed((await getActivityElapsedTime(id)) ?? 0);
+            } finally {
+                setIsRestored(true);
+            }
+        })();
+    }, []);
 
-        if(!isRestored) return
+    const running = isRestored && isRecording && !isPaused;
 
-        if (!isRecording) {
-            pause();
-            reset(undefined, false);
+    useEffect(() => {
+        if (!running) {
+            if (runStartRef.current !== null) {
+                setBaseElapsed(e => e + Date.now() - runStartRef.current!);
+                runStartRef.current = null;
+            }
             return;
         }
+        runStartRef.current = Date.now();
+        setNow(Date.now());
+        const id = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(id);
+    }, [running]);
 
-        if (isPaused) {
-            pause();
-        } else {
-            start();
-        }
-    }, [isRecording, isPaused]);
-
-    useEffect(() => {
-        if (!isRecording || !isRestored) return
-        useActivityStatsStore.getState().setStats({
-            duration: totalMilliseconds
-        })
-    }, [totalMilliseconds])
-
-
-    useEffect(() => {
-        const restoreTimer = async () => {
-            const activityId = await getCurrentActivityId();
-
-            if (activityId) {
-                const elapsed = await getActivityElapsedTime(activityId);
-
-                if (elapsed !== null) {
-                    reset(new Date(Date.now() - elapsed), false);
-                }
-            }
-        };
-
-        setIsRestored(true)
-
-        void restoreTimer();
-    }, []);
+    return baseElapsed + (running && runStartRef.current ? now - runStartRef.current : 0);
 };

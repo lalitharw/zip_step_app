@@ -37,6 +37,7 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
 
     const handleStartActivity = async () => {
         try {
+
             setLoading(true);
 
             await requestForegroundLocationPermission();
@@ -45,9 +46,12 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
                 await Location.getBackgroundPermissionsAsync();
 
 
+
+
             if (background.granted) {
                 setPermissionDeniedPermanently(false);
                 await ensureBatteryOptimizationIgnored()
+                
                 await startWorkout();
                 return;
             }

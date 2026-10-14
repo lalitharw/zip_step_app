@@ -17,6 +17,9 @@ type LocationState = {
     isRecording: boolean
     setIsRecording: (recording: boolean) => void
 
+    showActivityPointModal: boolean,
+    setShowActivityPointModal: (value: boolean) => void
+
     routeCoordinates: Coordinates[]
     addRouteCoordinate: (coordinate: Coordinates) => void
 
@@ -86,5 +89,12 @@ export const useLocationStore = create<LocationState>((set) => ({
         set({
             showResumeModal: value
         })
-    }
+    },
+
+    showActivityPointModal: false,
+    setShowActivityPointModal(value) {
+        set({
+            showActivityPointModal: value
+        })
+    },
 }))

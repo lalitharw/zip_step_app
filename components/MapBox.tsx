@@ -14,9 +14,10 @@ import * as Location from "expo-location";
 import { AnimatePresence } from "moti";
 import { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { View } from "tamagui";
+import { View, XStack } from "tamagui";
 import ActivityStats from "./ActivityStats";
 import GpsOffModal from "./modals/GpsOffModal";
+import LessActivityModal from "./modals/LessActivityModal";
 import ResumeModal from "./modals/resumeModal";
 import PauseButton from "./PauseButton";
 import ResumeButton from "./ResumeButton";
@@ -29,6 +30,9 @@ export default function MapBox() {
     const isRecording = useLocationStore(
         (state) => state.isRecording
     );
+
+    const isPaused = useActivityPauseStore(state => state.isActivityPaused)
+    
 
     const showResumeModal = useLocationStore(
         (state) => state.showResumeModal
@@ -63,9 +67,7 @@ export default function MapBox() {
         (state) => state.setIsGpsOff
     )
 
-    const isPaused = useActivityPauseStore(
-        (state) => state.isActivityPaused
-    )
+
 
 
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -215,6 +217,8 @@ export default function MapBox() {
         if (!isRecording || isPaused) {
             return;
         }
+
+        console.log("ok")
 
         let isFetching = false
         const loadRoute = async () => {
@@ -384,7 +388,7 @@ export default function MapBox() {
             </AnimatePresence>
 
 
-
+            {/* 
             {
                 isRecording && (
                     <View position="absolute" bottom={insets.bottom + 20} left={"15%"}>
@@ -407,9 +411,33 @@ export default function MapBox() {
                 }
 
 
+            </View> */}
+            <View position="absolute" justifyContent="center" alignItems="center" bottom={insets.bottom + 20} left={0} right={0}>
+
+                {
+                    isRecording ? (
+                        <View >
+                            {
+                                isPaused ? (<XStack alignItems="center" gap={"$3"}>
+                                    <ResumeButton />
+                                    <StopButton mapRef={mapRef} />
+                                </XStack>) : (<PauseButton />)
+                            }
+                        </View>
+                    ) : (
+                        <View >
+                            {
+                                <StartButton lastLoadedId={lastLoadedId} />
+                            }
+                        </View>
+                    )
+                }
             </View>
+
+
             <ResumeModal isVisible={showResumeModal} />
             <GpsOffModal isVisible={isGpsOff} />
+            <LessActivityModal />
 
         </View >
     );
