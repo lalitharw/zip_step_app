@@ -22,7 +22,6 @@ let filterActivityId: number | null = null
 TaskManager.defineTask(
     LOCATION_TASK_NAME,
     async ({ data, error }) => {
-        console.log("Data")
         if (error) {
             console.error("Location task error:", error);
             return;

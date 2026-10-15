@@ -74,8 +74,7 @@ export const startActivity = async (userId: number) => {
 export const stopActivity = async () => {
     try {
 
-        console.log("Stop Activity")
-        // Get current activity ID
+       
         const activityId = await getCurrentActivityId()
 
 
@@ -83,7 +82,7 @@ export const stopActivity = async () => {
             throw new Error("Activity Id not found")
         }
 
-        // Stop accelerometer
+        
         stopAccelerometer()
 
         // Reset motion detector

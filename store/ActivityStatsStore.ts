@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type ActivitySta = {
+export type ActivityStatsProps = {
     distance: number,
     duration: number,
     currentSpeed: number,
@@ -12,7 +12,7 @@ export type ActivitySta = {
     maxSpeed: number
 }
 
-const initialStats: ActivitySta = {
+const initialStats: ActivityStatsProps = {
     distance: 0,
     duration: 0,
     currentSpeed: 0,
@@ -26,8 +26,8 @@ const initialStats: ActivitySta = {
 
 
 type ActivityStatsState = {
-    stats: ActivitySta,
-    setStats: (stats: Partial<ActivitySta>) => void
+    stats: ActivityStatsProps,
+    setStats: (stats: Partial<ActivityStatsProps>) => void
     resetStats: () => void
 }
 

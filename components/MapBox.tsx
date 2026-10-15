@@ -16,13 +16,13 @@ import { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View, XStack } from "tamagui";
 import ActivityStats from "./ActivityStats";
+import StartButton from "./buttons/StartButton";
 import GpsOffModal from "./modals/GpsOffModal";
 import LessActivityModal from "./modals/LessActivityModal";
 import ResumeModal from "./modals/resumeModal";
-import PauseButton from "./PauseButton";
-import ResumeButton from "./ResumeButton";
-import StartButton from "./StartButton";
-import StopButton from "./StopButton";
+import PauseButton from "./buttons/PauseButton";
+import ResumeButton from "./buttons/ResumeButton";
+import StopButton from "./buttons/StopButton";
 
 export default function MapBox() {
     const insets = useSafeAreaInsets()
@@ -32,7 +32,7 @@ export default function MapBox() {
     );
 
     const isPaused = useActivityPauseStore(state => state.isActivityPaused)
-    
+
 
     const showResumeModal = useLocationStore(
         (state) => state.showResumeModal
@@ -99,34 +99,6 @@ export default function MapBox() {
             ])
         },
     };
-
-    useEffect(() => {
-        if (!isRecording || !activityId) {
-            return
-        }
-        const updateTimer = async () => {
-            try {
-                const time = await getActivityElapsedTime(activityId)
-
-                if (time !== null) {
-                    setStats({
-                        duration: time
-                    })
-                }
-            }
-            catch (error) {
-                console.error("Something went wrong: ", error)
-                throw error
-            }
-        }
-        updateTimer()
-
-        const interval = setInterval(updateTimer, 1000)
-
-        return () => {
-            clearInterval(interval)
-        }
-    }, [isRecording, activityId])
 
     useEffect(() => {
         const unsubscribe = networkStatus()
@@ -218,7 +190,6 @@ export default function MapBox() {
             return;
         }
 
-        console.log("ok")
 
         let isFetching = false
         const loadRoute = async () => {

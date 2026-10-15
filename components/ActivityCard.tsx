@@ -5,8 +5,8 @@ import { LinearGradient } from "@tamagui/linear-gradient";
 import { useRouter } from "expo-router";
 import { Pressable } from "react-native";
 import { Image, Text, View } from "tamagui";
-import Divider from "./Divider";
 import StatBlock from "./StatsBlock";
+import SeparatorVertical from "./separators/SeparatorVertical";
 
 
 type activityCard = {
@@ -78,7 +78,7 @@ export default function ActivityCard({ id, map_image_path, started_at, distance,
                         value={duration ? milliSecondsToMinutes(duration) : "--"}
                         unit="min"
                     />
-                    <Divider />
+                    <SeparatorVertical />
                     <StatBlock
                         label="Distance"
                         value={distance ? metersToKilometers(distance) : "--"}

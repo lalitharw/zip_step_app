@@ -6,7 +6,8 @@ export const colors = {
   ACCENT: "#1397c3",
   SHEET_BG: "#0F1318",
   TILE_BG: "rgba(255,255,255,0.05)",
-  TILE_BORDER: "rgba(255,255,255,0.07)"
+  TILE_BORDER: "rgba(255,255,255,0.07)",
+  LINE : "rgba(255,255,255,0.14)",
 };
 
 export const spacing = {

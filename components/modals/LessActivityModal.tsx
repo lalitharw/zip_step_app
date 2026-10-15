@@ -13,6 +13,7 @@ export default function LessActivityModal() {
     const ActivityPauseStore = useActivityPauseStore()
     const handleDiscard = async () => {
         try {
+            
             setIsLoading(true)
             await stopActivity()
             useLocationStore.getState().setShowActivityPointModal(false)

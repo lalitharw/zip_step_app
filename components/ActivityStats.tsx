@@ -9,6 +9,8 @@ import { AnimatePresence, MotiView } from "moti";
 import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View, XStack, YStack } from "tamagui";
+import SeparatorHorizontal from "./separators/SeparatorHorizontal";
+import SeparatorVertical from "./separators/SeparatorVertical";
 
 const LIVE = "#FF4D4F";
 const LINE = "rgba(255,255,255,0.14)";
@@ -74,10 +76,7 @@ function Stat({
     );
 }
 
-const VLine = () => <View width={1} alignSelf="stretch" backgroundColor={LINE} />;
-const HLine = () => (
-    <View height={1} alignSelf="stretch" backgroundColor={LINE} marginVertical={12} />
-);
+
 
 
 export default function ActivityStats() {
@@ -144,7 +143,7 @@ export default function ActivityStats() {
                             </Text>
                         </YStack>
 
-                        <VLine />
+                        <SeparatorVertical />
 
                         <YStack flex={1} gap={12}>
                             <Stat label="Time" value={formatTime(stats.duration)} />
@@ -165,21 +164,21 @@ export default function ActivityStats() {
                                 exit={{ opacity: 0, translateY: -8 }}
                                 transition={{ type: "timing", duration: 220 }}
                             >
-                                <HLine />
+                                <SeparatorHorizontal />
                                 <XStack alignItems="center" gap={12}>
                                     <Stat label="Speed now" value={kmh(stats.currentSpeed)} unit="km/h" />
-                                    <VLine />
+                                    <SeparatorVertical />
                                     <Stat label="Avg. speed" value={kmh(stats.averageSpeed)} unit="km/h" />
-                                    <VLine />
+                                    <SeparatorVertical />
                                     <Stat label="Max speed" value={kmh(stats.maxSpeed)} unit="km/h" />
                                 </XStack>
 
-                                <HLine />
+                                <SeparatorHorizontal />
                                 <XStack alignItems="center" gap={12}>
                                     <Stat label="Elevation" value={meters(stats.currentElevation)} unit="m" />
-                                    <VLine />
+                                    <SeparatorVertical />
                                     <Stat label="Elev. gain" value={meters(stats.elevationGain)} unit="m" />
-                                    <VLine />
+                                    <SeparatorVertical />
                                     <Stat label="Elev. loss" value={meters(stats.elevationLoss)} unit="m" />
 
                                 </XStack>

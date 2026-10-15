@@ -10,7 +10,7 @@ import * as Location from "expo-location";
 import { useState } from 'react';
 import Toast from 'react-native-toast-message';
 import { Button, Spinner } from "tamagui";
-import LocationPermissionModal from './permissions/LocationPermissionModal';
+import LocationPermissionModal from '../permissions/LocationPermissionModal';
 
 
 type StartButtonProps = {
@@ -51,7 +51,7 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
             if (background.granted) {
                 setPermissionDeniedPermanently(false);
                 await ensureBatteryOptimizationIgnored()
-                
+
                 await startWorkout();
                 return;
             }
