@@ -27,6 +27,8 @@ TaskManager.defineTask(
             return;
         }
 
+       
+
         if (!data) {
             return;
         }
@@ -41,7 +43,7 @@ TaskManager.defineTask(
 
         const activity_id = await getCurrentActivityId()
         if (activity_id === null) {
-            console.log("No activity ID Found")
+           
             return
         }
 

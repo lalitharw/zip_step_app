@@ -18,7 +18,6 @@ export default function GoogleLoginModal({ visible }: { visible: boolean; }) {
             setLoading(true)
             const res = await googleLogin()
 
-            console.log(res)
             router.replace("/(tabs)")
         }
         catch (error) {

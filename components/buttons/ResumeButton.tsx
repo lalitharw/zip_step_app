@@ -1,8 +1,8 @@
 import { colors } from '@/constants/theme';
 import { storeResumeActivity } from '@/services/ActivityPauseService';
-import { Backward01Icon } from '@hugeicons/core-free-icons';
+import { PlayIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { Button, Text, YStack } from "tamagui";
+import { Button, Text, XStack } from "tamagui";
 
 
 export default function ResumeButton() {
@@ -17,13 +17,13 @@ export default function ResumeButton() {
     }
 
     return (
-        <Button onPress={handleResumeActivity} backgroundColor={colors.primaryBlack} width={80} height={80} borderRadius={"50%"}>
-            <YStack justifyContent='center' alignItems='center'>
-                <HugeiconsIcon transform={[{ rotate: "180deg" }]} color={colors.primaryWhite}
-                    icon={Backward01Icon}
+        <Button size={"$6"} width="40%" onPress={handleResumeActivity} backgroundColor={colors.primaryBlack}>
+            <XStack gap={"$1"} justifyContent='center' alignItems='center'>
+                <HugeiconsIcon color={colors.primaryWhite}
+                    icon={PlayIcon}
                 />
-                <Text fontSize={10} color={colors.primaryWhite}>Resume</Text>
-            </YStack>
+                <Text color={colors.primaryWhite}>Resume</Text>
+            </XStack>
         </Button>
     )
 }

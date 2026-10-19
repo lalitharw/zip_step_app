@@ -1,4 +1,5 @@
 import { getNewLocationPointsById } from "@/database/locationPoints";
+import { useCompassDirection } from "@/hooks/useCompassDirection";
 import { checkIfActivityIsRunning } from "@/services/activity/activityService";
 import { getCurrentLocation, stopWatchingLocation } from "@/services/locationService";
 import { networkStatus } from "@/services/networkService";
@@ -7,22 +8,22 @@ import { useActivityStatsStore } from "@/store/ActivityStatsStore";
 import { useActivityStore } from "@/store/ActivityStore";
 import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
-import { getActivityElapsedTime } from "@/utils/ActivityElapsedTime";
-import { calculateAveragePace, calculateAverageSpeed, calculateDistance, calculateMaxSpeed, fetchAndCalculateElevation } from "@/utils/calculateActivityStats";
+import { calculateAveragePace, calculateAverageSpeed, calculateMaxSpeed, fetchAndCalculateElevation } from "@/utils/calculateActivityStats";
 import { Camera, GeoJSONSource, Layer, Map, MapRef, Marker, UserLocation, type CameraRef } from "@maplibre/maplibre-react-native";
 import * as Location from "expo-location";
+import haversineDistance from "haversine-distance";
 import { AnimatePresence } from "moti";
 import { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View, XStack } from "tamagui";
 import ActivityStats from "./ActivityStats";
+import PauseButton from "./buttons/PauseButton";
+import ResumeButton from "./buttons/ResumeButton";
 import StartButton from "./buttons/StartButton";
+import StopButton from "./buttons/StopButton";
 import GpsOffModal from "./modals/GpsOffModal";
 import LessActivityModal from "./modals/LessActivityModal";
 import ResumeModal from "./modals/resumeModal";
-import PauseButton from "./buttons/PauseButton";
-import ResumeButton from "./buttons/ResumeButton";
-import StopButton from "./buttons/StopButton";
 
 export default function MapBox() {
     const insets = useSafeAreaInsets()
@@ -32,6 +33,8 @@ export default function MapBox() {
     );
 
     const isPaused = useActivityPauseStore(state => state.isActivityPaused)
+
+    let isFetching = useRef<boolean>(false)
 
 
     const showResumeModal = useLocationStore(
@@ -50,6 +53,8 @@ export default function MapBox() {
     const activityId = useActivityStore(
         (state) => state.activityId
     )
+
+    useCompassDirection()
 
     const currentLocation = useLocationStore(
         (state) => state.currentLocation
@@ -71,7 +76,7 @@ export default function MapBox() {
 
 
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
+    const heading = useCompassDirection()
     const cameraRef = useRef<CameraRef>(null);
     const mapRef = useRef<MapRef>(null!);
     const lastLoadedId = useRef<number | null>(0)
@@ -191,21 +196,35 @@ export default function MapBox() {
         }
 
 
-        let isFetching = false
+        isFetching.current = false
         const loadRoute = async () => {
-            if (isFetching) return
-            isFetching = true
+            if (isFetching.current) return
+            isFetching.current = true
             try {
                 const activity_id = await getCurrentActivityId()
                 if (!activity_id) {
-                    console.log("No Activity ID Found")
                     return
                 }
                 const newPoints = await getNewLocationPointsById(activity_id, lastLoadedId.current ?? 0)
                 if (newPoints.length === 0) {
                     return
                 }
-                for (const point of newPoints) {
+                // for (const point of newPoints) {
+                //     addCoordinate({
+                //         longitude: point.longitude,
+                //         latitude: point.latitude,
+                //         accuracy: point.accuracy,
+                //         altitude: point.altitude,
+                //         speed: point.speed,
+                //         heading: point.heading
+                //     })
+
+
+                // }
+                let addedDistance = 0
+                for (let i = 0; i < newPoints.length; i++) {
+                    let point = newPoints[i]
+
                     addCoordinate({
                         longitude: point.longitude,
                         latitude: point.latitude,
@@ -214,13 +233,39 @@ export default function MapBox() {
                         speed: point.speed,
                         heading: point.heading
                     })
+
+                    if (i > 0) {
+                        addedDistance += haversineDistance(
+                            {
+                                latitude: newPoints[i - 1].latitude,
+                                longitude: newPoints[i - 1].longitude
+                            },
+                            {
+                                latitude: point.latitude,
+                                longitude: point.longitude
+                            }
+                        )
+                    }
+
+                }
+
+                if (addedDistance > 0) {
+                    const store = useActivityStatsStore.getState()
+
+                    store.setStats({
+                        distance: store.stats.distance + addedDistance
+                    })
                 }
 
                 try {
-                    calculateDistance()
-                    calculateMaxSpeed()
-                    calculateAveragePace()
-                    fetchAndCalculateElevation()
+                    // calculateDistance();
+
+                    calculateMaxSpeed();
+
+                    calculateAveragePace();
+
+                    await fetchAndCalculateElevation();
+
                     calculateAverageSpeed()
 
                 }
@@ -235,7 +280,7 @@ export default function MapBox() {
                 console.error("Failed to refresh route: ", error)
             }
             finally {
-                isFetching = false
+                isFetching.current = false
             }
         }
 
@@ -246,6 +291,8 @@ export default function MapBox() {
         };
     }, [isRecording]);
 
+
+    // useRouteTracking({isRecording,isPaused})
 
 
     return (
@@ -276,6 +323,7 @@ export default function MapBox() {
                             ],
                             zoom: 19,
                         }}
+                        trackUserLocation="course"
                     />
 
 
@@ -317,6 +365,7 @@ export default function MapBox() {
                                 borderWidth={3}
                                 borderColor="white"
                             />
+
                         </Marker>
                     )}
 
@@ -341,8 +390,7 @@ export default function MapBox() {
                     )}
 
 
-                    {
-                        !(routeCoordinates.length > 0) &&
+                    {!(routeCoordinates.length > 0) &&
                         <UserLocation
                             animated
                             heading
@@ -387,9 +435,9 @@ export default function MapBox() {
 
                 {
                     isRecording ? (
-                        <View >
+                        <View marginHorizontal={15} >
                             {
-                                isPaused ? (<XStack alignItems="center" gap={"$3"}>
+                                isPaused ? (<XStack width={"100%"} alignItems="center" gap={"$3"}>
                                     <ResumeButton />
                                     <StopButton mapRef={mapRef} />
                                 </XStack>) : (<PauseButton />)
@@ -413,3 +461,5 @@ export default function MapBox() {
         </View >
     );
 }
+
+

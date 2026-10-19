@@ -43,7 +43,6 @@ export async function storePauseAt({activityId,userId}:{activityId: number,userI
 
 
 export async function storeResumeAt(activityPauseId: number) {
-    console.log("Calling Resume Activity")
     try {
         await db.runAsync(`
             UPDATE activity_pauses SET resume_at = ?

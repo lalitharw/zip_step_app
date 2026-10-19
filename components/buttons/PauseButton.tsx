@@ -2,7 +2,7 @@ import { colors } from '@/constants/theme';
 import { storePauseActivity } from '@/services/ActivityPauseService';
 import { PauseIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { Button, Text, YStack } from "tamagui";
+import { Button, Text, XStack } from "tamagui";
 
 
 export default function PauseButton() {
@@ -23,14 +23,14 @@ export default function PauseButton() {
         //     />
         // </Button>
 
-        <Button onPress={handlePauseActivity} width={90} height={90} borderRadius={"50%"}>
-            <YStack alignItems='center'>
+        <Button onPress={handlePauseActivity} size={"$6"}  marginHorizontal={20} >
+            <XStack width={"100%"} gap={"$2"}  justifyContent='center' alignItems='center'>
                 <HugeiconsIcon
                     color={colors.primaryBlack}
                     icon={PauseIcon}
                 />
                 <Text>Pause</Text>
-            </YStack>
+            </XStack>
         </Button>
     )
 }

@@ -19,12 +19,11 @@ export default function resetPassword() {
 
     useEffect(() => {
         Linking.getInitialURL().then((url) => {
-            console.log("RAW URL 1: ", url)
+          
         })
     }, [])
 
     const testing = useLocalSearchParams()
-    console.log("Data: ", JSON.stringify(testing))
     const { token, email } = useLocalSearchParams<{
         token: string,
         email: string

@@ -36,7 +36,7 @@ export default function emailForm() {
             setLoading(true)
 
             const res = await checkEmail(email)
-            console.log(res)
+    
 
             if (res.success === true) {
                 if (res.data.has_google) {

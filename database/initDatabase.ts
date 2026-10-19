@@ -1,8 +1,8 @@
-import * as SQLite from "expo-sqlite"
+import * as SQLite from "expo-sqlite";
 
 export const db = SQLite.openDatabaseSync("stride_flow.db")
 
-export function initDatabase() {
+export async function initDatabase() {
     db.execAsync(`
         CREATE TABLE IF NOT EXISTS activities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -10,10 +10,11 @@ export function initDatabase() {
             server_id INTEGER NULL,
             client_id TEXT NOT NULL UNIQUE,
             status TEXT NOT NULL DEFAULT 'running'
-                CHECK (status IN ('completed', 'paused', 'running')),
+            CHECK (status IN ('completed', 'paused', 'running')),
             started_at TEXT NULL,
             stopped_at TEXT NULL,
-            distance INTEGER NULL,
+            distance INTEGER NULL DEFAULT 0,
+            last_loaded_location_id NULL DEFAULT 0,
             duration INTEGER NULL,
             average_speed INTEGER NULL,
             average_pace INTEGER NULL,
@@ -25,12 +26,12 @@ export function initDatabase() {
             map_image_url TEXT NULL,
             inactivity_notification_sent INTEGER DEFAULT 0,
             synced INTEGER DEFAULT 0
-            
         );
         
         CREATE INDEX IF NOT EXISTS idx_activities_user
         ON activities(user_id)
         `)
+
 
     db.execAsync(`
          CREATE TABLE IF NOT EXISTS location_points (

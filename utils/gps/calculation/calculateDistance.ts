@@ -1,25 +1,27 @@
 type Coordinate = {
-    latitude: number,
-    longitude: number
-}
+  latitude: number;
+  longitude: number;
+};
 
-export function calculateDistance(previousPoint: Coordinate,currentPoint: Coordinate){
-    const radLat1 = previousPoint.latitude * Math.PI / 180;
-    const radLon1 = previousPoint.longitude * Math.PI / 180;
-    const radLat2 = currentPoint.latitude * Math.PI / 180;
-    const radLon2 = currentPoint.longitude * Math.PI / 180;
+export function calculateDistance(
+  previousPoint: Coordinate,
+  currentPoint: Coordinate,
+): number {
+  const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
 
-    const R = 6_371_000;
+  const lat1 = toRadians(previousPoint.latitude);
+  const lon1 = toRadians(previousPoint.longitude);
+  const lat2 = toRadians(currentPoint.latitude);
+  const lon2 = toRadians(currentPoint.longitude);
 
-    const dLat = radLat2 - radLat1;
-    const dLon = radLon2 - radLon1;
+  const dLat = lat2 - lat1;
+  const dLon = lon2 - lon1;
 
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(radLat1) * Math.cos(radLat2) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return distance;
+  return 6_371_000 * c; // metres
 }

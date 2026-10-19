@@ -66,7 +66,6 @@ export async function requestBackgroundLocationPermission() {
 }
 
 export async function getCurrentLocation() {
-    console.log("Watching current Location")
     if (locationSubscription) {
         return true
     }
@@ -110,7 +109,6 @@ export function stopWatchingLocation() {
 
 export async function startLocationTracking() {
 
-    console.log("Task Registered: ", await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME))
     const alreadyRunning = await Location.hasStartedLocationUpdatesAsync(
         LOCATION_TASK_NAME
     )
@@ -124,7 +122,7 @@ export async function startLocationTracking() {
         {
 
             accuracy: Location.Accuracy.BestForNavigation,
-            timeInterval: 100,
+            timeInterval: 50,
             activityType: Location.ActivityType.Fitness,
             pausesUpdatesAutomatically: false,
             foregroundService: {
@@ -135,7 +133,6 @@ export async function startLocationTracking() {
         },
     )
 
-    console.log("Task Registered: ", await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME))
 
     return true
 

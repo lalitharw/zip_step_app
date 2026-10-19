@@ -13,7 +13,7 @@ export default function LessActivityModal() {
     const ActivityPauseStore = useActivityPauseStore()
     const handleDiscard = async () => {
         try {
-            
+
             setIsLoading(true)
             await stopActivity()
             useLocationStore.getState().setShowActivityPointModal(false)
@@ -24,14 +24,14 @@ export default function LessActivityModal() {
 
     }
 
-    const handleResume = async() => {
-        try{
+    const handleResume = async () => {
+        try {
             setIsLoading(true)
             locationStore.setShowActivityPointModal(false)
             ActivityPauseStore.setIsActivityPaused(false)
             await storeResumeActivity()
         }
-        finally{
+        finally {
             setIsLoading(false)
         }
     }
@@ -60,7 +60,7 @@ export default function LessActivityModal() {
                     </Text>
 
                     <XStack gap={"$3"} marginTop={"$6"}>
-                        <Button onPress={handleDiscard} color={colors.primaryWhite} flex={1} borderColor={"$borderColor"} backgroundColor={"$colorTransparent"}>
+                        <Button onPress={handleDiscard} disabled={isLoading} color={colors.primaryWhite} flex={1} borderColor={"$borderColor"} backgroundColor={"$colorTransparent"}>
                             {
                                 isLoading ? <Spinner
                                     size="small"
@@ -68,13 +68,8 @@ export default function LessActivityModal() {
                                 /> : "Discard"
                             }
                         </Button>
-                        <Button onPress={handleResume} flex={1}>
-                            {
-                                isLoading ? <Spinner
-                                    size="small"
-                                    color="$green10"
-                                /> : "Resume"
-                            }
+                        <Button disabled={isLoading} onPress={handleResume} flex={1}>
+                            Resume
                         </Button>
                     </XStack>
                 </View>

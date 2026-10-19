@@ -27,25 +27,20 @@ export const notifyActivityInactive = async () => {
 
 export const setUpNotificationChannel = async () => {
     try {
-        console.log("Setting up Notifications...")
         const permission = await Notifications.getPermissionsAsync()
 
-        console.log("Current Notification permission: ", permission.status)
 
         if (permission.status !== "granted") {
             const requested = await Notifications.requestPermissionsAsync()
             if (requested.status !== "granted") {
-                console.log("Notificiation Permission denied")
                 return false
             }
         }
 
-        console.log("Making notification ready")
         await Notifications.setNotificationChannelAsync("activity", {
             name: "Activity",
             importance: Notifications.AndroidImportance.HIGH
         })
-        console.log("Notification Ready")
         return true
 
     }

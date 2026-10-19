@@ -9,7 +9,7 @@ import { StopIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Button, Spinner, Text, YStack } from "tamagui";
+import { Button, Spinner, Text, XStack } from "tamagui";
 
 
 type StopButtonProps = {
@@ -21,8 +21,7 @@ export default function StopButton({ mapRef }: StopButtonProps) {
     const locationStore = useLocationStore()
     const handleStopTracking = async () => {
 
-        if(locationStore.routeCoordinates.length < 5){
-            console.log(locationStore.routeCoordinates.length)
+        if (locationStore.routeCoordinates.length < 5) {
             locationStore.setShowActivityPointModal(true)
             return
         }
@@ -51,7 +50,7 @@ export default function StopButton({ mapRef }: StopButtonProps) {
         }
     }
     return (
-        <Button onPress={handleStopTracking} width={90} disabled={isLoading} height={90} borderRadius={"50%"}>
+        <Button width={"60%"} onPress={handleStopTracking} size={"$6"} disabled={isLoading}>
 
             {
                 isLoading ?
@@ -60,13 +59,13 @@ export default function StopButton({ mapRef }: StopButtonProps) {
                         color="$green10"
                     />
                     :
-                    <YStack alignItems='center'>
+                    <XStack gap={"$1"} alignItems='center'>
 
                         <HugeiconsIcon
                             icon={StopIcon}
                         />
                         <Text>Finish</Text>
-                    </YStack>
+                    </XStack>
             }
         </Button>
     )

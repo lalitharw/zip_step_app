@@ -67,7 +67,7 @@ export default function ErrorModal({
             >
                 <YStack
                     width={64}
-                    height={64}
+                    
                     borderRadius={32}
                     backgroundColor="rgba(255,80,80,0.15)"
                     justifyContent="center"

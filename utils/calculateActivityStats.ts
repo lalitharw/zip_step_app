@@ -69,22 +69,23 @@ export function calculateAverageSpeed() {
 
 
 export function calculateAveragePace() {
+
     const { distance, duration } = useActivityStatsStore.getState().stats;
-    console.log("Distance: ", distance)
-    if (distance <= 0 || duration <= 0) {
+
+    logger.info("Distance", "", distance)
+    logger.info("Duration", "", duration)
+    if (distance <= 50 || duration <= 0) {
         useActivityStatsStore.getState().setStats({
             averagePace: 0
         });
         return;
     }
 
-    console.log(duration)
-    console.log(distance)
-    
-    
-    const paceSecondsPerKm = (duration / distance);
-    console.log(paceSecondsPerKm)
-    
+
+
+
+    const paceSecondsPerKm = (duration / 1000) / (distance / 1000);
+
     useActivityStatsStore.getState().setStats({
         averagePace: paceSecondsPerKm,
     });
@@ -124,7 +125,7 @@ export async function fetchAndCalculateElevation() {
 
         const data = await response.json()
 
-        console.log(data)
+
 
         const elevation = data?.elevation[0]
 

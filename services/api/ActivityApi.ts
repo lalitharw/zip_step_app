@@ -36,19 +36,15 @@ export async function stopActivity() {
 }
 
 export async function checkIfActivityIsActive() {
-    console.log("Inside ")
     try {
         const activity_id = await getCurrentActivityId()
-        console.log("Activity ID: ", activity_id)
         if (!activity_id) {
             return false
         }
 
         const response = await api.get(`activities/check-if-active/${activity_id}`)
-        console.log("Response:", response)
         if (response && response.data.data.activity) {
             if (response.data.data.activity.status === "active") {
-                console.log("Do you want to resume activity")
                 useLocationStore.getState().setShowResumeModal(true)
             }
         }

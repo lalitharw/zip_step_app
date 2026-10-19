@@ -27,7 +27,6 @@ export const useActivityTimerNew = ({ isRecording, isPaused }: activityTimerProp
             try {
                 cancelled = false
                 const activityId = await getCurrentActivityId()
-                console.log("Activity ID:l","",activityId)
                 if (activityId !== null) {
                     const time = await getActivityElapsedTime(activityId)
                     if (time !== null) {
@@ -65,7 +64,7 @@ export const useActivityTimerNew = ({ isRecording, isPaused }: activityTimerProp
     }, [isRecording, isPaused, isRestored])
 
     useEffect(() => {
-        logger.info("Timmer","",timerElapsedRef.current)
+        
         if (!isRestored) return
 
        setStats({

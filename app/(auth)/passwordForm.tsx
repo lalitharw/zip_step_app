@@ -42,7 +42,7 @@ export default function passwordForm() {
 
             const res = await login({ email, password })
 
-            console.log(res)
+
 
             if (res.success === true) {
                 if (res.data.user.name) {
