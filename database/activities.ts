@@ -241,22 +241,5 @@ export const getLastLoadedLocationId = async (activityId: number) => {
     return res?.last_processed_location_id ?? 0
 }
 
-export const getDistanceMeters = async(activityId: number) => {
-    const res = await db.getFirstAsync<{distance:number}>(`
-            SELECT distance
-            FROM activities
-            WHERE id = ?
-        `,activityId)
-    return res?.distance ?? 0
-}
-
-
-export const saveDistanceMeters = async (distance: number, activityId: number) => {
-    await db.runAsync(`
-         UPDATE activities
-         SET distance = ?
-         WHERE id = ?
-        `, distance, activityId)
-}
 
 

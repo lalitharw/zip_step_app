@@ -37,6 +37,7 @@ export default function ActivityDetail() {
                     setActivity(activity)
                     const locationPoints = await getLocationPoints(id)
                     setLocationPoints(locationPoints)
+                    console.log("locationPoints")
                 }
             }
             catch (error) {

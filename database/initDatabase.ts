@@ -3,7 +3,7 @@ import * as SQLite from "expo-sqlite";
 export const db = SQLite.openDatabaseSync("stride_flow.db")
 
 export async function initDatabase() {
-    db.execAsync(`
+    await db.execAsync(`
         CREATE TABLE IF NOT EXISTS activities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -27,14 +27,13 @@ export async function initDatabase() {
             inactivity_notification_sent INTEGER DEFAULT 0,
             synced INTEGER DEFAULT 0
         );
-        
+
         CREATE INDEX IF NOT EXISTS idx_activities_user
-        ON activities(user_id)
-        `)
+        ON activities(user_id);
+    `)
 
-
-    db.execAsync(`
-         CREATE TABLE IF NOT EXISTS location_points (
+    await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS location_points (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             activity_id INTEGER NOT NULL,
@@ -53,18 +52,18 @@ export async function initDatabase() {
             timestamp TEXT NOT NULL,
             synced INTEGER DEFAULT 0,
 
+            UNIQUE (activity_id, timestamp),
+
             FOREIGN KEY (activity_id)
             REFERENCES activities(id)
             ON DELETE CASCADE
         );
 
         CREATE INDEX IF NOT EXISTS idx_location_points_user
-        ON location_points(user_id,activity_id)
+        ON location_points(user_id, activity_id);
+    `)
 
-
-        `)
-
-    db.execAsync(`
+    await db.execAsync(`
         CREATE TABLE IF NOT EXISTS activity_pauses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
@@ -80,33 +79,31 @@ export async function initDatabase() {
         );
 
         CREATE INDEX IF NOT EXISTS idx_activity_pauses_user
-        ON activity_pauses(user_id,activity_id)
+        ON activity_pauses(user_id, activity_id);
+    `)
 
-        
-        `)
+    await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS activity_elevations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            activity_id INTEGER NOT NULL,
 
-    db.execAsync(`
-            CREATE TABLE IF NOT EXISTS activity_elevations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                activity_id INTEGER NOT NULL,
+            latitude REAL NOT NULL,
+            longitude REAL NOT NULL,
 
-                latitude REAL NOT NULL,
-                longitude REAL NOT NULL,
+            elevation REAL NOT NULL,
+            recorded_at TEXT NOT NULL,
 
-                elevation REAL NOT NULL,
-                recorded_at TEXT NOT NULL,
+            source TEXT DEFAULT 'open_meteo',
 
-                source TEXT DEFAULT 'open_meteo',
+            synced INTEGER DEFAULT 0,
 
-                synced INTEGER DEFAULT 0,
+            FOREIGN KEY (activity_id)
+            REFERENCES activities(id)
+            ON DELETE CASCADE
+        );
 
-                FOREIGN KEY (activity_id)
-                REFERENCES activities(id)
-                ON DELETE CASCADE
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_activity_elevation_user
-            ON activity_elevations(user_id,activity_id)
-        `)
+        CREATE INDEX IF NOT EXISTS idx_activity_elevation_user
+        ON activity_elevations(user_id, activity_id);
+    `)
 }

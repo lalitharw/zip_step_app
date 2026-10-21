@@ -5,5 +5,5 @@ export const validateAccuracy = (accuracy: number | null) => {
         return false;
     }
 
-            return accuracy <= MAX_ACCURACY_M
+    return accuracy > 0 && accuracy <= MAX_ACCURACY_M
 }

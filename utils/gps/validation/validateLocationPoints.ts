@@ -1,6 +1,6 @@
 import logger from "@/utils/logging/logger";
 import { motionDectector } from "@/utils/sensors/motionDetector";
-import { coordinateDistance } from "../../coordinateDistance";
+import haversineDistance from "haversine-distance";
 import { calculateTimeDifference } from "../calculation/calculateTimeDifference";
 import { validateAccuracy } from "./validateAccuracy";
 import { validateMeaningfulMovement } from "./validateMeaningfulMovement";
@@ -34,11 +34,6 @@ type validateLocationPointReturnType = {
 
 
 export function validateLocationPoint(location: LocationPointType, previousLocation: PreviousLocationType, maxSpeed: number): validateLocationPointReturnType {
-    // const gpsSpeed = location.coords.speed
-    // const gpsMoving = gpsSpeed !== null && gpsSpeed > 0.8
-    // const moving = motionDectector.isMoving() || gpsMoving
-    const moving = motionDectector.isMoving()
-    logger.info("Moving", "IS User Moving", moving)
     try {
         const {
             latitude,
@@ -46,19 +41,7 @@ export function validateLocationPoint(location: LocationPointType, previousLocat
             accuracy
         } = location.coords
 
-
-        const previousTimestamp = new Date(previousLocation.timestamp).getTime()
-        const currentTimestamp = location.timestamp
-        const timeDifference = calculateTimeDifference(currentTimestamp, previousTimestamp)
-
-        const distance = coordinateDistance({
-            lat1: previousLocation.latitude,
-            lon1: previousLocation.longitude,
-            lat2: latitude,
-            lon2: longitude
-        })
-
-
+        // accuracy check
         if (!validateAccuracy(accuracy ?? null)) {
             return {
                 valid: false,
@@ -67,6 +50,11 @@ export function validateLocationPoint(location: LocationPointType, previousLocat
         }
 
 
+
+        // validating timestamp
+        const previousTimestamp = new Date(previousLocation.timestamp).getTime()
+        const currentTimestamp = location.timestamp
+
         if (!validateTimeStamp({ previousTimeStamp: previousTimestamp, currentTimeStamp: currentTimestamp })) {
             return {
                 valid: false,
@@ -74,6 +62,43 @@ export function validateLocationPoint(location: LocationPointType, previousLocat
             }
         }
 
+        const timeDifference = calculateTimeDifference(currentTimestamp, previousTimestamp)
+        if (!Number.isFinite(timeDifference) || timeDifference <= 0) {
+            return {
+                valid: false,
+                reason: "Rejected: Invalid time difference"
+            }
+        }
+
+
+        const distance = haversineDistance(
+            {
+                latitude: previousLocation.latitude,
+                longitude: previousLocation.longitude
+            },
+            {
+                latitude: latitude,
+                longitude: longitude
+            }
+        )
+        if (!Number.isFinite(distance)) {
+            return {
+                valid: false,
+                reason: "Rejected: Invalid distance"
+            }
+        }
+
+        // identical coordinates: nothing new to save, whether moving or not
+        if (distance === 0) {
+            return {
+                valid: false,
+                skip: true,
+                reason: "Skipped: duplicate coordinates"
+            }
+        }
+
+        const moving = motionDectector.isMoving()
+        logger.info("Moving", "IS User Moving", moving)
 
         if (!moving) {
             if (!validateMeaningfulMovement(distance, previousLocation.accuracy ?? 0, accuracy ?? 0)) {
@@ -84,17 +109,6 @@ export function validateLocationPoint(location: LocationPointType, previousLocat
                 }
             }
         }
-        // else {
-        //     const floor = Math.max(1.5, (accuracy ?? 0) * 0.25)
-        //     if (distance < floor) {
-        //         return {
-        //             valid: false,
-        //             skip: true,
-        //             reason: "Skipped: tiny move while moving"
-        //         }
-        //     }
-        // }
-
 
         if (!validatePlausibleDistance(accuracy ?? 0, previousLocation.accuracy ?? 0, distance, timeDifference, maxSpeed)) {
             return {
@@ -110,7 +124,7 @@ export function validateLocationPoint(location: LocationPointType, previousLocat
 
     }
     catch (error) {
-        console.log("Something went wrong: ", error)
+        logger.error("GPS", "validateLocationPoint failed", error)
         return {
             valid: false,
             reason: "Something went wrong"

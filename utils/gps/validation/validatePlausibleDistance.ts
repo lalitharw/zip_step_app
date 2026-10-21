@@ -1,8 +1,16 @@
-export const validatePlausibleDistance = (current_accuracy:number,previous_accuracy:number,distance:number,timeDifference:number,maxSpeed: number) => {
-    const allowedSlack = current_accuracy + previous_accuracy
-    const maxPlausibleDistance = (timeDifference * maxSpeed) + allowedSlack
-    if(distance > maxPlausibleDistance){
-        return false
+const MAX_SLACK_M = 8;
+
+export const validatePlausibleDistance = (
+    currentAccuracy: number,
+    previousAccuracy: number,
+    distance: number,
+    timeDifferenceSec: number,
+    maxSpeed: number
+) => {
+    if (!Number.isFinite(distance) || !Number.isFinite(timeDifferenceSec) || timeDifferenceSec <= 0) {
+        return false;
     }
-    return true
-}
+    const slack = Math.min(currentAccuracy + previousAccuracy, MAX_SLACK_M);
+    const maxPlausible = timeDifferenceSec * maxSpeed + slack;
+    return distance <= maxPlausible;
+};

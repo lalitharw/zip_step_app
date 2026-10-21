@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "182139057357-hml0532dn7k4vrli54k7ih767rabb406.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anonymous.stride_flow_app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
           "client_id": "182139057357-ibsvq19486ovbegnkj2no8l45u9dg3jc.apps.googleusercontent.com",
           "client_type": 3
         }

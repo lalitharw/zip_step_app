@@ -122,7 +122,7 @@ export async function startLocationTracking() {
         {
 
             accuracy: Location.Accuracy.BestForNavigation,
-            timeInterval: 50,
+            timeInterval: 100,
             activityType: Location.ActivityType.Fitness,
             pausesUpdatesAutomatically: false,
             foregroundService: {

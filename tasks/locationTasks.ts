@@ -4,7 +4,7 @@ import { getLastLocationPoint, saveLocationPoint } from "@/database/locationPoin
 import { checkAndNotifyActivityInactivity, updateIsActiveNotificationSentStatus } from "@/services/activityInActiveService";
 import { getCurrentActivityId } from "@/utils/activity";
 import { kalmanFilter } from "@/utils/gps/filtering/kalmanFilter";
-import { DEFAULT_MAX_SPEED, MAX_ACCURACY_M, MAX_FIRST_POINT_ACCURACY_M, MAX_SPEED_BY_ACTIVITY } from "@/utils/gps/gpsConfig";
+import { MAX_ACCURACY_M, MAX_FIRST_POINT_ACCURACY_M, MAX_SPEED_BY_ACTIVITY } from "@/utils/gps/gpsConfig";
 import { validateLocationPoint } from "@/utils/gps/validation/validateLocationPoints";
 import logger from "@/utils/logging/logger";
 import { getCachedUser } from "@/utils/userStorage";
@@ -12,8 +12,6 @@ import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 
 export const LOCATION_TASK_NAME = "stride_flow_location_task";
-
-
 
 const gpsFilter = new kalmanFilter(3)
 let filterActivityId: number | null = null
@@ -26,8 +24,6 @@ TaskManager.defineTask(
             console.error("Location task error:", error);
             return;
         }
-
-       
 
         if (!data) {
             return;
@@ -43,7 +39,6 @@ TaskManager.defineTask(
 
         const activity_id = await getCurrentActivityId()
         if (activity_id === null) {
-           
             return
         }
 
@@ -51,7 +46,6 @@ TaskManager.defineTask(
         if (!activity) {
             return
         }
-
 
         if (activity.status === 'paused') {
             return
@@ -65,8 +59,17 @@ TaskManager.defineTask(
         }
 
         let lastLocationPoint: lastLocationPointReference | null = await getLastLocationPoint(activity_id)
-        const sortedLocations = [...locations].sort((a, b) => a.timestamp - b.timestamp)
-        const maxSpeed = MAX_SPEED_BY_ACTIVITY[0] ?? DEFAULT_MAX_SPEED
+
+        // skip locations that were already saved, then process in time order
+        const lastTs = lastLocationPoint ? new Date(lastLocationPoint.timestamp).getTime() : 0
+        const sortedLocations = [...locations]
+            .filter(l => l.timestamp > lastTs)
+            .sort((a, b) => a.timestamp - b.timestamp)
+
+        // NOTE: change `activity.type` if your field is named differently.
+        // Falls back to walk (strictest), not the loose default.
+        const maxSpeed = MAX_SPEED_BY_ACTIVITY.walk
+
         for (const location of sortedLocations) {
             const {
                 latitude,
@@ -77,16 +80,13 @@ TaskManager.defineTask(
                 heading
             } = location.coords;
 
-
             logger.info("GPS", "", location.coords)
-
 
             // accuracy check
             const maxAcc = lastLocationPoint ? MAX_ACCURACY_M : MAX_FIRST_POINT_ACCURACY_M
-            if (accuracy == null || accuracy > maxAcc) {
+            if (accuracy == null || accuracy <= 0 || accuracy > maxAcc) {
                 continue
             }
-
 
             // first point
             if (!lastLocationPoint) {
@@ -114,7 +114,6 @@ TaskManager.defineTask(
                 await updateIsActiveNotificationSentStatus(false)
                 continue
             }
-
 
             // if already some points available
             const result = validateLocationPoint(location, lastLocationPoint, maxSpeed)
@@ -146,7 +145,7 @@ TaskManager.defineTask(
 
             lastLocationPoint = {
                 ...lastLocationPoint,
-                accuracy: accuracy ?? 0,
+                accuracy,
                 latitude: filtered.latitude,
                 longitude: filtered.longitude,
                 timestamp: new Date(location.timestamp).toISOString()

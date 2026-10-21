@@ -33,7 +33,8 @@ export default function Login() {
         } catch (error: any) {
             Toast.show({
                 type: "error",
-                position: "bottom"
+                position: "bottom",
+                text2: error
             })
 
         } finally {

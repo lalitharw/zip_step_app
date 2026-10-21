@@ -190,41 +190,33 @@ export default function MapBox() {
 
 
 
+    const prevPoint = useRef<{ latitude: number; longitude: number } | null>(null)
+
     useEffect(() => {
         if (!isRecording || isPaused) {
             return;
         }
 
+        let cancelled = false
 
-        isFetching.current = false
         const loadRoute = async () => {
             if (isFetching.current) return
             isFetching.current = true
             try {
                 const activity_id = await getCurrentActivityId()
-                if (!activity_id) {
+                if (!activity_id || cancelled) {
                     return
                 }
                 const newPoints = await getNewLocationPointsById(activity_id, lastLoadedId.current ?? 0)
-                if (newPoints.length === 0) {
+                if (newPoints.length === 0 || cancelled) {
                     return
                 }
-                // for (const point of newPoints) {
-                //     addCoordinate({
-                //         longitude: point.longitude,
-                //         latitude: point.latitude,
-                //         accuracy: point.accuracy,
-                //         altitude: point.altitude,
-                //         speed: point.speed,
-                //         heading: point.heading
-                //     })
 
+                // advance immediately so an overlapping run can't re-fetch these points
+                lastLoadedId.current = newPoints[newPoints.length - 1].id
 
-                // }
                 let addedDistance = 0
-                for (let i = 0; i < newPoints.length; i++) {
-                    let point = newPoints[i]
-
+                for (const point of newPoints) {
                     addCoordinate({
                         longitude: point.longitude,
                         latitude: point.latitude,
@@ -234,52 +226,31 @@ export default function MapBox() {
                         heading: point.heading
                     })
 
-                    if (i > 0) {
-                        addedDistance += haversineDistance(
-                            {
-                                latitude: newPoints[i - 1].latitude,
-                                longitude: newPoints[i - 1].longitude
-                            },
-                            {
-                                latitude: point.latitude,
-                                longitude: point.longitude
-                            }
-                        )
+                    if (prevPoint.current) {
+                        addedDistance += haversineDistance(prevPoint.current, {
+                            latitude: point.latitude,
+                            longitude: point.longitude
+                        })
                     }
-
+                    prevPoint.current = { latitude: point.latitude, longitude: point.longitude }
                 }
 
                 if (addedDistance > 0) {
                     const store = useActivityStatsStore.getState()
-
-                    store.setStats({
-                        distance: store.stats.distance + addedDistance
-                    })
+                    store.setStats({ distance: store.stats.distance + addedDistance })
                 }
 
                 try {
-                    // calculateDistance();
-
                     calculateMaxSpeed();
-
                     calculateAveragePace();
-
                     await fetchAndCalculateElevation();
-
                     calculateAverageSpeed()
-
-                }
-                catch (statsError) {
+                } catch (statsError) {
                     console.error("Failed to update stats: ", statsError);
                 }
-
-                lastLoadedId.current = newPoints[newPoints.length - 1].id
-
-            }
-            catch (error) {
+            } catch (error) {
                 console.error("Failed to refresh route: ", error)
-            }
-            finally {
+            } finally {
                 isFetching.current = false
             }
         }
@@ -287,9 +258,10 @@ export default function MapBox() {
         loadRoute()
         const routeInterval = setInterval(loadRoute, 2000)
         return () => {
+            cancelled = true
             clearInterval(routeInterval)
         };
-    }, [isRecording]);
+    }, [isRecording, isPaused]);
 
 
     // useRouteTracking({isRecording,isPaused})

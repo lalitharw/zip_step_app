@@ -69,6 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const firebaseIdToken =
                 await userCredentials.user.getIdToken()
 
+            logger.info("Token","",firebaseIdToken)
+
             const { data } = await api.post("/auth/login/google", {
                 id_token: firebaseIdToken,
             })
@@ -83,13 +85,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return data.data.user
 
         } catch (error) {
+            logger.error("Google Login Error","",error.response.data.message)
             logger.error(
                 "Google Auth",
                 "Something went wrong",
-                error
+                error.response.data.message
             )
 
-            throw error
+            throw error.response.data.message
         }
     }
 
