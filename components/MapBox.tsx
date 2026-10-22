@@ -192,79 +192,6 @@ export default function MapBox() {
 
 
 
-    // const prevPoint = useRef<{ latitude: number; longitude: number } | null>(null)
-
-    // useEffect(() => {
-    //     if (!isRecording || isPaused) {
-    //         return;
-    //     }
-
-    //     let cancelled = false
-
-    //     const loadRoute = async () => {
-    //         if (isFetching.current) return
-    //         isFetching.current = true
-    //         try {
-    //             const activity_id = await getCurrentActivityId()
-    //             if (!activity_id || cancelled) {
-    //                 return
-    //             }
-    //             const newPoints = await getNewLocationPointsById(activity_id, lastLoadedId.current ?? 0)
-    //             if (newPoints.length === 0 || cancelled) {
-    //                 return
-    //             }
-
-    //             // advance immediately so an overlapping run can't re-fetch these points
-    //             lastLoadedId.current = newPoints[newPoints.length - 1].id
-
-    //             let addedDistance = 0
-    //             for (const point of newPoints) {
-    //                 addCoordinate({
-    //                     longitude: point.longitude,
-    //                     latitude: point.latitude,
-    //                     accuracy: point.accuracy,
-    //                     altitude: point.altitude,
-    //                     speed: point.speed,
-    //                     heading: point.heading
-    //                 })
-
-    //                 if (prevPoint.current) {
-    //                     addedDistance += haversineDistance(prevPoint.current, {
-    //                         latitude: point.latitude,
-    //                         longitude: point.longitude
-    //                     })
-    //                 }
-    //                 prevPoint.current = { latitude: point.latitude, longitude: point.longitude }
-    //             }
-
-    //             if (addedDistance > 0) {
-    //                 const store = useActivityStatsStore.getState()
-    //                 store.setStats({ distance: store.stats.distance + addedDistance })
-    //             }
-
-    //             try {
-    //                 calculateMaxSpeed();
-    //                 calculateAveragePace();
-    //                 await fetchAndCalculateElevation();
-    //                 calculateAverageSpeed()
-    //             } catch (statsError) {
-    //                 console.error("Failed to update stats: ", statsError);
-    //             }
-    //         } catch (error) {
-    //             console.error("Failed to refresh route: ", error)
-    //         } finally {
-    //             isFetching.current = false
-    //         }
-    //     }
-
-    //     loadRoute()
-    //     const routeInterval = setInterval(loadRoute, 2000)
-    //     return () => {
-    //         cancelled = true
-    //         clearInterval(routeInterval)
-    //     };
-    // }, [isRecording, isPaused]);
-
 
     const prevPoint = useRef<{ latitude: number; longitude: number } | null>(null)
 
@@ -348,8 +275,6 @@ export default function MapBox() {
         }
     }, [isRecording,isPaused])
 
-
-    // useRouteTracking({isRecording,isPaused})
 
 
     return (
