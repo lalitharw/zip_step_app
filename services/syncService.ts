@@ -42,7 +42,7 @@ export const syncLocationPoints = async () => {
                     continue
                 }
                 const points = await getUnsyncedLocationPoints(activity.id)
-                if (points.length == 0) {
+                if (!points.length) {
                     continue
                 }
 

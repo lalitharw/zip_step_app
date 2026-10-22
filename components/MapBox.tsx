@@ -26,8 +26,9 @@ import LessActivityModal from "./modals/LessActivityModal";
 import ResumeModal from "./modals/resumeModal";
 
 export default function MapBox() {
+
     const insets = useSafeAreaInsets()
-    const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
+
     const isRecording = useLocationStore(
         (state) => state.isRecording
     );
@@ -46,7 +47,7 @@ export default function MapBox() {
         (state) => state.setStats
     )
 
-    const clearCoordinates = useLocationStore(state => state.clearRoute) 
+    const clearCoordinates = useLocationStore(state => state.clearRoute)
 
     const addCoordinate = useLocationStore(
         (state) => state.addRouteCoordinate
@@ -199,11 +200,11 @@ export default function MapBox() {
         if (!isRecording || isPaused) return
 
         let cancelled = false
-        
+
         lastLoadedId.current = 0
         prevPoint.current = null
         clearCoordinates()
-        useActivityStatsStore.getState().setStats({distance:0})
+        useActivityStatsStore.getState().setStats({ distance: 0 })
 
 
         const loadRoute = async () => {
@@ -273,7 +274,7 @@ export default function MapBox() {
         return () => {
             clearInterval(interval)
         }
-    }, [isRecording,isPaused])
+    }, [isRecording, isPaused])
 
 
 
@@ -288,7 +289,7 @@ export default function MapBox() {
                     bottom: 0,
                 }}
                     ref={mapRef}
-                    mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${MAPTILER_API_KEY}`}
+                    mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${process.env.EXPO_PUBLIC_MAPTILER_API_KEY}`}
                     attributionPosition={{
                         bottom: 8,
                         right: 8,

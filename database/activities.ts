@@ -222,7 +222,7 @@ export const updateActivityStats = async (activityId: number, stats: {
 
 // ------
 
-export const saveLastLoadedLocationIdAndDistance = async (locationId: number, activityId: number,distance: number) => {
+export const saveLastLoadedLocationIdAndDistance = async (locationId: number, activityId: number, distance: number) => {
     await db.runAsync(`
             UPDATE activities
             SET last_loaded_location_id = ?,
@@ -232,7 +232,7 @@ export const saveLastLoadedLocationIdAndDistance = async (locationId: number, ac
 }
 
 export const getLastLoadedLocationId = async (activityId: number) => {
-    const res = await db.getFirstAsync<{last_processed_location_id: number}>(`
+    const res = await db.getFirstAsync<{ last_processed_location_id: number }>(`
             SELECT last_loaded_location_id
             FROM activities
             WHERE id = ?

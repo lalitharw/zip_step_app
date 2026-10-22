@@ -1,22 +1,23 @@
 import { colors } from '@/constants/theme';
 import { ArrowLeft02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { View } from 'tamagui';
 
 type backButtonProps = {
     top?: null | number,
-    left?: null | number
+    left?: null | number,
+    url?: null | string
 }
 
-export default function BackButton({ top = 80, left = 15 }: backButtonProps) {
+export default function BackButton({ top = 80, left = 15, url }: backButtonProps) {
 
     const handleGoBack = () => {
-        if (router.canGoBack()) {
-            router.back()
+        if(url){
+            router.replace(url as Href)
         }
         else {
-            router.replace("/")
+            router.back()
         }
 
     }
@@ -26,6 +27,8 @@ export default function BackButton({ top = 80, left = 15 }: backButtonProps) {
         <View
             onPress={handleGoBack}
             position="absolute"
+            borderColor={"#ffeaea94"}
+            borderWidth={0.1}
             top={top}
             left={left}
             height={48}

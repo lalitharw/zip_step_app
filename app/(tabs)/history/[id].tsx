@@ -1,5 +1,7 @@
 import BackButton from "@/components/buttons/BackButton";
+import DeleteButton from "@/components/buttons/DeleteButton";
 import GradientBackground from "@/components/GradientBackground";
+import DeleteModal from "@/components/modals/DeleteModal";
 import ActivityCardDetailSkeleton from "@/components/skeleton_loading/ActivityCardDetailSkeleton";
 import ReplayRouteButton from "@/components/ui/ReplayRouteUI";
 import { colors } from "@/constants/theme";
@@ -20,6 +22,7 @@ export default function ActivityDetail() {
     const cameraRef = useRef<CameraRef>(null)
     const [activity, setActivity] = useState<Activity | null>(null)
     const [loading, setLoading] = useState<boolean>(false)
+    const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false)
 
     const isReplaying = useReplayRouteStore((state) => state.isReplaying)
     const replayCoordinates = useReplayRouteStore((state) => state.replayRoute)
@@ -93,18 +96,10 @@ export default function ActivityDetail() {
         }
     ), [replayCoordinates])
 
-    // const replayRouteGeoJSON = {
-    //     type: "Feature" as const,
-    //     properties: {},
-    //     geometry: {
-    //         type: "LineString" as const,
-    //         coordinates: replayCoordinates
-    //     },
-    // };
 
 
 
-    const MAPTILER_API_KEY = "xvEVbRhauAEaNQ1Ucv4L";
+
 
     if (loading) {
         return (
@@ -124,7 +119,7 @@ export default function ActivityDetail() {
     const fmtTime = (ms: string | number) =>
         new Date(ms ?? 0).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
 
-    function Metric({ label, value, unit }:{label:string, value:number |string, unit: number | string}) {
+    function Metric({ label, value, unit }: { label: string, value: number | string, unit: number | string }) {
         return (
             <View
                 flex={1}
@@ -151,7 +146,7 @@ export default function ActivityDetail() {
         );
     }
 
-    // One end of the start → stop timeline.
+
     function TimeStop({ label, ms, align = "flex-start" }: { label: string, ms: string | number, align: "flex-start" | "flex-end" | "center" }) {
         return (
             <View flex={1} alignItems={align} gap={2}>
@@ -168,10 +163,11 @@ export default function ActivityDetail() {
 
 
                 <View height={400} overflow="hidden">
-                    <BackButton top={50} />
+                    <BackButton url={"/history"} top={50} />
+                    <DeleteButton top={50}  onPressDelete={() => { setOpenDeleteModal(true); }}/>
                     <Map
                         style={{ flex: 1 }}
-                        mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${MAPTILER_API_KEY}`}
+                        mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${process.env.EXPO_PUBLIC_MAPTILER_API_KEY}`}
                         logo={false}
                         attribution={false}
                         compass={false}
@@ -322,6 +318,13 @@ export default function ActivityDetail() {
                     </View>
                 </ScrollView>
             </View>
+            
+
+            {
+               <DeleteModal visible={openDeleteModal} onClose={() => setOpenDeleteModal(false)} />
+            }
+
+            
         </GradientBackground>
     );
 }

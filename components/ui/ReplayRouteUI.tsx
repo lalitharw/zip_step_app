@@ -27,8 +27,8 @@ export default function ReplayRouteButton({ cameraRef, locationPoints }: replayR
 
     const cancelRef = useRef(false)
 
-    const STEP_DELAY_MS = 100
-    const MAX_STEPS = 300
+    const STEP_DELAY_MS = 10
+    const MAX_STEPS = 200
 
     useEffect(() => {
         return () => {
