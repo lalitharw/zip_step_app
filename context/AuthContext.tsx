@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
 
         GoogleSignin.configure({
-            webClientId: "182139057357-ibsvq19486ovbegnkj2no8l45u9dg3jc.apps.googleusercontent.com"
+            webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEBCLIENT_ID
         })
 
 
