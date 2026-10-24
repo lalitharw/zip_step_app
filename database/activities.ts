@@ -20,6 +20,7 @@ export type Activity = {
     distance: number | null,
     duration: number | null,
     average_speed: number | null,
+    last_loaded_location_id: number | null
     average_pace: number | null,
     elevation_gain: number | null,
     elevation_loss: number | null,
@@ -57,7 +58,7 @@ export async function createActivity(userId: number | null) {
 
 export async function getActivity(activityId: number | string): Promise<Activity | null> {
     return db.getFirstAsync<Activity>(`
-            SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced, 
+            SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, last_loaded_location_id, synced, 
             distance, duration, average_speed, average_pace, elevation_gain, max_speed
             FROM activities WHERE id = ?
         `, activityId)
@@ -222,13 +223,13 @@ export const updateActivityStats = async (activityId: number, stats: {
 
 // ------
 
-export const saveLastLoadedLocationIdAndDistance = async (locationId: number, activityId: number, distance: number) => {
+export const saveLastLoadedLocationIdAndDistance = async (activityId: number, data:{distance: number, lastProcessedPointId: number}) => {
     await db.runAsync(`
             UPDATE activities
             SET last_loaded_location_id = ?,
             distance = ?
             WHERE id = ?
-        `, locationId, activityId, distance)
+        `, data.lastProcessedPointId,data.distance,activityId)
 }
 
 export const getLastLoadedLocationId = async (activityId: number) => {
@@ -240,6 +241,9 @@ export const getLastLoadedLocationId = async (activityId: number) => {
 
     return res?.last_processed_location_id ?? 0
 }
+
+
+
 
 
 

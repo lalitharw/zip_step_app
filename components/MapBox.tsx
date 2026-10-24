@@ -1,4 +1,5 @@
-import { getNewLocationPointsById } from "@/database/locationPoints";
+import { getActivity, saveLastLoadedLocationIdAndDistance } from "@/database/activities";
+import { getLocationPointsUpToId, getNewLocationPointsById } from "@/database/locationPoints";
 import { useCompassDirection } from "@/hooks/useCompassDirection";
 import { checkIfActivityIsRunning } from "@/services/activity/activityService";
 import { getCurrentLocation, stopWatchingLocation } from "@/services/locationService";
@@ -35,7 +36,6 @@ export default function MapBox() {
 
     const isPaused = useActivityPauseStore(state => state.isActivityPaused)
 
-    let isFetching = useRef<boolean>(false)
 
 
     const showResumeModal = useLocationStore(
@@ -82,7 +82,7 @@ export default function MapBox() {
     const heading = useCompassDirection()
     const cameraRef = useRef<CameraRef>(null);
     const mapRef = useRef<MapRef>(null!);
-    const lastLoadedId = useRef<number | null>(0)
+
 
     const startPoint =
         routeCoordinates.length > 0
@@ -192,24 +192,82 @@ export default function MapBox() {
     }, []);
 
 
-
-
-    const prevPoint = useRef<{ latitude: number; longitude: number } | null>(null)
+    // restore and starting routes
+    const prevPoint = useRef<{ latitude: number, longitude: number } | null>(null)
+    const lastLoadedId = useRef(0)
+    const isFetching = useRef(false)
+    const [isRouteRestored, setIsRouteRestored] = useState(false)
 
     useEffect(() => {
-        if (!isRecording || isPaused) return
+        if (!isRecording) return
 
         let cancelled = false
 
-        lastLoadedId.current = 0
-        prevPoint.current = null
-        clearCoordinates()
-        useActivityStatsStore.getState().setStats({ distance: 0 })
+        const restore = async () => {
+            try {
+                setIsRouteRestored(false)
 
+                const activityId = await getCurrentActivityId()
+
+                if (!activityId || cancelled) return
+
+                const activity = await getActivity(activityId)
+
+                if (cancelled) return
+
+                const cursor = activity?.last_loaded_location_id ?? 0
+
+                const points = await getLocationPointsUpToId(activityId, cursor)
+
+                if (cancelled) return
+
+                clearCoordinates()
+
+                for (const point of points) {
+                    if (cancelled) return
+                    addCoordinate({
+                        longitude: point.longitude,
+                        latitude: point.latitude,
+                        accuracy: point.accuracy,
+                        altitude: point.altitude,
+                        speed: point.speed,
+                        heading: point.heading,
+                    })
+                }
+
+                lastLoadedId.current = cursor
+
+                prevPoint.current = null
+
+                useActivityStatsStore.getState().setStats({
+                    distance: activity?.distance ?? 0
+                })
+
+                setIsRouteRestored(true)
+
+            }
+            catch (error) {
+                console.error("Activity Restoration Failed: ", error)
+            }
+        }
+
+        restore()
+
+
+        return () => {
+            cancelled = true
+        }
+    }, [isRecording])
+
+
+    useEffect(() => {
+        if (!isRecording || isPaused || !isRouteRestored) return
+
+        let cancelled = false
 
         const loadRoute = async () => {
-
             if (isFetching.current) return
+
             isFetching.current = true
 
             try {
@@ -217,64 +275,86 @@ export default function MapBox() {
 
                 if (!activityId || cancelled) return
 
-                const newPoints = await getNewLocationPointsById(activityId, lastLoadedId.current ?? 0)
+                const newPoints = await getNewLocationPointsById(
+                    activityId, lastLoadedId.current ?? 0
+                )
 
-                if (!newPoints.length || cancelled) return
-
-                lastLoadedId.current = newPoints[newPoints.length - 1].id
+                if (cancelled || !newPoints.length) return
 
                 let addedDistance = 0
+                let processedId = lastLoadedId.current
 
-                for (let point of newPoints) {
+                for (const point of newPoints) {
+                    if (cancelled) return
+
                     addCoordinate({
-                        longitude: point.longitude,
                         latitude: point.latitude,
+                        longitude: point.longitude,
                         accuracy: point.accuracy,
                         altitude: point.altitude,
                         speed: point.speed,
                         heading: point.heading
                     })
 
-                    if (prevPoint.current) {
-                        addedDistance += haversineDistance(prevPoint.current, {
-                            latitude: point.latitude,
-                            longitude: point.longitude
-                        })
+                    const currentPoint = {
+                        latitude: point.latitude,
+                        longitude: point.longitude
                     }
 
-                    prevPoint.current = { latitude: point.latitude, longitude: point.longitude }
+                    if (prevPoint.current) {
+                        addedDistance += haversineDistance(
+                            prevPoint.current,
+                            currentPoint
+                        )
+                    }
 
+                    prevPoint.current = currentPoint
+                    processedId = point.id
                 }
 
-                if (addedDistance > 0) {
-                    const store = useActivityStatsStore.getState()
+                if (cancelled) return
 
-                    store.setStats({
-                        distance: store.stats.distance + addedDistance
-                    })
-                }
+                const store = useActivityStatsStore.getState()
+                const newDistance = store.stats.distance + addedDistance
 
-                calculateMaxSpeed();
-                calculateAveragePace();
-                await fetchAndCalculateElevation();
+                await saveLastLoadedLocationIdAndDistance(activityId, { distance: newDistance, lastProcessedPointId: processedId })
+
+                if (cancelled) return
+
+                lastLoadedId.current = processedId
+
+                store.setStats({
+                    distance: newDistance
+                })
+
+                calculateMaxSpeed()
+                calculateAveragePace()
+                await fetchAndCalculateElevation()
+
+                if (cancelled) return
+
                 calculateAverageSpeed()
-
             }
             catch (error) {
-
+                console.error('Route polling failed:', error)
             }
+
             finally {
                 isFetching.current = false
             }
         }
 
         loadRoute()
+
         const interval = setInterval(loadRoute, 2000)
 
         return () => {
+            cancelled = true
             clearInterval(interval)
+            prevPoint.current = null
         }
-    }, [isRecording, isPaused])
+
+    }, [isRecording, isPaused, isRouteRestored])
 
 
 
