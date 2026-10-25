@@ -1,5 +1,5 @@
 import { colors } from "@/constants/theme"
-import { stopActivity } from "@/services/activity/activityService"
+import { discardActivity } from "@/services/activity/activityService"
 import { storeResumeActivity } from "@/services/ActivityPauseService"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { useLocationStore } from "@/store/locationStore"
@@ -15,7 +15,7 @@ export default function LessActivityModal() {
         try {
 
             setIsLoading(true)
-            await stopActivity()
+            await discardActivity()
             useLocationStore.getState().setShowActivityPointModal(false)
         }
         finally {

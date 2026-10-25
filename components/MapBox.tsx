@@ -1,3 +1,4 @@
+import { colors } from "@/constants/theme";
 import { getActivity, saveLastLoadedLocationIdAndDistance } from "@/database/activities";
 import { getLocationPointsUpToId, getNewLocationPointsById } from "@/database/locationPoints";
 import { useCompassDirection } from "@/hooks/useCompassDirection";
@@ -6,7 +7,6 @@ import { getCurrentLocation, stopWatchingLocation } from "@/services/locationSer
 import { networkStatus } from "@/services/networkService";
 import { useActivityPauseStore } from "@/store/ActivityPauseStore";
 import { useActivityStatsStore } from "@/store/ActivityStatsStore";
-import { useActivityStore } from "@/store/ActivityStore";
 import { useLocationStore } from "@/store/locationStore";
 import { getCurrentActivityId } from "@/utils/activity";
 import { calculateAveragePace, calculateAverageSpeed, calculateMaxSpeed, fetchAndCalculateElevation } from "@/utils/calculateActivityStats";
@@ -16,7 +16,7 @@ import haversineDistance from "haversine-distance";
 import { AnimatePresence } from "moti";
 import { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { View, XStack } from "tamagui";
+import { Image, View, XStack } from "tamagui";
 import ActivityStats from "./ActivityStats";
 import PauseButton from "./buttons/PauseButton";
 import ResumeButton from "./buttons/ResumeButton";
@@ -43,18 +43,10 @@ export default function MapBox() {
     )
 
 
-    const setStats = useActivityStatsStore(
-        (state) => state.setStats
-    )
-
     const clearCoordinates = useLocationStore(state => state.clearRoute)
 
     const addCoordinate = useLocationStore(
         (state) => state.addRouteCoordinate
-    )
-
-    const activityId = useActivityStore(
-        (state) => state.activityId
     )
 
     useCompassDirection()
@@ -346,7 +338,7 @@ export default function MapBox() {
 
         loadRoute()
 
-        const interval = setInterval(loadRoute, 2000)
+        const interval = setInterval(loadRoute, 1000)
 
         return () => {
             cancelled = true
@@ -379,16 +371,15 @@ export default function MapBox() {
                         ref={cameraRef}
                         initialViewState={{
                             center: [
-                                currentLocation?.longitude ??
-                                72.8777,
-                                currentLocation?.latitude ??
-                                19.0760,
+                                currentLocation?.longitude ?? 72.8777,
+                                currentLocation?.latitude ?? 19.0760,
                             ],
                             zoom: 19,
                         }}
+                        minZoom={3}
+                        maxZoom={19}
                         trackUserLocation="course"
                     />
-
 
                     {routeCoordinates.length > 1 && (
                         <GeoJSONSource
@@ -412,51 +403,59 @@ export default function MapBox() {
                     )}
 
 
-                    {startPoint && (
-                        <Marker
-                            id="start-point"
-                            lngLat={[
-                                startPoint.longitude,
-                                startPoint.latitude,
-                            ]}
-                        >
-                            <View
-                                width={20}
-                                height={20}
-                                borderRadius={10}
-                                backgroundColor="green"
-                                borderWidth={3}
-                                borderColor="white"
-                            />
+                    {isRecording && (
+                        <>
+                            {startPoint && (
+                                <Marker
+                                    id="start-point"
+                                    lngLat={[
+                                        startPoint.longitude,
+                                        startPoint.latitude,
+                                    ]}
+                                >
+                                    <View
+                                        borderColor={colors.primaryWhite}
+                                        borderWidth={2}
+                                        borderRadius="50%"
+                                    >
+                                        <Image
+                                            width={20}
+                                            height={20}
+                                            src={require("../assets/icons/flag.png")}
+                                        />
+                                    </View>
+                                </Marker>
+                            )}
 
-                        </Marker>
+                            {endPoint && (
+                                <Marker
+                                    id="end-point"
+                                    lngLat={[
+                                        endPoint.longitude,
+                                        endPoint.latitude,
+                                    ]}
+                                >
+                                    <View
+                                        width={20}
+                                        height={20}
+                                        borderRadius={10}
+                                        backgroundColor="red"
+                                        borderWidth={3}
+                                        borderColor="white"
+                                    />
+                                </Marker>
+                            )}
+                        </>
                     )}
 
 
-                    {endPoint && (
-                        <Marker
-                            id="end-point"
-                            lngLat={[
-                                endPoint.longitude,
-                                endPoint.latitude,
-                            ]}
-                        >
-                            <View
-                                width={20}
-                                height={20}
-                                borderRadius={10}
-                                backgroundColor="red"
-                                borderWidth={3}
-                                borderColor="white"
-                            />
-                        </Marker>
-                    )}
 
-
-                    {!(routeCoordinates.length > 0) &&
+                    {!(routeCoordinates.length) &&
                         <UserLocation
                             animated
+                            accuracy
                             heading
+                            minDisplacement={1}
                         />
                     }
 
@@ -470,30 +469,6 @@ export default function MapBox() {
             </AnimatePresence>
 
 
-            {/* 
-            {
-                isRecording && (
-                    <View position="absolute" bottom={insets.bottom + 20} left={"15%"}>
-                        {
-                            isPaused ? <ResumeButton /> : <PauseButton />
-                        }
-                    </View>
-                )
-            }
-
-            <View position="absolute" bottom={insets.bottom + 10} left={0} right={0} alignItems="center">
-                {
-                    isRecording ? (
-                        <StopButton mapRef={mapRef} />
-                    ) : (
-                        <>
-                            <StartButton lastLoadedId={lastLoadedId} />
-                        </>
-                    )
-                }
-
-
-            </View> */}
             <View position="absolute" justifyContent="center" alignItems="center" bottom={insets.bottom + 20} left={0} right={0}>
 
                 {

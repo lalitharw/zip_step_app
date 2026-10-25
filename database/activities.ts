@@ -94,6 +94,16 @@ export async function completeActivity(activityId: number) {
     return result.changes > 0
 }
 
+export async function cancelledActivity(activityId: number){
+    const result = await db.runAsync(`
+        UPDATE activities
+        SET status = 'cancelled',
+        stopped_at = ?
+        WHERE id = ?
+        `,new Date().toISOString(),activityId)
+    return result.changes > 0
+}
+
 export async function updateInactivityNotificationStatus(activityId: number, value: boolean) {
     await db.runAsync(`
             UPDATE activities
@@ -173,9 +183,9 @@ export const getAllActivitiesOnlyIfLocationPointIsPresent = async (userId: numbe
     return await db.getAllAsync<Activity>(
         `
         SELECT a.* FROM activities a
-        WHERE (SELECT COUNT(*) FROM location_points lp WHERE lp.activity_id = a.id) >= 2
+        WHERE (SELECT COUNT(*) FROM location_points lp WHERE lp.activity_id = a.id) >= 5
         AND a.status = 'completed' AND a.user_id = ?
-        ORDER BY a.id DESC 
+        ORDER BY a.id DESC
         `,
         userId
     );

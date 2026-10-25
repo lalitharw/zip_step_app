@@ -10,7 +10,7 @@ export async function initDatabase() {
             server_id INTEGER NULL,
             client_id TEXT NOT NULL UNIQUE,
             status TEXT NOT NULL DEFAULT 'running'
-            CHECK (status IN ('completed', 'paused', 'running')),
+            CHECK (status IN ('completed', 'paused', 'running','cancelled')),
             started_at TEXT NULL,
             stopped_at TEXT NULL,
             distance INTEGER NULL DEFAULT 0,

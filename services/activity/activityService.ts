@@ -1,4 +1,4 @@
-import { completeActivity, createActivity, getActivity, updateActivityStats, updateImagePath } from "@/database/activities"
+import { cancelledActivity, completeActivity, createActivity, getActivity, updateActivityStats, updateImagePath } from "@/database/activities"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { useActivityStatsStore } from "@/store/ActivityStatsStore"
 import { useActivityStore } from "@/store/ActivityStore"
@@ -74,7 +74,7 @@ export const startActivity = async (userId: number) => {
 export const stopActivity = async () => {
     try {
 
-       
+
         const activityId = await getCurrentActivityId()
 
 
@@ -82,7 +82,7 @@ export const stopActivity = async () => {
             throw new Error("Activity Id not found")
         }
 
-        
+
         stopAccelerometer()
 
         // Reset motion detector
@@ -149,6 +149,67 @@ export const stopActivity = async () => {
         console.error("Stop Activity Error: ", error)
 
         throw error
+    }
+}
+
+
+export const discardActivity = async () => {
+    try {
+        const activityId = await getCurrentActivityId()
+
+        if (!activityId) return
+
+        stopAccelerometer()
+
+        // Reset motion detector
+        motionDectector.reset()
+
+        stopBarometer()
+
+        // Stop GPS tracking
+        await stopLocationTracking()
+
+        const discarded = await cancelledActivity(activityId)
+
+        if(!discarded){
+            throw new Error("Failed to cancel Activity")
+        }
+
+        // Remove persisted activity IDs
+        await deleteCurrentActivityId()
+        await deleteCurrentPauseActivityId()
+
+        // Clear activity store
+        useActivityStore
+            .getState()
+            .setActivityId(null)
+
+        // Stop recording state
+        useLocationStore
+            .getState()
+            .setIsRecording(false)
+
+
+        // clearing location route
+        useLocationStore.getState().clearRoute()
+
+        // Clear pause state
+        useActivityPauseStore
+            .getState()
+            .setIsActivityPaused(false)
+
+        // Clear map path
+        useActivityStore
+            .getState()
+            .deleteMapPath()
+
+
+        await getCurrentLocation()
+
+        return true
+    }
+    catch (error) {
+        console.error("Discard Activity Error: ", error)
     }
 }
 
