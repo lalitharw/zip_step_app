@@ -3,10 +3,10 @@ import { create } from "zustand"
 type Coordinates = {
     longitude: number,
     latitude: number,
-    accuracy? : number | null,
+    accuracy?: number | null,
     altitude?: number | null,
-    speed? : number | null,
-    heading? : number | null
+    speed?: number | null,
+    heading?: number | null
 }
 
 
@@ -33,6 +33,11 @@ type LocationState = {
 
     showResumeModal: boolean
     setShowResumeModal: (value: boolean) => void
+
+    compassHeading: number | null,
+    setCompassHeading: (value: number | null) => void
+
+
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
@@ -73,7 +78,7 @@ export const useLocationStore = create<LocationState>((set) => ({
 
     deleteRouteCoordinate() {
         set({
-            routeCoordinates:[]
+            routeCoordinates: []
         })
     },
 
@@ -97,4 +102,11 @@ export const useLocationStore = create<LocationState>((set) => ({
             showActivityPointModal: value
         })
     },
+
+    compassHeading: null,
+    setCompassHeading(value){
+        set({
+            compassHeading: value
+        })
+    }
 }))

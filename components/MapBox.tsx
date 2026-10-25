@@ -30,9 +30,16 @@ export default function MapBox() {
 
     const insets = useSafeAreaInsets()
 
+    // const compassHeading = useLocationStore(
+    //     (state) => state.compassHeading
+    // );
+
+
     const isRecording = useLocationStore(
         (state) => state.isRecording
     );
+
+    const [mapBearing, setMapBearing] = useState(0);
 
     const isPaused = useActivityPauseStore(state => state.isActivityPaused)
 
@@ -134,6 +141,7 @@ export default function MapBox() {
         }
         startLocationWatcher();
         checkIfActivityIsRunningAndPaused()
+
         return () => {
             stopWatchingLocation();
         };
@@ -366,6 +374,14 @@ export default function MapBox() {
                         bottom: 8,
                         right: 8,
                     }}
+
+                // onRegionIsChanging={(event) => {
+                //     const bearing = event.nativeEvent.bearing;
+
+                //     if (Number.isFinite(bearing)) {
+                //         setMapBearing(bearing);
+                //     }
+                // }}
                 >
                     <Camera
                         ref={cameraRef}
@@ -375,6 +391,7 @@ export default function MapBox() {
                                 currentLocation?.latitude ?? 19.0760,
                             ],
                             zoom: 19,
+                            // pitch: 45
                         }}
                         minZoom={3}
                         maxZoom={19}
@@ -443,6 +460,8 @@ export default function MapBox() {
                                         borderWidth={3}
                                         borderColor="white"
                                     />
+
+                                   
                                 </Marker>
                             )}
                         </>
@@ -450,7 +469,15 @@ export default function MapBox() {
 
 
 
-                    {!(routeCoordinates.length) &&
+                    {(currentLocation && !isRecording) &&
+                        // <PulsingLocationPuck
+                        //     latitude={currentLocation.latitude}
+                        //     longitude={currentLocation.longitude}
+                        //     accuracy={currentLocation.accuracy}
+                        //     heading={compassHeading}
+                        //     rotateWithHeading
+                        //     mapBearing={mapBearing}
+                        // />
                         <UserLocation
                             animated
                             accuracy

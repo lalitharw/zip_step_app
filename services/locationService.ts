@@ -91,7 +91,9 @@ export async function getCurrentLocation() {
             useLocationStore.getState().setCurrentLocation({
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
-                accuracy: location.coords.accuracy
+                accuracy: location.coords.accuracy,
+                speed: location.coords.speed,
+                heading: location.coords.heading
             })
         }
     )
@@ -122,7 +124,8 @@ export async function startLocationTracking() {
         {
 
             accuracy: Location.Accuracy.BestForNavigation,
-            timeInterval: 100,
+            timeInterval: 1000,
+            distanceInterval:1,
             activityType: Location.ActivityType.Fitness,
             pausesUpdatesAutomatically: false,
             foregroundService: {

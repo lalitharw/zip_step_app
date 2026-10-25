@@ -125,7 +125,7 @@ export default function ActivityStats() {
                     <XStack alignItems="center" gap={16}>
                         <YStack flex={1.2}>
                             <XStack alignItems="flex-end" gap={6}>
-                                {/* <Text
+                                <Text
                                     color={colors.primaryWhite}
                                     fontSize={48}
                                     lineHeight={52}
@@ -133,8 +133,8 @@ export default function ActivityStats() {
                                     letterSpacing={-1}
                                 >
                                     {metersToKilometers(stats.distance)}
-                                </Text> */}
-                                <Text
+                                </Text>
+                                {/* <Text
                                     color={colors.primaryWhite}
                                     fontSize={20}
                                     lineHeight={52}
@@ -142,7 +142,7 @@ export default function ActivityStats() {
                                     letterSpacing={-1}
                                 >
                                     {stats.distance}
-                                </Text>
+                                </Text> */}
                                 <Text color={colors.secondaryWhite} fontSize={16} marginBottom={6}>
                                     km
                                 </Text>

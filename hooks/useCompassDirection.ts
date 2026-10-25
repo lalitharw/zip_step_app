@@ -1,9 +1,9 @@
 
-import { useEffect, useState } from "react";
+import { useLocationStore } from "@/store/locationStore";
+import { useEffect } from "react";
 import CompassHeading from "react-native-compass-heading";
 
 export const useCompassDirection = () => {
-    const [heading, setHeading] = useState(0);
 
     useEffect(() => {
         const degreeUpdateRate = 1;
@@ -14,7 +14,7 @@ export const useCompassDirection = () => {
                 heading: number;
                 accuracy: number;
             }) => {
-                setHeading(heading);
+                useLocationStore.getState().setCompassHeading(heading)
             }
         );
 
@@ -23,5 +23,4 @@ export const useCompassDirection = () => {
         };
     }, []);
 
-    return heading;
 };
