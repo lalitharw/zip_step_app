@@ -6,7 +6,6 @@ export default function MapBottomSheet() {
 
   return (
     <Sheet
-    
       modal
       open={open}
       onOpenChange={setOpen}

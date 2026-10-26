@@ -36,6 +36,8 @@ export default function emailForm() {
             setLoading(true)
 
             const res = await checkEmail(email)
+
+            
     
 
             if (res.success === true) {

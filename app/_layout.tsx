@@ -29,7 +29,7 @@ export default function RootLayout() {
   return (
 
     <SafeAreaProvider>
-      <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
+      <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
         <AuthProvider>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(auth)" />

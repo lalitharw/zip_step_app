@@ -1,5 +1,6 @@
 import GradientBackground from "@/components/GradientBackground"
 import MapBox from "@/components/MapBox"
+import MapBoxNew from "@/components/maps/MapboxNew"
 import { useActivityTimerNew } from "@/hooks/useActivityTimerNew"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { useLocationStore } from "@/store/locationStore"
@@ -11,7 +12,7 @@ export default function index() {
     return (
         <GradientBackground>
             <View style={{ flex: 1 }}>
-                <MapBox />
+                <MapBoxNew/>
             </View>
         </GradientBackground>
     )

@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "Stride Flow",
-    "slug": "stride_flow_app",
+    "name": "Zipstep",
+    "slug": "zip_step",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/android-icon-foreground.png",
-    "scheme": "strideflow",
+    "scheme": "zipstep",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "in.zipstep.app.dev"
     },
     "android": {
       "googleServicesFile": "./google-services.json",
@@ -30,7 +31,7 @@
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION"
       ],
-      "package": "com.anonymous.stride_flow_app"
+      "package": "in.zipstep.app.dev"
     },
     "web": {
       "bundler": "metro",
@@ -43,6 +44,13 @@
       "@react-native-google-signin/google-signin",
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsVersion": "11.23.1"
+        }
+      ],
+      "@rnmapbox/navigation",
       [
         "expo-file-system",
         {
