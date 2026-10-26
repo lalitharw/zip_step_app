@@ -1,5 +1,4 @@
 import GradientBackground from "@/components/GradientBackground"
-import MapBox from "@/components/MapBox"
 import MapBoxNew from "@/components/maps/MapboxNew"
 import { useActivityTimerNew } from "@/hooks/useActivityTimerNew"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"

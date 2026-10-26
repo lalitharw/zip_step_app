@@ -1,5 +1,6 @@
 import { useLocationStore } from "@/store/locationStore"
 import { LOCATION_TASK_NAME } from "@/tasks/locationTasks"
+import logger from "@/utils/logging/logger"
 import * as Location from "expo-location"
 
 

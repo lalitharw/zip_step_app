@@ -80,7 +80,6 @@ TaskManager.defineTask(
                 heading
             } = location.coords;
 
-            logger.info("GPS", "", location.coords)
 
             // accuracy check
             const maxAcc = lastLocationPoint ? MAX_ACCURACY_M : MAX_FIRST_POINT_ACCURACY_M
