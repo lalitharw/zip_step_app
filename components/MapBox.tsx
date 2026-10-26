@@ -461,7 +461,6 @@ export default function MapBox() {
                                         borderColor="white"
                                     />
 
-                                   
                                 </Marker>
                             )}
                         </>
