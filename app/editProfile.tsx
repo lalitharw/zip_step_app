@@ -1,3 +1,4 @@
+import BackButton from "@/components/buttons/BackButton";
 import GradientBackground from "@/components/GradientBackground";
 import InputComponent from "@/components/Input";
 import { useAuth } from "@/context/AuthContext";
@@ -46,6 +47,7 @@ export default function editProfile() {
     return (
         <GradientBackground>
             <SafeAreaView style={{ flex: 1 }}>
+                <BackButton top={60}/>
                 <YStack padding={20} paddingVertical={40}>
                     <YStack gap={"$5"}>
                         <XStack justifyContent="center">

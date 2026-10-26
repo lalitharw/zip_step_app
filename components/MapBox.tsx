@@ -25,6 +25,7 @@ import StopButton from "./buttons/StopButton";
 import GpsOffModal from "./modals/GpsOffModal";
 import LessActivityModal from "./modals/LessActivityModal";
 import ResumeModal from "./modals/resumeModal";
+import MapBottomSheet from "./bottom_sheet/mapBottomSheet";
 
 export default function MapBox() {
 
@@ -436,8 +437,8 @@ export default function MapBox() {
                                         borderRadius="50%"
                                     >
                                         <Image
-                                            width={20}
-                                            height={20}
+                                            width={15}
+                                            height={15}
                                             src={require("../assets/icons/flag.png")}
                                         />
                                     </View>
@@ -521,6 +522,7 @@ export default function MapBox() {
             <ResumeModal isVisible={showResumeModal} />
             <GpsOffModal isVisible={isGpsOff} />
             <LessActivityModal />
+            <MapBottomSheet/>
 
         </View >
     );

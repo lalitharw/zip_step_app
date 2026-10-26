@@ -8,7 +8,7 @@ import { router } from "expo-router"
 import LottieView from "lottie-react-native"
 import { useCallback, useEffect, useState } from "react"
 import { FlatList, RefreshControl } from "react-native"
-import { ScrollView, Text, View, YStack } from "tamagui"
+import { Button, ScrollView, Text, View, YStack } from "tamagui"
 
 
 export default function index() {
@@ -122,7 +122,7 @@ return (
                                     No Data Found
                                 </Text>
 
-                                <Text
+                                {/* <Text
                                     onPress={() => router.push({ pathname: "/(tabs)" })}
                                     fontSize={"$4"}
                                     fontWeight={"600"}
@@ -136,7 +136,9 @@ return (
                                     pressStyle={{ opacity: 0.8, scale: 0.97 }}
                                 >
                                     Create Activity
-                                </Text>
+                                </Text> */}
+
+                                <Button marginTop={20} onPress={() => router.push("/(tabs)")}  color={colors.primaryBlack}>Create Activity</Button>
                             </YStack>
                         </ScrollView>
                     )
