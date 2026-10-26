@@ -24,6 +24,7 @@
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@rnmapbox/maps": "^10.3.11",
+    "@rnmapbox/navigation": "^0.1.0-alpha.1",
     "@tamagui/config": "^2.4.5",
     "@tamagui/linear-gradient": "^2.4.5",
     "axios": "^1.18.1",
