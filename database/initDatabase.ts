@@ -1,6 +1,8 @@
 import * as SQLite from "expo-sqlite";
 
-export const db = SQLite.openDatabaseSync("stride_flow.db")
+export const db = SQLite.openDatabaseSync("stride_flow.db",{
+    enableChangeListener:true
+})
 
 export async function initDatabase() {
     await db.execAsync(`

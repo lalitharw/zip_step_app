@@ -26,6 +26,7 @@ import LessActivityModal from "../modals/LessActivityModal"
 import ResumeModal from "../modals/resumeModal"
 import { useCheckIfActivityRunning } from "@/hooks/useCheckIfActivityRunning"
 import { useIfGpsServiceIsDisabled } from "@/hooks/useIfGpsServiceIsEnabled"
+import * as SQLite from "expo-sqlite"
 
 
 export default function MapBoxNew() {
@@ -162,94 +163,95 @@ export default function MapBoxNew() {
 
         let cancelled = false
 
-        const loadRoute = async () => {
-            if (isFetching.current) return
+        // const loadRoute = async () => {
+        const subscription = SQLite.addDatabaseChangeListener(async(event) => {
+            if (event.tableName === "location_points") {
+                if (isFetching.current) return
 
-            isFetching.current = true
+                isFetching.current = true
 
-            try {
-                const activityId = await getCurrentActivityId()
+                try {
+                    const activityId = await getCurrentActivityId()
 
-                if (!activityId || cancelled) return
+                    if (!activityId || cancelled) return
 
-                const newPoints = await getNewLocationPointsById(
-                    activityId, lastLoadedId.current ?? 0
-                )
+                    const newPoints = await getNewLocationPointsById(
+                        activityId, lastLoadedId.current ?? 0
+                    )
 
-                if (cancelled || !newPoints.length) return
+                    if (cancelled || !newPoints.length) return
 
-                let addedDistance = 0
-                let processedId = lastLoadedId.current
+                    let addedDistance = 0
+                    let processedId = lastLoadedId.current
 
-                for (const point of newPoints) {
+                    for (const point of newPoints) {
+                        if (cancelled) return
+
+                        addCoordinate({
+                            latitude: point.latitude,
+                            longitude: point.longitude,
+                            accuracy: point.accuracy,
+                            altitude: point.altitude,
+                            speed: point.speed,
+                            heading: point.heading
+                        })
+
+                        const currentPoint = {
+                            latitude: point.latitude,
+                            longitude: point.longitude
+                        }
+
+                        if (prevPoint.current) {
+                            addedDistance += haversineDistance(
+                                prevPoint.current,
+                                currentPoint
+                            )
+                        }
+
+                        prevPoint.current = currentPoint
+                        processedId = point.id
+                    }
+
                     if (cancelled) return
 
-                    addCoordinate({
-                        latitude: point.latitude,
-                        longitude: point.longitude,
-                        accuracy: point.accuracy,
-                        altitude: point.altitude,
-                        speed: point.speed,
-                        heading: point.heading
+                    const store = useActivityStatsStore.getState()
+                    const newDistance = store.stats.distance + addedDistance
+
+                    await saveLastLoadedLocationIdAndDistance(activityId, { distance: newDistance, lastProcessedPointId: processedId })
+
+                    if (cancelled) return
+
+                    lastLoadedId.current = processedId
+
+                    store.setStats({
+                        distance: newDistance
                     })
 
-                    const currentPoint = {
-                        latitude: point.latitude,
-                        longitude: point.longitude
-                    }
+                    calculateMaxSpeed()
+                    calculateAveragePace()
+                    await fetchAndCalculateElevation()
 
-                    if (prevPoint.current) {
-                        addedDistance += haversineDistance(
-                            prevPoint.current,
-                            currentPoint
-                        )
-                    }
+                    if (cancelled) return
 
-                    prevPoint.current = currentPoint
-                    processedId = point.id
+                    calculateAverageSpeed()
+                }
+                catch (error) {
+                    console.error('Route polling failed:', error)
                 }
 
-                if (cancelled) return
-
-                const store = useActivityStatsStore.getState()
-                const newDistance = store.stats.distance + addedDistance
-
-                await saveLastLoadedLocationIdAndDistance(activityId, { distance: newDistance, lastProcessedPointId: processedId })
-
-                if (cancelled) return
-
-                lastLoadedId.current = processedId
-
-                store.setStats({
-                    distance: newDistance
-                })
-
-                calculateMaxSpeed()
-                calculateAveragePace()
-                await fetchAndCalculateElevation()
-
-                if (cancelled) return
-
-                calculateAverageSpeed()
-            }
-            catch (error) {
-                console.error('Route polling failed:', error)
+                finally {
+                    isFetching.current = false
+                }
             }
 
-            finally {
-                isFetching.current = false
-            }
-        }
-
-        loadRoute()
-
-        const interval = setInterval(loadRoute, 1000)
+        })
 
         return () => {
             cancelled = true
-            clearInterval(interval)
+            subscription.remove()
             prevPoint.current = null
         }
+
 
     }, [isRecording, isPaused, isRouteRestored])
 
@@ -261,7 +263,7 @@ export default function MapBoxNew() {
                 styleURL={Mapbox.StyleURL.Outdoors}
                 compassEnabled
                 compassFadeWhenNorth={false}
-                compassPosition={{top: 400, right:16}}
+                compassPosition={{ top: 400, right: 16 }}
                 scaleBarEnabled={false}
                 onCameraChanged={(event) => {
                     if (event.gestures.isGestureActive) {
