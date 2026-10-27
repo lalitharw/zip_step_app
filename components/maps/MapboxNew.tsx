@@ -24,6 +24,8 @@ import StopButton from "../buttons/StopButton"
 import GpsOffModal from "../modals/GpsOffModal"
 import LessActivityModal from "../modals/LessActivityModal"
 import ResumeModal from "../modals/resumeModal"
+import { useCheckIfActivityRunning } from "@/hooks/useCheckIfActivityRunning"
+import { useIfGpsServiceIsDisabled } from "@/hooks/useIfGpsServiceIsEnabled"
 
 
 export default function MapBoxNew() {
@@ -41,7 +43,7 @@ export default function MapBoxNew() {
     const isRecording = useLocationStore.getState().isRecording
     const isPaused = useActivityPauseStore.getState().isActivityPaused
     const showResumeModal = useLocationStore.getState().showResumeModal
-    const isGpsOff = useLocationStore.getState().isGpsOff
+    const isGpsOff = useLocationStore((state) => state.isGpsOff)
     const setIsGpsOff = useLocationStore.getState().setIsGpsOff
     const routePoints = useLocationStore.getState().routeCoordinates
     const clearCoordinates = useLocationStore.getState().clearRoute
@@ -54,7 +56,9 @@ export default function MapBoxNew() {
 
     // hooks
     useCurrentLocation()
+    useCheckIfActivityRunning()
     const cameraRef = useAnimateCamera(currentLocation)
+    useIfGpsServiceIsDisabled()
 
 
     const routeGeoJSON = {

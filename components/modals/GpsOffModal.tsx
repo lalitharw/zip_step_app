@@ -2,9 +2,11 @@ import { colors } from "@/constants/theme";
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { LocationOffline01Icon } from '@hugeicons/core-free-icons';
 import { Modal } from "react-native";
-import { Text, View } from "tamagui";
+import { Button, Text, View } from "tamagui";
+import { openAppDetailsSettings } from "../Linking/openAppDetailsSettings";
 
 export default function GpsOffModal({ isVisible }: { isVisible: boolean }) {
+
     return (
         <Modal
             visible={
@@ -45,6 +47,8 @@ export default function GpsOffModal({ isVisible }: { isVisible: boolean }) {
                         lineHeight={20}>
                         Please turn on Location to continue
                     </Text>
+
+                    <Button onPress={openAppDetailsSettings} marginTop={"$3"} size={"$4"}>Okay</Button>
                 </View>
 
             </View>
