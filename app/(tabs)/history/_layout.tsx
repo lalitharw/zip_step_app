@@ -1,10 +1,12 @@
 import { colors } from "@/constants/theme"
+import { useTheme } from "@/context/ThemeContext"
 import { Stack } from "expo-router"
 
 export default function HistoryLayout() {
+    const {theme} = useTheme()
     return (
         <Stack>
-            <Stack.Screen name="index" options={{ title: "History", headerStyle: { backgroundColor: colors.primaryBlack }, headerTintColor:colors.primaryWhite }} />
+            <Stack.Screen name="index" options={{ title: "History", headerStyle: { backgroundColor: theme.tabBar }, headerTintColor:theme.text }} />
             {/* <Stack.Screen name="[id]"  options={{ headerShown:false, title: "Activity" }}  /> */}
         </Stack>
 

@@ -1,3 +1,4 @@
+import { useTheme } from '@/context/ThemeContext';
 import { useAnimateCamera } from '@/hooks/useAnimateCamera';
 import { resetActivity } from '@/services/activity/activityLifeCycle';
 import { stopActivity } from '@/services/activity/activityService';
@@ -19,6 +20,7 @@ import { Button, Spinner, Text, XStack } from "tamagui";
 export default function StopButton({ mapRef,cameraRef }: { mapRef: RefObject<MapView>,cameraRef: ReturnType<typeof useAnimateCamera> }) {
     const [isLoading, setLoading] = useState<boolean>(false)
     const locationStore = useLocationStore()
+    const {theme} = useTheme()
     const handleStopTracking = async () => {
 
         // if (locationStore.routeCoordinates.length < 5) {
@@ -51,13 +53,13 @@ export default function StopButton({ mapRef,cameraRef }: { mapRef: RefObject<Map
         }
     }
     return (
-        <Button width={"60%"} onPress={handleStopTracking} size={"$6"} disabled={isLoading}>
+        <Button width={"60%"}  onPress={handleStopTracking} size={"$6"} disabled={isLoading}>
 
             {
                 isLoading ?
                     <Spinner
                         size="small"
-                        color="$green10"
+                        color={theme.primary}
                     />
                     :
                     <XStack gap={"$1"} alignItems='center'>

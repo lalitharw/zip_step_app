@@ -11,6 +11,7 @@ import { useState } from 'react';
 import Toast from 'react-native-toast-message';
 import { Button, Spinner } from "tamagui";
 import LocationPermissionModal from '../permissions/LocationPermissionModal';
+import { useTheme } from '@/context/ThemeContext';
 
 
 type StartButtonProps = {
@@ -19,6 +20,7 @@ type StartButtonProps = {
 
 export default function StartButton({ lastLoadedId }: StartButtonProps) {
     const { user } = useAuth()
+    const {theme} = useTheme()
     const [isLoading, setLoading] = useState<boolean>(false)
     const [showBackgroundDisclosure, setShowBackgroundDisclosure] = useState<boolean>(false)
     const [permissionDeniedPermanently, setPermissionDeniedPermanently] = useState<boolean>(false)
@@ -99,7 +101,7 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
                 Toast.show({
                     type: "error",
                     position: "top",
-                    text1: "Background location permission denied",
+                    text1: "Background location permission denied!",
                     text2: "Please allow background location to track your workout.",
                 });
             }
@@ -110,11 +112,11 @@ export default function StartButton({ lastLoadedId }: StartButtonProps) {
 
     return (
         <>
-            <Button onPress={handleStartActivity} width={90} disabled={isLoading} height={90} borderRadius={"50%"}>
+            <Button backgroundColor={theme.buttonPrimary} onPress={handleStartActivity} width={90} disabled={isLoading} height={90} borderRadius={"50%"}>
                 {
                     isLoading ? <Spinner
                         size="small"
-                        color="$green10"
+                        color={theme.spinner}
                     />
                         :
                         <HugeiconsIcon

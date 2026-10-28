@@ -1,6 +1,7 @@
 import GradientBackground from "@/components/GradientBackground";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Keyboard, KeyboardAvoidingView, Platform } from "react-native";
@@ -12,6 +13,7 @@ import { Button, Image, Overlay, Spinner, Text, View, XStack, YStack } from "tam
 export default function Login() {
 
     const { googleLogin } = useAuth();
+    const {theme} = useTheme();
 
 
     const [googleLoading, setGoogleLoading] = useState(false);
@@ -62,14 +64,14 @@ export default function Login() {
                     alignItems="center"
                 >
                     <XStack paddingHorizontal={8} paddingVertical={4}>
-                        <Text fontSize={"$8"} textAlign="center" fontWeight={500} color={colors.primaryWhite}>Sign Up or log in to start exploring</Text>
+                        <Text fontSize={"$8"} textAlign="center" fontWeight={500} color={theme.text}>Sign Up or log in to start exploring</Text>
                     </XStack>
 
                     <Button
                         onPress={handleGoogleLogin}
                         width="100%"
                         height={52}
-                        backgroundColor="white"
+                        backgroundColor={theme.buttonPrimary}
                         borderRadius="$4"
                         borderWidth={0}
                         disabled={googleLoading}
@@ -96,7 +98,7 @@ export default function Login() {
                                 >
                                     <Image width={15} height={15} src={require("../../assets/icons/google.png")} />
 
-                                    <Text fontWeight={"bold"}>
+                                    <Text color={theme.buttonPrimaryText} fontWeight={"bold"}>
                                         Continue with Google
                                     </Text>
                                 </XStack>
@@ -158,7 +160,7 @@ export default function Login() {
 
 
                     <View>
-                        <Text fontSize={11} textAlign="center" color={"#edede996"}>By continuing to use StrideFlow, you agree to our Terms of Service and Privacy Policy. Personal data added to StrideFlow is public by default refer to our </Text>
+                        <Text fontSize={11} textAlign="center" color={theme.secondaryText}>By continuing to use StrideFlow, you agree to our Terms of Service and Privacy Policy. Personal data added to StrideFlow is public by default refer to our </Text>
                     </View>
                 </YStack>
 

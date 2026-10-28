@@ -1,4 +1,4 @@
-import { colors } from "@/constants/theme"
+import { useTheme } from "@/context/ThemeContext"
 import { getActivity, saveLastLoadedLocationIdAndDistance } from "@/database/activities"
 import { getLocationPointsUpToId, getNewLocationPointsById } from "@/database/locationPoints"
 import { useAnimateCamera } from "@/hooks/useAnimateCamera"
@@ -30,8 +30,8 @@ import ResumeModal from "../modals/resumeModal"
 
 
 export default function MapBoxNew() {
-    
 
+    const { theme } = useTheme()
     // Map configuration
     Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN)
     Navigation.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN)
@@ -239,7 +239,7 @@ export default function MapBoxNew() {
                     calculateAverageSpeed()
                 }
                 catch (error) {
-                    console.error('Route polling failed:', error)
+                    console.error('Route polling failed: ', error)
                 }
 
                 finally {
@@ -267,7 +267,7 @@ export default function MapBoxNew() {
                 styleURL={Mapbox.StyleURL.Outdoors}
                 compassEnabled
                 compassFadeWhenNorth={false}
-                compassPosition={{ top: 400, right: 16 }}
+                compassPosition={{ top: 300, right: 16 }}
                 scaleBarEnabled={false}
                 onCameraChanged={(event) => {
                     if (event.gestures.isGestureActive) {
@@ -301,8 +301,8 @@ export default function MapBoxNew() {
                         <LineLayer
                             id="routeLine"
                             style={{
-                                lineColor: '#2563EB',
-                                lineWidth: 5,
+                                lineColor: '#0B1F3A',
+                                lineWidth: 10,
                                 lineCap: 'round',
                                 lineJoin: 'round',
                             }}
@@ -318,7 +318,7 @@ export default function MapBoxNew() {
             </MapView>
 
             <AnimatePresence>
-                {isRecording && <ActivityStats />}
+                <ActivityStats />
             </AnimatePresence>
 
             <View
@@ -347,20 +347,21 @@ export default function MapBoxNew() {
             {!following && (
                 <View
                     position="absolute"
-                    right={10}
-                    bottom="25%"
+                    right={18}
+                    top="355"
                     zIndex={10}
                 >
                     <Button
+                        backgroundColor={theme.background}
                         circular
-                        size="$5"
+                        
                         onPress={() => setFollowing(true)}
                     >
                         <HugeiconsIcon
                             width={25}
                             height={25}
                             icon={Gps01Icon}
-                            color={colors.primaryWhite}
+                            color={theme.text}
                         />
                     </Button>
                 </View>

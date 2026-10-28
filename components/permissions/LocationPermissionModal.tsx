@@ -1,4 +1,5 @@
 import { colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import LottieView from "lottie-react-native";
 import { Linking, Modal } from "react-native";
 import { Button, Text, View, XStack } from "tamagui";
@@ -11,6 +12,7 @@ type LocationPermissionModalProps = {
 }
 
 export default function LocationPermissionModal({ isVisible, onClose, onContinue, permissionDeniedPermanently = false }: LocationPermissionModalProps) {
+    const {theme} = useTheme()
     return (
         <Modal
             visible={
@@ -19,13 +21,13 @@ export default function LocationPermissionModal({ isVisible, onClose, onContinue
             transparent
             animationType="slide"
         >
-            <View flex={1} alignItems="center" backgroundColor={colors.lessOpacityBlack} justifyContent="center" paddingHorizontal={"$5"}>
+            <View flex={1} alignItems="center" backgroundColor={theme.background} justifyContent="center" paddingHorizontal={"$5"}>
                 <View alignItems="center" justifyContent="center" backgroundColor={colors.primaryBlack} borderRadius={"$6"} padding={"$6"} borderWidth={1} borderColor={colors.primaryWhite}>
                     <View
                         width={56}
                         height={56}
                         borderRadius={28}
-                        backgroundColor="$backgroundStrong"
+                        backgroundColor={theme.background}
                         alignItems="center"
                         justifyContent="center"
                         marginBottom="$4"

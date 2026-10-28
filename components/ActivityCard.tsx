@@ -7,6 +7,7 @@ import { Pressable } from "react-native";
 import { Image, Text, View } from "tamagui";
 import StatBlock from "./StatsBlock";
 import SeparatorVertical from "./separators/SeparatorVertical";
+import { useTheme } from "@/context/ThemeContext";
 
 
 type activityCard = {
@@ -19,14 +20,15 @@ type activityCard = {
 
 export default function ActivityCard({ id, map_image_path, started_at, distance, duration }: activityCard) {
     const router = useRouter()
+    const {theme} = useTheme()
 
     return (
         <Pressable onPress={() => router.push(`/(tabs)/history/${id}`)}>
             <View
                 marginBottom={16}
-                backgroundColor={colors.primaryBlack}
+                backgroundColor={theme.background}
                 borderRadius={16}
-                borderColor="rgba(255,255,255,0.08)"
+                borderColor={theme.border}
                 borderWidth={1}
                 shadowColor="#000"
                 shadowOffset={{ width: 0, height: 4 }}
@@ -55,12 +57,12 @@ export default function ActivityCard({ id, map_image_path, started_at, distance,
                         bottom={10}
                         left={12}
                     >
-                        <Text color="white" fontSize={13} fontWeight="600">
+                        <Text color={theme.text} fontSize={13} fontWeight="600">
                             {new Date(started_at ?? 0).toLocaleDateString("en-IN", {
                                 day: "2-digit", month: "short", year: "numeric",
                             })}
                         </Text>
-                        <Text color="rgba(255,255,255,0.7)" fontSize={11}>
+                        <Text color={theme.text} fontSize={11}>
                             {new Date(started_at ?? 0).toLocaleTimeString("en-IN", {
                                 hour: "2-digit", minute: "2-digit", hour12: true,
                             })}

@@ -1,4 +1,5 @@
 import { colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { stopActivity } from "@/services/activity/activityService";
 import { useLocationStore } from "@/store/locationStore";
 import { PlayIcon } from '@hugeicons/core-free-icons';
@@ -10,8 +11,9 @@ import { Button, Spinner, Text, View, XGroup } from "tamagui";
 export default function ResumeModal({ isVisible }: { isVisible: boolean }) {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const setShowResumeModal = useLocationStore((state) => state.setShowResumeModal)
-
+    const { theme } = useTheme()
     const handleDiscardActivity = async () => {
+
         try {
             setIsLoading(true)
             await stopActivity()
@@ -37,7 +39,7 @@ export default function ResumeModal({ isVisible }: { isVisible: boolean }) {
 
 
             <View flex={1} alignItems="center" justifyContent="center" backgroundColor={colors.lessOpacityBlack} paddingHorizontal={"$5"}>
-                <View alignItems="center" justifyContent="center" backgroundColor={colors.primaryBlack} borderRadius={"$6"} padding={"$6"} borderWidth={1} borderColor={colors.primaryWhite}>
+                <View alignItems="center" justifyContent="center" backgroundColor={theme.background} borderRadius={"$6"} padding={"$6"} borderWidth={1} borderColor={colors.primaryWhite}>
                     <View
                         width={56}
                         height={56}
@@ -47,21 +49,21 @@ export default function ResumeModal({ isVisible }: { isVisible: boolean }) {
                         justifyContent="center"
                         marginBottom="$4"
                     >
-                        <Text fontSize={26}><HugeiconsIcon size={40} color={colors.primaryWhite} icon={PlayIcon} /></Text>
+                        <Text fontSize={26}><HugeiconsIcon size={40} color={theme.icon} icon={PlayIcon} /></Text>
                     </View>
                     <Text
-                        color={colors.primaryWhite}
+                        color={theme.text}
                         fontSize={20}
                         fontWeight="700"
                         textAlign="center">Activity in Progress
                     </Text>
                     <Text
-                        color="$color11"
+                        color={theme.secondaryText}
                         fontSize={14}
                         textAlign="center"
                         marginTop="$2"
                         lineHeight={20}>
-                        You have an activity that wasn't finished.
+                        You have an activity that wasn't finished. 
                         {"\n"}
                         Would you like to resume it?
                     </Text>
@@ -71,9 +73,7 @@ export default function ResumeModal({ isVisible }: { isVisible: boolean }) {
                             flex={1}
                             disabled={isLoading}
                             borderRadius="$4"
-                            backgroundColor="transparent"
-                            borderWidth={1}
-                            borderColor="$borderColor"
+                            backgroundColor={theme.buttonDanger}
                             onPress={() => {
                                 handleDiscardActivity()
                             }}
@@ -93,10 +93,11 @@ export default function ResumeModal({ isVisible }: { isVisible: boolean }) {
                         <Button
                             flex={1}
                             borderRadius="$4"
-                            backgroundColor={colors.primaryWhite}
+                           
+                            
                             onPress={() => setShowResumeModal(false)}
                         >
-                            <Text color="black" fontWeight="600">
+                            <Text color={theme.buttonPrimaryText} fontWeight="600">
                                 Resume
                             </Text>
                         </Button>

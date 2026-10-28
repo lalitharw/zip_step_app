@@ -1,7 +1,7 @@
 import GradientBackground from "@/components/GradientBackground";
 import ProfileAvatar from "@/components/ProfileAvatar";
-import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { ChevronDown, Edit04Icon, Logout01Icon, Mail01Icon, UserIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { router } from "expo-router";
@@ -12,6 +12,7 @@ import { Accordion, Button, ScrollView, Separator, Spinner, Text, View, XStack, 
 
 export default function Profile() {
     const { user, logout } = useAuth();
+    const { theme } = useTheme()
 
 
     const [isLoading, setIsLoading] = useState(false)
@@ -36,12 +37,12 @@ export default function Profile() {
                 <YStack paddingHorizontal={20} paddingTop={40} flex={1}>
                     <YStack alignItems="center" gap={"$3"}>
                         <ProfileAvatar date="12" />
-                        <Text fontSize={20} fontWeight={500} color={"white"}>{user?.name}</Text>
-                        <Button onPress={() => router.push("/editProfile")} borderRadius={"$10"} paddingHorizontal={30}><HugeiconsIcon icon={Edit04Icon} />Edit Profile</Button>
-                        <Separator my={14} borderColor={'#22221ffd'} width={"100%"} borderWidth={.5} />
+                        <Text fontSize={20} fontWeight={500} color={theme.text}>{user?.name}</Text>
+                        <Button backgroundColor={theme.buttonPrimary} color={theme.buttonPrimaryText} onPress={() => router.push("/editProfile")} borderRadius={"$10"} paddingHorizontal={30}><HugeiconsIcon icon={Edit04Icon} />Edit Profile</Button>
+                        <Separator my={14} borderColor={theme.separator} width={"100%"} borderWidth={.5} />
                     </YStack>
                     <ScrollView showsVerticalScrollIndicator={false} >
-                        <Text textTransform="capitalize" fontSize={"$5"} color={colors.primaryWhite}>Account</Text>
+                        <Text textTransform="capitalize" fontSize={"$5"} color={theme.text}>Account</Text>
                         <YStack width={"100%"}>
                             <Accordion type="single" collapsible backgroundColor="transparent">
                                 <Accordion.Item value="personal-information" backgroundColor="transparent">
@@ -56,37 +57,37 @@ export default function Profile() {
                                         >
                                             <XStack width={"100%"} alignItems="center" justifyContent="space-between">
                                                 <YStack gap="$1">
-                                                    <Text color={colors.primaryWhite} fontSize="$6">
+                                                    <Text color={theme.text} fontSize="$6">
                                                         Personal Information
                                                     </Text>
-                                                    <Text color={colors.secondaryWhite} fontSize="$2">
+                                                    <Text color={theme.secondaryText} fontSize="$2">
                                                         Name and account details
                                                     </Text>
                                                 </YStack>
                                                 <View>
-                                                    <HugeiconsIcon icon={ChevronDown} size={20} color={colors.primaryWhite} />
+                                                    <HugeiconsIcon icon={ChevronDown} size={20} color={theme.text} />
                                                 </View>
                                             </XStack>
                                         </Accordion.Trigger>
                                     </Accordion.Header>
 
                                     <Accordion.Content padding={0} backgroundColor="transparent">
-                                        <Separator marginBottom={5} borderColor={'#22221ffd'} width={"100%"} borderWidth={.5} />
+                                        <Separator marginBottom={5} borderColor={theme.separator} width={"100%"} borderWidth={.5} />
 
                                         <YStack paddingBottom="$3" gap="$4">
                                             <XStack alignItems="center" gap={"$3"}>
-                                                <HugeiconsIcon size={20} color={colors.secondaryWhite} icon={UserIcon} />
+                                                <HugeiconsIcon size={20} color={theme.secondaryText} icon={UserIcon} />
                                                 <YStack>
-                                                    <Text fontSize={"$5"} color={colors.primaryWhite}>Full name</Text>
-                                                    <Text fontSize={"$2"} color={colors.secondaryWhite}>Edit your name</Text>
+                                                    <Text fontSize={"$5"} color={theme.text}>Full name</Text>
+                                                    <Text fontSize={"$2"} color={theme.secondaryText}>Edit your name</Text>
                                                 </YStack>
                                             </XStack>
 
                                             <XStack alignItems="center" gap={"$3"}>
-                                                <HugeiconsIcon size={20} icon={Mail01Icon} color={colors.secondaryWhite} />
+                                                <HugeiconsIcon size={20} icon={Mail01Icon} color={theme.secondaryText} />
                                                 <YStack>
-                                                    <Text fontSize={"$5"} color={colors.primaryWhite}>Email address</Text>
-                                                    <Text fontSize={"$2"} color={colors.secondaryWhite}>Manage your email</Text>
+                                                    <Text fontSize={"$5"} color={theme.text}>Email address</Text>
+                                                    <Text fontSize={"$2"} color={theme.secondaryText}>Manage your email</Text>
                                                 </YStack>
                                             </XStack>
 
@@ -109,58 +110,58 @@ export default function Profile() {
                                         >
                                             <XStack width={"100%"} alignItems="center" justifyContent="space-between">
                                                 <YStack gap="$1">
-                                                    <Text color={colors.primaryWhite} fontSize="$6">
+                                                    <Text color={theme.text} fontSize="$6">
                                                         Privacy & Security
                                                     </Text>
-                                                    <Text color={colors.secondaryWhite} fontSize="$2">
+                                                    <Text color={theme.secondaryText} fontSize="$2">
                                                         Understand how your data is handled
                                                     </Text>
                                                 </YStack>
                                                 <View>
-                                                    <HugeiconsIcon icon={ChevronDown} size={20} color={colors.primaryWhite} />
+                                                    <HugeiconsIcon icon={ChevronDown} size={20} color={theme.text} />
                                                 </View>
                                             </XStack>
                                         </Accordion.Trigger>
                                     </Accordion.Header>
 
                                     <Accordion.Content padding={0} backgroundColor="transparent">
-                                        <Separator marginBottom={5} borderColor={'#22221ffd'} width={"100%"} borderWidth={.5} />
+                                        <Separator marginBottom={5} borderColor={theme.separator} width={"100%"} borderWidth={.5} />
 
                                         <YStack paddingBottom="$3" gap="$4">
                                             <XStack alignItems="center" gap={"$3"}>
-                                                <HugeiconsIcon size={20} color={colors.secondaryWhite} icon={UserIcon} />
+                                                <HugeiconsIcon size={20} color={theme.secondaryText} icon={UserIcon} />
                                                 <YStack>
-                                                    <Text fontSize={"$5"} color={colors.primaryWhite}>Location & GPS</Text>
-                                                    <Text fontSize={"$2"} color={colors.secondaryWhite}>Learn how StrideFlow uses your location</Text>
+                                                    <Text fontSize={"$5"} color={theme.text}>Location & GPS</Text>
+                                                    <Text fontSize={"$2"} color={theme.secondaryText}>Learn how StrideFlow uses your location</Text>
                                                 </YStack>
                                             </XStack>
 
                                             <XStack alignItems="center" gap={"$3"}>
-                                                <HugeiconsIcon size={20} icon={Mail01Icon} color={colors.secondaryWhite} />
+                                                <HugeiconsIcon size={20} icon={Mail01Icon} color={theme.secondaryText} />
                                                 <YStack>
-                                                    <Text fontSize={"$5"} color={colors.primaryWhite}>Your activity data</Text>
-                                                    <Text fontSize={"$2"} color={colors.secondaryWhite}>Understand how routes and activity history are stored</Text>
+                                                    <Text fontSize={"$5"} color={theme.text}>Your activity data</Text>
+                                                    <Text fontSize={"$2"} color={theme.secondaryText}>Understand how routes and activity history are stored</Text>
                                                 </YStack>
                                             </XStack>
                                             <XStack alignItems="center" gap={"$3"}>
-                                                <HugeiconsIcon size={20} icon={Mail01Icon} color={colors.secondaryWhite} />
+                                                <HugeiconsIcon size={20} icon={Mail01Icon} color={theme.secondaryText} />
                                                 <YStack>
-                                                    <Text fontSize={"$5"} color={colors.primaryWhite}>Privacy Policy</Text>
-                                                    <Text fontSize={"$2"} color={colors.secondaryWhite}>Read how your information is handled</Text>
+                                                    <Text fontSize={"$5"} color={theme.text}>Privacy Policy</Text>
+                                                    <Text fontSize={"$2"} color={theme.secondaryText}>Read how your information is handled</Text>
                                                 </YStack>
                                             </XStack>
                                             <XStack alignItems="center" gap={"$3"}>
-                                                <HugeiconsIcon size={20} icon={Mail01Icon} color={colors.secondaryWhite} />
+                                                <HugeiconsIcon size={20} icon={Mail01Icon} color={theme.secondaryText} />
                                                 <YStack>
-                                                    <Text fontSize={"$5"} color={colors.primaryWhite}>Terms of Service</Text>
-                                                    <Text fontSize={"$2"} color={colors.secondaryWhite}>Review the terms for using StrideFlow</Text>
+                                                    <Text fontSize={"$5"} color={theme.text}>Terms of Service</Text>
+                                                    <Text fontSize={"$2"} color={theme.secondaryText}>Review the terms for using StrideFlow</Text>
                                                 </YStack>
                                             </XStack>
                                             <XStack alignItems="center" gap={"$3"}>
-                                                <HugeiconsIcon size={20} icon={Mail01Icon} color={colors.secondaryWhite} />
+                                                <HugeiconsIcon size={20} icon={Mail01Icon} color={theme.secondaryText} />
                                                 <YStack>
-                                                    <Text fontSize={"$5"} color={colors.primaryWhite}>App Permissions</Text>
-                                                    <Text fontSize={"$2"} color={colors.secondaryWhite}>Manage location and other permissions in device settings</Text>
+                                                    <Text fontSize={"$5"} color={theme.text}>App Permissions</Text>
+                                                    <Text fontSize={"$2"} color={theme.secondaryText}>Manage location and other permissions in device settings</Text>
                                                 </YStack>
                                             </XStack>
 
@@ -169,12 +170,12 @@ export default function Profile() {
                                     </Accordion.Content>
                                 </Accordion.Item>
                             </Accordion>
-                            <Separator my={14} borderColor={'#22221ffd'} width={"100%"} borderWidth={.5} />
-                            <Text textTransform="capitalize" fontSize={"$5"} color={colors.primaryWhite}>Preferences</Text>
+                            <Separator my={14} borderColor={theme.separator} width={"100%"} borderWidth={.5} />
+                            <Text textTransform="capitalize" fontSize={"$5"} color={theme.text}>Preferences</Text>
                         </YStack>
                     </ScrollView>
 
-                    <Separator my={14} borderColor={'#22221ffd'} width={"100%"} borderWidth={.5} />
+                    <Separator my={14} borderColor={theme.separator} width={"100%"} borderWidth={.5} />
                     <XStack onPress={handleLogout} alignItems="center" gap={"$4"}>
 
                         {

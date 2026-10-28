@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { initDatabase } from "@/database/initDatabase";
 import { setUpNotificationChannel } from "@/services/notificationService";
 import tamaguiConfig from "@/tamagui.config";
@@ -29,7 +30,8 @@ export default function RootLayout() {
   return (
 
     <SafeAreaProvider>
-      <TamaguiProvider config={tamaguiConfig} defaultTheme="dark">
+      <TamaguiProvider config={tamaguiConfig} defaultTheme="default">
+        <ThemeProvider>
         <AuthProvider>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(auth)" />
@@ -37,6 +39,7 @@ export default function RootLayout() {
           </Stack>
           <Toast config={toastConfig} />
         </AuthProvider>
+        </ThemeProvider>
       </TamaguiProvider>
     </SafeAreaProvider>
   )

@@ -11,8 +11,8 @@ export default function ProfileAvatar({date}: {
 }) {
   return (
     <YStack
-      width={130}
-      height={130}
+      width={80}
+      height={80}
       alignItems="center"
       justifyContent="center"
     >

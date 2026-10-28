@@ -1,4 +1,5 @@
 import { colors } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { storePauseActivity } from '@/services/ActivityPauseService';
 import { PauseIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
@@ -6,7 +7,7 @@ import { Button, Text, XStack } from "tamagui";
 
 
 export default function PauseButton() {
-
+    const {theme} = useTheme()
     const handlePauseActivity = async () => {
         try {
             await storePauseActivity()
@@ -23,10 +24,10 @@ export default function PauseButton() {
         //     />
         // </Button>
 
-        <Button onPress={handlePauseActivity} size={"$6"}  marginHorizontal={20} >
+        <Button backgroundColor={theme.buttonPrimary} onPress={handlePauseActivity} size={"$6"}  marginHorizontal={20} >
             <XStack width={"100%"} gap={"$2"}  justifyContent='center' alignItems='center'>
                 <HugeiconsIcon
-                    color={colors.primaryBlack}
+                    color={theme.buttonPrimaryText}
                     icon={PauseIcon}
                 />
                 <Text>Pause</Text>
