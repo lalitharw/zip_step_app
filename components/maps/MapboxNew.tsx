@@ -2,7 +2,9 @@ import { colors } from "@/constants/theme"
 import { getActivity, saveLastLoadedLocationIdAndDistance } from "@/database/activities"
 import { getLocationPointsUpToId, getNewLocationPointsById } from "@/database/locationPoints"
 import { useAnimateCamera } from "@/hooks/useAnimateCamera"
+import { useCheckIfActivityRunning } from "@/hooks/useCheckIfActivityRunning"
 import { useCurrentLocation } from "@/hooks/useCurrentLocation"
+import { useIfGpsServiceIsDisabled } from "@/hooks/useIfGpsServiceIsEnabled"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { useActivityStatsStore } from "@/store/ActivityStatsStore"
 import { useLocationStore } from "@/store/locationStore"
@@ -13,6 +15,7 @@ import { HugeiconsIcon } from "@hugeicons/react-native"
 import Mapbox, { Camera, LineLayer, MapView, ShapeSource, UserLocation } from "@rnmapbox/maps"
 import Navigation from "@rnmapbox/navigation"
 import * as Location from "expo-location"
+import * as SQLite from "expo-sqlite"
 import haversineDistance from "haversine-distance"
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, Button, View, XStack } from "tamagui"
@@ -24,12 +27,11 @@ import StopButton from "../buttons/StopButton"
 import GpsOffModal from "../modals/GpsOffModal"
 import LessActivityModal from "../modals/LessActivityModal"
 import ResumeModal from "../modals/resumeModal"
-import { useCheckIfActivityRunning } from "@/hooks/useCheckIfActivityRunning"
-import { useIfGpsServiceIsDisabled } from "@/hooks/useIfGpsServiceIsEnabled"
-import * as SQLite from "expo-sqlite"
 
 
 export default function MapBoxNew() {
+    
+
     // Map configuration
     Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN)
     Navigation.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN)
@@ -52,7 +54,8 @@ export default function MapBoxNew() {
 
     //useRef
     const lastLoadedId = useRef<number>(0)
-    const mapRef = useRef(null)
+    const mapRef = useRef<MapView>(null!)
+
     const isFetching = useRef<boolean>(false)
 
     // hooks
@@ -164,7 +167,7 @@ export default function MapBoxNew() {
         let cancelled = false
 
         // const loadRoute = async () => {
-        const subscription = SQLite.addDatabaseChangeListener(async(event) => {
+        const subscription = SQLite.addDatabaseChangeListener(async (event) => {
             if (event.tableName === "location_points") {
                 if (isFetching.current) return
 
@@ -259,6 +262,7 @@ export default function MapBoxNew() {
     return (
         <View flex={1}>
             <MapView
+                ref={mapRef}
                 style={{ flex: 1 }}
                 styleURL={Mapbox.StyleURL.Outdoors}
                 compassEnabled
@@ -329,7 +333,7 @@ export default function MapBoxNew() {
                         {isPaused ? (
                             <XStack width="100%" alignItems="center" gap="$3">
                                 <ResumeButton />
-                                <StopButton mapRef={mapRef} />
+                                <StopButton mapRef={mapRef} cameraRef={cameraRef} />
                             </XStack>
                         ) : (
                             <PauseButton />

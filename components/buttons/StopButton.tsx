@@ -1,3 +1,4 @@
+import { useAnimateCamera } from '@/hooks/useAnimateCamera';
 import { resetActivity } from '@/services/activity/activityLifeCycle';
 import { stopActivity } from '@/services/activity/activityService';
 import { stopLocationTracking } from '@/services/locationService';
@@ -7,30 +8,30 @@ import { saveMapSnapShot } from '@/utils/maps/saveMapSnapShot';
 import { mapSnapShot } from '@/utils/mapSnapShot';
 import { StopIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
+import {  MapView } from '@rnmapbox/maps';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useState, type RefObject } from 'react';
 import { Button, Spinner, Text, XStack } from "tamagui";
 
 
-type StopButtonProps = {
-    mapRef: Parameters<typeof mapSnapShot>[0]
-}
 
-export default function StopButton({ mapRef }: StopButtonProps) {
+
+export default function StopButton({ mapRef,cameraRef }: { mapRef: RefObject<MapView>,cameraRef: ReturnType<typeof useAnimateCamera> }) {
     const [isLoading, setLoading] = useState<boolean>(false)
     const locationStore = useLocationStore()
     const handleStopTracking = async () => {
 
-        if (locationStore.routeCoordinates.length < 5) {
-            locationStore.setShowActivityPointModal(true)
-            return
-        }
+        // if (locationStore.routeCoordinates.length < 5) {
+        //     locationStore.setShowActivityPointModal(true)
+        //     return
+        // }
+        if (isLoading) return
+        setLoading(true)
 
         try {
             const activityId = await getCurrentActivityId();
             await stopLocationTracking()
-            setLoading(true)
-            await mapSnapShot(mapRef)
+            await mapSnapShot(mapRef,cameraRef)
             await saveMapSnapShot()
             await stopActivity()
             await resetActivity()

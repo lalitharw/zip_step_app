@@ -183,7 +183,7 @@ export const getAllActivitiesOnlyIfLocationPointIsPresent = async (userId: numbe
     return await db.getAllAsync<Activity>(
         `
         SELECT a.* FROM activities a
-        WHERE (SELECT COUNT(*) FROM location_points lp WHERE lp.activity_id = a.id) >= 5
+        WHERE (SELECT COUNT(*) FROM location_points lp WHERE lp.activity_id = a.id) >= 0
         AND a.status = 'completed' AND a.user_id = ?
         ORDER BY a.id DESC
         `,

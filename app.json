@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Zipstep",
-    "slug": "zip_step",
+    "slug": "stride_flow_app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/android-icon-foreground.png",
