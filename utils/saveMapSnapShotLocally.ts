@@ -19,7 +19,6 @@ export const saveMapSnapShotLocally = async(imagePath:string) => {
        })
 
        useActivityStore.getState().setMapPath(destination)
-       logger.info("Map Destination","",destination)
        return destination
         
     }

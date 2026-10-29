@@ -9,7 +9,7 @@ type CameraRef = RefObject<Camera | null>
 
 export const mapSnapShot = async (mapRef: MapRef, cameraRef: CameraRef) => {
     const routePoints = useLocationStore.getState().routeCoordinates
-    if (!mapRef.current || !cameraRef.current) return
+    if (!mapRef.current || !cameraRef.current || !routePoints.length )  return
 
     try {
         const longitudes = routePoints.map(point => point.longitude)
@@ -25,7 +25,7 @@ export const mapSnapShot = async (mapRef: MapRef, cameraRef: CameraRef) => {
             [48, 48, 48, 48],
             500
         )
-        await new Promise(resolve => setTimeout(resolve, 600))
+        await new Promise(resolve => setTimeout(resolve, 800))
         const imagePath = await mapRef.current.takeSnap(true)
         
         if(imagePath){

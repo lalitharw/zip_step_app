@@ -7,7 +7,7 @@ export default function HistoryLayout() {
     return (
         <Stack>
             <Stack.Screen name="index" options={{ title: "History", headerStyle: { backgroundColor: theme.tabBar }, headerTintColor:theme.text }} />
-            {/* <Stack.Screen name="[id]"  options={{ headerShown:false, title: "Activity" }}  /> */}
+            <Stack.Screen name="[id]"  options={{ headerShown:false, title: "Activities" }}  />
         </Stack>
 
     )

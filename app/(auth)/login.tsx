@@ -121,7 +121,7 @@ export default function Login() {
                         />
 
                         <Text
-                            color="#edede9"
+                            color={theme.text}
                             fontSize="$4"
                         >
                             or
@@ -130,7 +130,7 @@ export default function Login() {
                         <YStack
                             flex={1}
                             height={1}
-                            backgroundColor="#edede93e"
+                            backgroundColor={theme.separator}
                         />
                     </XStack>
 

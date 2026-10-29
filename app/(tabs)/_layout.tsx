@@ -44,7 +44,7 @@ export default function TabLayout() {
                     ),
                 }} />
                 <Tabs.Screen name="history" options={{
-                    title: "Activity",
+                    title: "Activities",
                     tabBarIcon: ({ color, size }) => (
                         <HugeiconsIcon
                             icon={Task01Icon}

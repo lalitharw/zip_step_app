@@ -3,14 +3,14 @@ import DeleteButton from "@/components/buttons/DeleteButton";
 import GradientBackground from "@/components/GradientBackground";
 import DeleteModal from "@/components/modals/DeleteModal";
 import ActivityCardDetailSkeleton from "@/components/skeleton_loading/ActivityCardDetailSkeleton";
-import ReplayRouteButton from "@/components/ui/ReplayRouteUI";
 import { colors } from "@/constants/theme";
 import { Activity, getActivity } from "@/database/activities";
 import { getLocationPoints } from "@/database/locationPoints";
 import { useReplayRouteStore } from "@/store/ReplayRouteStore";
 import { metersToKilometers } from "@/utils/dataConversion";
 import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
-// import { Camera, CameraRef, GeoJSONSource, Layer, Map } from "@maplibre/maplibre-react-native";
+import Mapbox, { Camera, LineLayer, MapView, ShapeSource } from "@rnmapbox/maps";
+import Navigation from "@rnmapbox/navigation";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, View } from "tamagui";
@@ -18,11 +18,17 @@ import { ScrollView, Text, View } from "tamagui";
 
 export default function ActivityDetail() {
 
+    // mapbox configuration
+    Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN)
+    Navigation.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN)
+
     const { id } = useLocalSearchParams<{ id: string }>()
-    // const cameraRef = useRef<CameraRef>(null)
+    const cameraRef = useRef<Camera>(null)
     const [activity, setActivity] = useState<Activity | null>(null)
     const [loading, setLoading] = useState<boolean>(false)
     const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false)
+    const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false)
+
 
     const isReplaying = useReplayRouteStore((state) => state.isReplaying)
     const replayCoordinates = useReplayRouteStore((state) => state.replayRoute)
@@ -69,18 +75,40 @@ export default function ActivityDetail() {
 
 
     const routeBounds = useMemo(() => {
-        if (locationPoints.length === 0) return null
+        if (!locationPoints.length) return
 
         const longitudes = locationPoints.map((p) => p.longitude)
         const latitudes = locationPoints.map((p) => p.latitude)
-        //  { top: 30, right: 30, bottom: 30, left: 30 },
-        return [
-            Math.min(...longitudes),
-            Math.min(...latitudes),
-            Math.max(...longitudes),
-            Math.max(...latitudes)
-        ]
+
+
+        return {
+            northeast: [
+                Math.max(...longitudes),
+                Math.max(...latitudes)
+            ] as [number, number],
+            southwest: [
+                Math.min(...longitudes),
+                Math.min(...latitudes)
+            ] as [number, number]
+        }
+
     }, [locationPoints])
+
+
+    useEffect(() => {
+        console.log("Map Loaded: ", isMapLoaded)
+        if (!locationPoints.length || !isMapLoaded || !routeBounds) return
+
+        cameraRef.current?.fitBounds(
+            routeBounds.northeast,
+            routeBounds?.southwest,
+            [25, 35, 25, 35],
+            1000
+        )
+    }, [isMapLoaded, routeBounds, locationPoints.length])
+
+
+
 
 
 
@@ -157,175 +185,153 @@ export default function ActivityDetail() {
     }
 
     return (
-        // <GradientBackground>
-        //     <View flex={1} backgroundColor={SHEET_BG}>
+        <GradientBackground>
+
+            <View flex={1} backgroundColor={SHEET_BG}>
 
 
-        //         <View height={400} overflow="hidden">
-        //             <BackButton url={"/history"} top={50} />
-        //             <DeleteButton top={50}  onPressDelete={() => { setOpenDeleteModal(true); }}/>
-        //             <Map
-        //                 style={{ flex: 1 }}
-        //                 mapStyle={`https://api.maptiler.com/maps/streets-v2-dark/style.json?key=${process.env.EXPO_PUBLIC_MAPTILER_API_KEY}`}
-        //                 logo={false}
-        //                 attribution={false}
-        //                 compass={false}
-        //             >
-        //                 {(!isReplaying && locationPoints.length > 0) && (
-        //                     <>
-        //                         <Camera
-        //                             ref={cameraRef}
-        //                             center={[locationPoints[0].longitude, locationPoints[0].latitude]}
-        //                             zoom={16}
-        //                         />
-        //                         <GeoJSONSource id="raw-route" data={routeGeoJSON}>
-        //                             <Layer
-        //                                 type="line"
-        //                                 id="raw-route-glow"
-        //                                 style={{ lineColor: ACCENT, lineWidth: 14, lineOpacity: 0.18, lineBlur: 6, lineCap: "round", lineJoin: "round" }}
-        //                             />
-        //                             <Layer
-        //                                 type="line"
-        //                                 id="raw-route-line"
-        //                                 style={{ lineColor: "#3CC4F0", lineWidth: 5, lineCap: "round", lineJoin: "round" }}
-        //                             />
-        //                         </GeoJSONSource>
-        //                     </>
-        //                 )}
-
-        //                 {(isReplaying && replayCoordinates.length >= 2) && (
-        //                     <>
-        //                         <Camera ref={cameraRef} zoom={17} />
-        //                         <GeoJSONSource id="replay-route" data={replayRouteGeoJSON}>
-        //                             <Layer
-        //                                 type="line"
-        //                                 id="replay-route-glow"
-        //                                 style={{ lineColor: ACCENT, lineWidth: 14, lineOpacity: 0.18, lineBlur: 6, lineCap: "round", lineJoin: "round" }}
-        //                             />
-        //                             <Layer
-        //                                 type="line"
-        //                                 id="replay-route-line"
-        //                                 style={{ lineColor: "#3CC4F0", lineWidth: 5, lineCap: "round", lineJoin: "round" }}
-        //                             />
-        //                         </GeoJSONSource>
-        //                     </>
-        //                 )}
-        //             </Map>
+                <View height={400} overflow="hidden">
+                    <BackButton url={"/history"} top={50} />
+                    <DeleteButton top={50} onPressDelete={() => { setOpenDeleteModal(true); }} />
 
 
-        //             <View position="absolute" right={20} bottom={44}>
-        //                 <ReplayRouteButton cameraRef={cameraRef} locationPoints={locationPoints} />
-        //             </View>
-        //         </View>
-
-        //         <ScrollView
-        //             style={{
-        //                 marginTop: -28,
-        //                 backgroundColor: SHEET_BG,
-        //                 borderTopLeftRadius: 32,
-        //                 borderTopRightRadius: 32,
-        //             }}
-        //             showsVerticalScrollIndicator={false}
-        //         >
-        //             <View paddingHorizontal={20} paddingTop={12} paddingBottom={40} gap={14}>
-
-
-        //                 <View alignSelf="center" width={40} height={4} borderRadius={2} backgroundColor="rgba(255,255,255,0.18)" />
-
-
-        //                 <View paddingTop={14} paddingBottom={6} gap={2}>
-        //                     <Text color={colors.secondaryWhite} fontSize={14}>
-        //                         {fmtDate(activity?.started_at)}
-        //                     </Text>
-        //                     <View flexDirection="row" alignItems="flex-end" gap={8}>
-        //                         <Text
-        //                             color={colors.primaryWhite}
-        //                             fontSize={80}
-        //                             lineHeight={84}
-        //                             fontWeight="800"
-        //                             letterSpacing={-3}
-        //                         >
-        //                             {metersToKilometers(activity?.distance ?? 0)}
-        //                         </Text>
-        //                         <Text color={ACCENT} fontSize={24} fontWeight="700" marginBottom={12}>
-        //                             km
-        //                         </Text>
-        //                     </View>
-        //                 </View>
+                    <MapView onDidFinishLoadingMap={() => setIsMapLoaded(true)} style={{ flex: 1 }} scaleBarEnabled={false} styleURL={Mapbox.StyleURL.Outdoors}>
+                        <Camera
+                            ref={cameraRef}
+                            defaultSettings={{
+                                centerCoordinate: locationPoints.length
+                                    ? [
+                                        locationPoints[0].longitude,
+                                        locationPoints[0].latitude,
+                                    ]
+                                    : [72.973068, 19.2242275],
+                                    
+                            }}
+                            minZoomLevel={3}
+                            maxZoomLevel={18}
+                        />
+                        <ShapeSource id="rawroutesource" shape={routeGeoJSON}>
+                            <LineLayer id="raw-route-line" style={{
+                                lineColor: '#293a0b',
+                                lineWidth: 6,
+                                lineCap: 'round',
+                                lineJoin: 'round',
+                            }} />
+                        </ShapeSource>
+                    </MapView>
 
 
-        //                 <View flexDirection="row" gap={12}>
-        //                     <Metric
-        //                         label="Duration"
-        //                         value={activity?.duration ? milliSecondsToMinutes(activity.duration) : "--"}
-        //                         unit="min"
-        //                     />
-        //                     <Metric
-        //                         label="Avg speed"
-        //                         value={activity?.average_speed?.toFixed(1) ?? "--"}
-        //                         unit="km/h"
-        //                     />
-        //                 </View>
+                    {/* <View position="absolute" right={20} bottom={44}>
+                        <ReplayRouteButton cameraRef={cameraRef} locationPoints={locationPoints} />
+                    </View> */}
+                </View>
 
-        //                 <View flexDirection="row" gap={12}>
-        //                     <Metric
-        //                         label="Max speed"
-        //                         value={((activity?.max_speed ?? 0) * 3.6).toFixed(1)}
-        //                         unit="km/h"
-        //                     />
-        //                     <Metric
-        //                         label="Avg pace"
-        //                         value={metersToKilometers(activity?.average_pace ?? 0)}
-        //                         unit="/km"
-        //                     />
-        //                 </View>
-
-        //                 <View flexDirection="row" gap={12}>
-        //                     <Metric
-        //                         label="Elevation gained"
-        //                         value={activity?.elevation_gain?.toFixed(0) ?? "--"}
-        //                         unit="m"
-        //                     />
-        //                     <Metric
-        //                         label="Elevation loss"
-        //                         value={activity?.elevation_loss?.toFixed(0) ?? "--"}
-        //                         unit="m"
-        //                     />
-        //                 </View>
+                <ScrollView
+                    style={{
+                        marginTop: -28,
+                        backgroundColor: SHEET_BG,
+                        borderTopLeftRadius: 32,
+                        borderTopRightRadius: 32,
+                    }}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View paddingHorizontal={20} paddingTop={12} paddingBottom={40} gap={14}>
 
 
-        //                 <View
-        //                     backgroundColor={TILE_BG}
-        //                     borderRadius={20}
-        //                     borderWidth={1}
-        //                     borderColor={TILE_BORDER}
-        //                     padding={18}
-        //                     marginTop={4}
-        //                 >
-        //                     <View flexDirection="row" alignItems="center">
-        //                         <TimeStop label="Started" ms={activity?.started_at ?? "--"} align="flex-start" />
+                        <View alignSelf="center" width={40} height={4} borderRadius={2} backgroundColor="rgba(255,255,255,0.18)" />
 
-        //                         <View flex={1.2} flexDirection="row" alignItems="center" paddingHorizontal={8}>
-        //                             <View width={9} height={9} borderRadius={5} backgroundColor={ACCENT} />
-        //                             <View flex={1} height={2} backgroundColor="rgba(19,151,195,0.35)" />
-        //                             <View width={9} height={9} borderRadius={5} borderWidth={2} borderColor={ACCENT} />
-        //                         </View>
 
-        //                         <TimeStop label="Stopped" ms={activity?.stopped_at ?? "--"} align="flex-end" />
-        //                     </View>
-        //                 </View>
-        //             </View>
-        //         </ScrollView>
-        //     </View>
-            
+                        <View paddingTop={14} paddingBottom={6} gap={2}>
+                            <Text color={colors.secondaryWhite} fontSize={14}>
+                                {fmtDate(activity?.started_at)}
+                            </Text>
+                            <View flexDirection="row" alignItems="flex-end" gap={8}>
+                                <Text
+                                    color={colors.primaryWhite}
+                                    fontSize={80}
+                                    lineHeight={84}
+                                    fontWeight="800"
+                                    letterSpacing={-3}
+                                >
+                                    {metersToKilometers(activity?.distance ?? 0)}
+                                </Text>
+                                <Text color={ACCENT} fontSize={24} fontWeight="700" marginBottom={12}>
+                                    km
+                                </Text>
+                            </View>
+                        </View>
 
-        //     {
-        //        <DeleteModal visible={openDeleteModal} onClose={() => setOpenDeleteModal(false)} />
-        //     }
 
-            
-        // </GradientBackground>
-        <>
-        </>
+                        <View flexDirection="row" gap={12}>
+                            <Metric
+                                label="Duration"
+                                value={activity?.duration ? milliSecondsToMinutes(activity.duration) : "--"}
+                                unit="min"
+                            />
+                            <Metric
+                                label="Avg speed"
+                                value={activity?.average_speed?.toFixed(1) ?? "--"}
+                                unit="km/h"
+                            />
+                        </View>
+
+                        <View flexDirection="row" gap={12}>
+                            <Metric
+                                label="Max speed"
+                                value={((activity?.max_speed ?? 0) * 3.6).toFixed(1)}
+                                unit="km/h"
+                            />
+                            <Metric
+                                label="Avg pace"
+                                value={metersToKilometers(activity?.average_pace ?? 0)}
+                                unit="/km"
+                            />
+                        </View>
+
+                        <View flexDirection="row" gap={12}>
+                            <Metric
+                                label="Elevation gained"
+                                value={activity?.elevation_gain?.toFixed(0) ?? "--"}
+                                unit="m"
+                            />
+                            <Metric
+                                label="Elevation loss"
+                                value={activity?.elevation_loss?.toFixed(0) ?? "--"}
+                                unit="m"
+                            />
+                        </View>
+
+
+                        <View
+                            backgroundColor={TILE_BG}
+                            borderRadius={20}
+                            borderWidth={1}
+                            borderColor={TILE_BORDER}
+                            padding={18}
+                            marginTop={4}
+                        >
+                            <View flexDirection="row" alignItems="center">
+                                <TimeStop label="Started" ms={activity?.started_at ?? "--"} align="flex-start" />
+
+                                <View flex={1.2} flexDirection="row" alignItems="center" paddingHorizontal={8}>
+                                    <View width={9} height={9} borderRadius={5} backgroundColor={ACCENT} />
+                                    <View flex={1} height={2} backgroundColor="rgba(19,151,195,0.35)" />
+                                    <View width={9} height={9} borderRadius={5} borderWidth={2} borderColor={ACCENT} />
+                                </View>
+
+                                <TimeStop label="Stopped" ms={activity?.stopped_at ?? "--"} align="flex-end" />
+                            </View>
+                        </View>
+                    </View>
+                </ScrollView>
+            </View>
+
+
+            {
+                <DeleteModal visible={openDeleteModal} onClose={() => setOpenDeleteModal(false)} />
+            }
+
+
+        </GradientBackground >
     );
 }
