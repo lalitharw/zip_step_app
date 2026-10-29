@@ -1,9 +1,10 @@
 import { colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { useReplayRouteStore } from "@/store/ReplayRouteStore";
 import logger from "@/utils/logging/logger";
 import { PlayIcon, StopIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { CameraRef } from "@maplibre/maplibre-react-native";
+import { Camera } from "@rnmapbox/maps";
 import React, { useEffect, useRef } from "react";
 import { Button } from "tamagui";
 
@@ -14,12 +15,12 @@ type Coordinate = {
 }
 
 type replayRouteButtonProp = {
-    cameraRef: React.RefObject<CameraRef | null>,
+    cameraRef: React.RefObject<Camera | null>,
     locationPoints: Coordinate[]
 }
 
 export default function ReplayRouteButton({ cameraRef, locationPoints }: replayRouteButtonProp) {
-
+    const {theme} = useTheme()
     const setIsReplaying = useReplayRouteStore((state) => state.setIsReplaying)
     const addReplayCoordinate = useReplayRouteStore((state) => state.addReplayRoute)
     const clearReplayRoute = useReplayRouteStore((state) => state.clearReplayRoute)
@@ -28,7 +29,7 @@ export default function ReplayRouteButton({ cameraRef, locationPoints }: replayR
     const cancelRef = useRef(false)
 
     const STEP_DELAY_MS = 10
-    const MAX_STEPS = 200
+    const MAX_STEPS = 400
 
     useEffect(() => {
         return () => {
@@ -60,11 +61,10 @@ export default function ReplayRouteButton({ cameraRef, locationPoints }: replayR
                 
 
                 addReplayCoordinate(coordinate)
-                cameraRef.current?.easeTo({
-                    center: [
-                        coordinate[0], coordinate[1]
-                    ],
-                    duration: STEP_DELAY_MS,
+                cameraRef.current?.setCamera({
+                    centerCoordinate: [coordinate[0], coordinate[1]],
+                    animationDuration: STEP_DELAY_MS,
+                    animationMode: "easeTo"
                 })
 
                 await new Promise(resolve => setTimeout(resolve, STEP_DELAY_MS))
@@ -90,12 +90,12 @@ export default function ReplayRouteButton({ cameraRef, locationPoints }: replayR
         <>
             {
                 isReplaying ? (
-                    <Button onPress={stopReplayRoute} width={40} height={40} borderRadius={"50%"} backgroundColor={colors.primaryWhite}>
-                        <HugeiconsIcon icon={StopIcon} />
+                    <Button onPress={stopReplayRoute} width={40} height={40} borderRadius={"50%"} backgroundColor={theme.buttonPrimary}>
+                        <HugeiconsIcon icon={StopIcon} color={theme.buttonPrimaryText} />
                     </Button>
                 ) : (
-                    <Button onPress={replayRoute} width={40} height={40} borderRadius={"50%"} backgroundColor={colors.primaryWhite}>
-                        <HugeiconsIcon icon={PlayIcon} />
+                    <Button onPress={replayRoute} width={40} height={40} borderRadius={"50%"} backgroundColor={theme.buttonPrimary}>
+                        <HugeiconsIcon icon={PlayIcon} color={theme.buttonPrimaryText} />
                     </Button>
                 )
             }

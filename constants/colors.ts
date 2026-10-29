@@ -1,5 +1,5 @@
 export const lightTheme = {
-    background: '#FFFFFF',
+    background: '#F1F5F2',
     surface: '#F3F6FA',
     card: '#FFFFFF',
     primary: '#B6F500',
@@ -19,19 +19,23 @@ export const lightTheme = {
     buttonDisabled: '#D1D5DB',
     buttonDisabledText: '#64748B',
     buttonDanger: '#7F1D1D',
-    buttonDangerText: '#B91C1C',
+    buttonDangerText: '#dbcfcf',
     iconActiveColor: "#B6F500",
-    iconInActiveColor:"#00000087"
+    iconInActiveColor: "#00000087",
+    pill: "rgba(30, 26, 26, 0.18)",
+    sheetBg:"#F5F7FA",
+    tileBg:"rgba(0,0,0,0.035)",
+    tileBorder: "rgba(15,19,24,0.08)",
 };
 
 export const darkTheme = {
-    background: '#0B1F3A',
-    surface: '#142B49',
-    card: '#142B49',
+    background: '#151E2B',
+    surface: '#1C2736',
+    card: '#222F40',
     primary: '#B6F500',
     text: '#FFFFFF',
     secondaryText: '#edede9b8',
-    border: '#29415F',
+    border: '#1d2329',
     icon: '#FFFFFF',
     success: '#B6F500',
     separator: "rgba(175, 167, 167, 0.12)",
@@ -47,5 +51,9 @@ export const darkTheme = {
     buttonDanger: '#7F1D1D',
     buttonDangerText: '#FEE2E2',
     iconActiveColor: "#B6F500",
-    iconInActiveColor:"#edede9b8"
+    iconInActiveColor: "#edede9b8",
+    pill: "rgba(255,255,255,0.18)",
+    sheetBg: "#0F1318",
+    tileBg : "rgba(255,255,255,0.05)",
+    tileBorder : "rgba(255,255,255,0.07)",
 };

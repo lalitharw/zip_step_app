@@ -23,10 +23,10 @@ export default function StopButton({ mapRef,cameraRef }: { mapRef: RefObject<Map
     const {theme} = useTheme()
     const handleStopTracking = async () => {
 
-        // if (locationStore.routeCoordinates.length < 5) {
-        //     locationStore.setShowActivityPointModal(true)
-        //     return
-        // }
+        if (locationStore.routeCoordinates.length < 5) {
+            locationStore.setShowActivityPointModal(true)
+            return
+        }
         if (isLoading) return
         setLoading(true)
 

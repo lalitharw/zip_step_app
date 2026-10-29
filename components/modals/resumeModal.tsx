@@ -78,7 +78,7 @@ export default function ResumeModal({ isVisible }: { isVisible: boolean }) {
                                 handleDiscardActivity()
                             }}
                         >
-                            <Text color={colors.primaryWhite}>
+                            <Text color={theme.buttonDangerText}>
                                 {isLoading ? (
                                     <Spinner
                                         size="small"

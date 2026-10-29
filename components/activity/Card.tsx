@@ -1,13 +1,12 @@
-import { colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { metersToKilometers } from "@/utils/dataConversion";
 import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
 import { LinearGradient } from "@tamagui/linear-gradient";
 import { useRouter } from "expo-router";
 import { Pressable } from "react-native";
 import { Image, Text, View } from "tamagui";
-import StatBlock from "./StatsBlock";
-import SeparatorVertical from "./separators/SeparatorVertical";
-import { useTheme } from "@/context/ThemeContext";
+import StatBlock from "../StatsBlock";
+import SeparatorVertical from "../separators/SeparatorVertical";
 
 
 type activityCard = {
@@ -18,17 +17,17 @@ type activityCard = {
     duration: number | null
 }
 
-export default function ActivityCard({ id, map_image_path, started_at, distance, duration }: activityCard) {
+export default function Card({ id, map_image_path, started_at, distance, duration }: activityCard) {
     const router = useRouter()
-    const {theme} = useTheme()
+    const { theme } = useTheme()
 
     return (
         <Pressable onPress={() => router.push(`/(tabs)/history/${id}`)}>
             <View
                 marginBottom={16}
-                backgroundColor={theme.background}
+                backgroundColor={theme.tileBg}
                 borderRadius={16}
-                borderColor={theme.border}
+                borderColor={theme.tileBorder}
                 borderWidth={1}
                 shadowColor="#000"
                 shadowOffset={{ width: 0, height: 4 }}

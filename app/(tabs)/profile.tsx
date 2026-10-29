@@ -1,18 +1,19 @@
 import GradientBackground from "@/components/GradientBackground";
 import ProfileAvatar from "@/components/ProfileAvatar";
+import SeparatorVertical from "@/components/separators/SeparatorVertical";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import { ChevronDown, Edit04Icon, Logout01Icon, Mail01Icon, UserIcon } from '@hugeicons/core-free-icons';
+import { ChevronDown, Edit04Icon, Logout01Icon, Mail01Icon, Moon02FreeIcons, Sun01FreeIcons, UserIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { router } from "expo-router";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Accordion, Button, ScrollView, Separator, Spinner, Text, View, XStack, YStack } from "tamagui";
+import { Accordion, Button, ScrollView, Separator, Spinner, Switch, Text, View, XStack, YStack } from "tamagui";
 
 
 export default function Profile() {
     const { user, logout } = useAuth();
-    const { theme } = useTheme()
+    const { theme, toggleTheme, isDark } = useTheme()
 
 
     const [isLoading, setIsLoading] = useState(false)
@@ -172,6 +173,61 @@ export default function Profile() {
                             </Accordion>
                             <Separator my={14} borderColor={theme.separator} width={"100%"} borderWidth={.5} />
                             <Text textTransform="capitalize" fontSize={"$5"} color={theme.text}>Preferences</Text>
+                            <XStack
+                                alignItems="center"
+                                justifyContent="space-between"
+                                paddingVertical="$3"
+                            >
+                                <XStack alignItems="center" gap="$3" flex={1}>
+                                    <HugeiconsIcon
+                                        icon={Moon02FreeIcons}
+                                        size={22}
+                                        color={theme.secondaryText}
+                                    />
+                                    <YStack gap="$1" flex={1}>
+                                        <Text color={theme.text} fontSize="$5">
+                                            Appearance
+                                        </Text>
+                                        <Text color={theme.secondaryText} fontSize="$2">
+                                            Choose your preferred theme
+                                        </Text>
+                                    </YStack>
+                                </XStack>
+
+                                <XStack alignItems="center" height="100%">
+                                    <View>
+                                        {
+                                            isDark ? <HugeiconsIcon size={20} icon={Moon02FreeIcons} color={theme.secondaryText} /> :
+                                                <HugeiconsIcon size={20} icon={Sun01FreeIcons} color={theme.secondaryText} />
+                                        }
+                                    </View>
+
+
+
+                                    <SeparatorVertical />
+
+                                    <Switch
+                                        size="$4"
+                                        checked={isDark}
+                                        onCheckedChange={toggleTheme}
+                                        backgroundColor={isDark ? "#1C2736" : "#DCE3EA"}
+                                        
+                                        borderWidth={0}
+                                        focusStyle={{
+                                            backgroundColor: isDark ? "#1C2736" : "#DCE3EA",
+                                        }}
+                                        hoverStyle={{
+                                            backgroundColor: isDark ? "#1C2736" : "#DCE3EA",
+                                        }}
+                                    >
+                                        <Switch.Thumb
+                                            transition="quicker"
+                                            backgroundColor={isDark ? "#B6F500" : "#FFFFFF"}
+                                        />
+                                    </Switch>
+                                </XStack>
+
+                            </XStack>
                         </YStack>
                     </ScrollView>
 

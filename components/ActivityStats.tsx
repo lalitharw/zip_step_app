@@ -1,4 +1,3 @@
-import { colors } from "@/constants/theme";
 import { useTheme } from "@/context/ThemeContext";
 import { useActivityPauseStore } from "@/store/ActivityPauseStore";
 import { useActivityStatsStore } from "@/store/ActivityStatsStore";
@@ -13,7 +12,6 @@ import { Text, View, XStack, YStack } from "tamagui";
 import SeparatorHorizontal from "./separators/SeparatorHorizontal";
 import SeparatorVertical from "./separators/SeparatorVertical";
 
-const LIVE = "#FF4D4F";
 const LINE = "#ffffff24";
 const TABULAR = { fontVariant: ["tabular-nums" as const] };
 
@@ -23,7 +21,7 @@ const kmh = (ms: number) => (Number.isFinite(ms) ? (ms * 3.6).toFixed(1) : "--")
 const meters = (v: number) => (Number.isFinite(v) ? String(Math.round(v)) : "--");
 
 function LiveDot({ active }: { active: boolean }) {
-    const {theme} = useTheme()
+    const { theme } = useTheme()
     return (
         <View width={10} height={10} alignItems="center" justifyContent="center">
             {active && (
@@ -215,8 +213,8 @@ export default function ActivityStats() {
                         accessibilityRole="button"
                         accessibilityLabel={expanded ? "Show fewer stats" : "Show more stats"}
                     >
-                        <View width={36} height={4} borderRadius={2} backgroundColor={theme.secondaryText} />
-                        <Text color={theme.text} fontSize={12} fontWeight="600">
+                        <View width={36} height={4} borderRadius={2} backgroundColor={theme.pill} />
+                        <Text color={theme.secondaryText} fontSize={12} fontWeight="600">
                             {expanded ? "Fewer stats" : "More stats"}
                         </Text>
                     </YStack>

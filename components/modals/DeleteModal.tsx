@@ -1,21 +1,23 @@
 import { colors } from '@/constants/theme';
+import { useTheme } from '@/context/ThemeContext';
 import { Alert01Icon, Delete01FreeIcons } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { useEffect, useRef, useState } from "react";
-import { Animated } from "react-native";
+import { Animated, Modal } from "react-native";
+import { View } from 'tamagui';
 
 import { Button, Spinner, Text, XStack, YStack } from "tamagui";
 
 export default function DeleteModal({ visible, onClose }: { visible: boolean, onClose: () => void }) {
-   
-    const [loading,setLoading] = useState<boolean>(false)
+    const { theme } = useTheme()
+    const [loading, setLoading] = useState<boolean>(false)
 
     const handleDelete = () => {
-        try{
+        try {
             setLoading(true)
-            
+
         }
-        finally{
+        finally {
             setLoading(false)
         }
     }
@@ -49,106 +51,91 @@ export default function DeleteModal({ visible, onClose }: { visible: boolean, on
     }
 
     return (
-        <Animated.View
-            style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 1000,
-                backgroundColor: "rgba(0,0,0,0.7)",
-                justifyContent: "center",
-                alignItems: "center",
-                opacity,
-            }}
+
+        <Modal
+            visible={
+                visible
+            }
+            transparent
+            animationType="fade"
         >
-            <Animated.View
-                style={{
-                    width: "85%",
-                    maxWidth: 380,
-                    backgroundColor: "#181818",
-                    borderRadius: 24,
-                    padding: 24,
-                    alignItems: "center",
-                    transform: [{ scale }],
-                }}
-            >
-
-                <YStack
-                    width={64}
-                    height={64}
-                    borderRadius={32}
-                    backgroundColor="rgba(137, 30, 62, 0.15)"
-                    justifyContent="center"
-                    alignItems="center"
-                    marginBottom="$4"
-                >
-                    <Text
-                        fontSize={30}
-                        color="#d8ff64"
-                        fontWeight="700"
+            <View flex={1} alignItems="center" justifyContent="center" backgroundColor={colors.lessOpacityBlack} paddingHorizontal={"$5"}>
+                <View alignItems="center" justifyContent="center" backgroundColor={theme.background} borderRadius={"$6"} padding={"$6"} borderWidth={1} borderColor={theme.tileBorder}>
+                    <YStack
+                        width={64}
+                        height={64}
+                        borderRadius={88}
+                        backgroundColor="rgba(137, 30, 62, 0.15)"
+                        justifyContent="center"
+                        alignItems="center"
+                        marginBottom="$4"
                     >
-                        <HugeiconsIcon
-                            icon={Alert01Icon}
-                            size={40}
-                            color="#ab1842"
-                            strokeWidth={1.5}
-                        />
+                        <Text
+                            fontSize={30}
+                            color="#d8ff64"
+                            fontWeight="700"
+                        >
+                            <HugeiconsIcon
+                                icon={Alert01Icon}
+                                size={40}
+                                color="#ab1842"
+                                strokeWidth={1.5}
+                            />
+                        </Text>
+                    </YStack>
+
+                    <Text
+                        color={theme.text}
+                        fontSize="$6"
+                        fontWeight="700"
+                        textAlign="center"
+                    // marginBottom="$2"
+                    >
+                        Are you sure you want to delete activity?
                     </Text>
-                </YStack>
 
-                <Text
-                    color="#edede9"
-                    fontSize="$6"
-                    fontWeight="700"
-                    textAlign="center"
-                // marginBottom="$2"
-                >
-                    Are you sure you want to delete activity?
-                </Text>
+                    <Text
+                        color="#edede9"
+                        opacity={0.65}
+                        fontSize="$3"
+                        textAlign="center"
+                        lineHeight={22}
+                    >
 
-                <Text
-                    color="#edede9"
-                    opacity={0.65}
-                    fontSize="$3"
-                    textAlign="center"
-                    lineHeight={22}
-                >
-
-                </Text>
+                    </Text>
 
 
-                <XStack gap={"$3"} >
-                    <Button disabled={loading}>
-                        <XStack gap={"$2"} alignItems='center'>
-                            {
-                                loading ?
+                    <XStack gap={"$3"} >
+                        <Button backgroundColor={theme.buttonDanger}  disabled={loading}>
+                            <XStack gap={"$2"} alignItems='center'>
+                                {
+                                    loading ?
 
-                                    <>
-                                        <Spinner
-                                            size="small"
-                                            color="#111"
-                                        />
-                                    </>
-                                    :
+                                        <>
+                                            <Spinner
+                                                size="small"
+                                                color={theme.buttonDangerText}
+                                            />
+                                        </>
+                                        :
 
-                                    <>
-                                        <HugeiconsIcon icon={Delete01FreeIcons} />
-                                        <Text fontWeight={"bold"}>Delete</Text>
-                                    </>
-                            }
+                                        <>
+                                            <HugeiconsIcon color={theme.buttonDangerText} icon={Delete01FreeIcons} />
+                                            <Text color={theme.buttonDangerText} >Delete</Text>
+                                        </>
+                                }
 
 
-                        </XStack>
-                    </Button>
-                    <Button borderColor={colors.primaryWhite} onPress={() => onClose()} backgroundColor="transparent">
-                        <Text color={colors.primaryWhite} fontWeight={"bold"}>Cancel</Text>
-                    </Button>
-                </XStack>
+                            </XStack>
+                        </Button>
+                        <Button backgroundColor={theme.buttonSecondary} onPress={() => onClose()}>
+                            <Text color={theme.buttonSecondaryText} fontWeight={"bold"}>Cancel</Text>
+                        </Button>
+                    </XStack>
+                </View>
+            </View>
+        </Modal>
 
-              
-            </Animated.View>
-        </Animated.View>
+
     );
 }

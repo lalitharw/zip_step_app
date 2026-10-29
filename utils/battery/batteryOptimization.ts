@@ -9,7 +9,6 @@ export async function ensureBatteryOptimizationIgnored() {
 
     try {
         const isBatteryOptimizationEnabled = await Battery.isBatteryOptimizationEnabledAsync();
-        logger.info("Battery Optimization", "", isBatteryOptimizationEnabled)
 
         if (!isBatteryOptimizationEnabled) return
 

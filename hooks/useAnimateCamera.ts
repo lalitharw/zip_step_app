@@ -12,7 +12,6 @@ export const useAnimateCamera = (currentLocation: currentLocationProps | null) =
 
     useEffect(() => {
         if (!currentLocation) return;
-        logger.info("Current Location","",currentLocation)
         cameraRef.current?.setCamera({
             centerCoordinate: [
                 currentLocation.longitude,
