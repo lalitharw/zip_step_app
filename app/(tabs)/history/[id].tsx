@@ -12,7 +12,7 @@ import { getLocationPoints } from "@/database/locationPoints";
 import { useReplayRouteStore } from "@/store/ReplayRouteStore";
 import { metersToKilometers } from "@/utils/dataConversion";
 import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
-import { formatDate } from "@/utils/formatUnits";
+import { formatDate, formatPace } from "@/utils/formatUnits";
 import Mapbox, { Camera, LineLayer, MapView, ShapeSource } from "@rnmapbox/maps";
 import Navigation from "@rnmapbox/navigation";
 import { useLocalSearchParams } from "expo-router";
@@ -168,7 +168,7 @@ export default function ActivityDetail() {
                                     />
                                     <ShapeSource id="rawroutesource" shape={routeGeoJSON}>
                                         <LineLayer id="raw-route-line" style={{
-                                            lineColor: '#293a0b',
+                                            lineColor: theme.surface,
                                             lineWidth: 6,
                                             lineCap: 'round',
                                             lineJoin: 'round',
@@ -183,12 +183,13 @@ export default function ActivityDetail() {
                                 <>
                                     <Camera
                                         ref={cameraRef}
+                                        zoomLevel={17}
 
 
                                     />
                                     <ShapeSource id="replay-route-source" shape={replayRouteGeoJSON}>
                                         <LineLayer id="replay-route-line" style={{
-                                            lineColor: '#293a0b',
+                                            lineColor: theme.surface,
                                             lineWidth: 6,
                                             lineCap: 'round',
                                             lineJoin: 'round',
@@ -202,7 +203,10 @@ export default function ActivityDetail() {
 
 
                     <View position="absolute" right={20} bottom={44}>
-                        <ReplayRouteButton cameraRef={cameraRef} locationPoints={locationPoints} />
+                        {
+                            isMapLoaded && <ReplayRouteButton cameraRef={cameraRef} locationPoints={locationPoints} />
+
+                        }
                     </View>
                 </View>
 
@@ -263,7 +267,7 @@ export default function ActivityDetail() {
                             />
                             <Metric
                                 label="Avg pace"
-                                value={metersToKilometers(activity?.average_pace ?? 0)}
+                                value={formatPace(activity?.average_pace ?? 0)}
                                 unit="/km"
                             />
                         </View>

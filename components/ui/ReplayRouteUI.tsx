@@ -64,7 +64,8 @@ export default function ReplayRouteButton({ cameraRef, locationPoints }: replayR
                 cameraRef.current?.setCamera({
                     centerCoordinate: [coordinate[0], coordinate[1]],
                     animationDuration: STEP_DELAY_MS,
-                    animationMode: "easeTo"
+                    animationMode: "easeTo",
+                    zoomLevel: 18
                 })
 
                 await new Promise(resolve => setTimeout(resolve, STEP_DELAY_MS))
@@ -95,7 +96,7 @@ export default function ReplayRouteButton({ cameraRef, locationPoints }: replayR
                     </Button>
                 ) : (
                     <Button onPress={replayRoute} width={40} height={40} borderRadius={"50%"} backgroundColor={theme.buttonPrimary}>
-                        <HugeiconsIcon icon={PlayIcon} color={theme.buttonPrimaryText} />
+                        <HugeiconsIcon icon={PlayIcon}  />
                     </Button>
                 )
             }
