@@ -12,7 +12,7 @@ import { getCurrentActivityId } from "@/utils/activity"
 import { calculateAveragePace, calculateAverageSpeed, calculateMaxSpeed, fetchAndCalculateElevation } from "@/utils/calculateActivityStats"
 import { Gps01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react-native"
-import Mapbox, { Camera, LineLayer, MapView, ShapeSource, UserLocation } from "@rnmapbox/maps"
+import Mapbox, { Camera, LineLayer, LocationPuck, MapView, ShapeSource, UserLocation } from "@rnmapbox/maps"
 import Navigation from "@rnmapbox/navigation"
 import * as Location from "expo-location"
 import * as SQLite from "expo-sqlite"
@@ -310,11 +310,12 @@ export default function MapBoxNew() {
                     </ShapeSource>
                 )}
 
-                <UserLocation
+                <LocationPuck visible={true} puckBearingEnabled={true} puckBearing="heading"/>
+                {/* <UserLocation
                     visible
                     requestsAlwaysUse
                     showsUserHeadingIndicator
-                />
+                /> */}
             </MapView>
 
             <AnimatePresence>

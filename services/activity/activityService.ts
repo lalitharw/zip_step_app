@@ -140,8 +140,15 @@ export const stopActivity = async () => {
             .getState()
             .deleteMapPath()
 
+        //clear activity stats
+        useActivityStatsStore.getState().resetStats()
+
+        //clear routes
+        useLocationStore.getState().clearRoute()
 
         await getCurrentLocation()
+
+
 
         return true
 
@@ -171,7 +178,7 @@ export const discardActivity = async () => {
 
         const discarded = await cancelledActivity(activityId)
 
-        if(!discarded){
+        if (!discarded) {
             throw new Error("Failed to cancel Activity")
         }
 
@@ -202,6 +209,9 @@ export const discardActivity = async () => {
         useActivityStore
             .getState()
             .deleteMapPath()
+
+        //clear activity stats
+        useActivityStatsStore.getState().resetStats()
 
 
         await getCurrentLocation()
