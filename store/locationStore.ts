@@ -23,6 +23,7 @@ type LocationState = {
 
     routeCoordinates: Coordinates[]
     addRouteCoordinate: (coordinate: Coordinates) => void
+    addRouteCoordinates: (coordinates: Coordinates[]) => void
 
     clearRoute: () => void
 
@@ -68,7 +69,7 @@ export const useLocationStore = create<LocationState>((set) => ({
         set((state) => {
             const alreadyExists = state.routeCoordinates.some(point => point.id === coordinate.id)
 
-            if(alreadyExists){
+            if (alreadyExists) {
                 return state
             }
 
@@ -76,6 +77,24 @@ export const useLocationStore = create<LocationState>((set) => ({
                 routeCoordinates: [
                     ...state.routeCoordinates,
                     coordinate
+                ]
+            }
+        })
+    },
+
+    addRouteCoordinates(coordinates) {
+        set((state) => {
+            const existingIds = new Set(state.routeCoordinates.map((p) => p.id))
+
+            const newCoordinates = coordinates.filter((c) => !existingIds.has(c.id))
+
+            if (!newCoordinates.length) return state
+
+
+            return {
+                routeCoordinates: [
+                    ...state.routeCoordinates,
+                    ...coordinates
                 ]
             }
         })
@@ -122,7 +141,7 @@ export const useLocationStore = create<LocationState>((set) => ({
     },
 
     compassHeading: null,
-    setCompassHeading(value){
+    setCompassHeading(value) {
         set({
             compassHeading: value
         })

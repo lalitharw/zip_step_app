@@ -65,7 +65,7 @@ export default function ReplayRouteButton({ cameraRef, locationPoints }: replayR
                     centerCoordinate: [coordinate[0], coordinate[1]],
                     animationDuration: STEP_DELAY_MS,
                     animationMode: "easeTo",
-                    zoomLevel: 15
+                    zoomLevel: 17
                 })
 
                 await new Promise(resolve => setTimeout(resolve, STEP_DELAY_MS))

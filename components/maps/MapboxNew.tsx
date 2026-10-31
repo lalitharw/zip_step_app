@@ -68,7 +68,7 @@ export default function MapBoxNew() {
     const routeGeoJSON = {
         type: 'Feature' as const,
         properties: {},
-    geometry: {
+        geometry: {
             type: 'LineString' as const,
             coordinates: routePoints.map(point => [
                 point.longitude,
@@ -101,7 +101,10 @@ export default function MapBoxNew() {
     }, []);
 
     useEffect(() => {
-        if (!isRecording) return
+        if (!isRecording){
+            setIsRouteRestored(false)
+            return
+        }
 
         let cancelled = false
 
@@ -111,7 +114,14 @@ export default function MapBoxNew() {
 
                 const activityId = await getCurrentActivityId()
 
-                if (!activityId || cancelled) return
+                if (cancelled) return
+
+                if(!activityId){
+                    lastLoadedId.current = 0
+                    prevPoint.current = null
+                    setIsRouteRestored(true)
+                    return
+                }
 
                 const activity = await getActivity(activityId)
 
@@ -123,20 +133,19 @@ export default function MapBoxNew() {
 
                 if (cancelled) return
 
-                clearCoordinates()
-
-                for (const point of points) {
-                    addCoordinate({
-                        id: point.id,
-                        longitude: point.longitude,
-                        latitude: point.latitude,
-                        accuracy: point.accuracy,
-                        altitude: point.altitude,
-                        speed: point.speed,
-                        heading: point.heading,
-                    })
-                }
-
+            
+                useLocationStore.getState().setRouteCoordinate(
+                    points.map((p) => ({
+                    id: p.id,
+                    latitude: p.latitude,
+                    longitude: p.longitude,
+                    accuracy: p.accuracy,
+                    altitude: p.altitude,
+                    speed: p.speed,
+                    heading: p.heading,
+                }))
+                )
+               
                 lastLoadedId.current = cursor
 
                 const lastPoint = points[points.length - 1]
@@ -144,7 +153,7 @@ export default function MapBoxNew() {
                 prevPoint.current = lastPoint ? {
                     latitude: lastPoint.latitude,
                     longitude: lastPoint.longitude
-                }: null
+                } : null
 
                 useActivityStatsStore.getState().setStats({
                     distance: activity?.distance ?? 0
@@ -183,61 +192,70 @@ export default function MapBoxNew() {
 
                     if (!activityId || cancelled) return
 
+                    const activity = await getActivity(activityId)
+
+                    if (!activity || cancelled) return
+
+
                     const newPoints = await getNewLocationPointsById(
                         activityId, lastLoadedId.current ?? 0
                     )
 
                     if (cancelled || !newPoints.length) return
 
+                    let prev = prevPoint.current
                     let addedDistance = 0
-                    let processedId = lastLoadedId.current
+                    let processedId = lastLoadedId.current ?? 0
 
 
                     for (const point of newPoints) {
-
-                        addCoordinate({
-                            id: point.id,
-                            latitude: point.latitude,
-                            longitude: point.longitude,
-                            accuracy: point.accuracy,
-                            altitude: point.altitude,
-                            speed: point.speed,
-                            heading: point.heading
-                        })
 
                         const currentPoint = {
                             latitude: point.latitude,
                             longitude: point.longitude
                         }
 
-                        if (prevPoint.current) {
+                        if (prev) {
                             addedDistance += haversineDistance(
-                                prevPoint.current,
+                                prev,
                                 currentPoint
                             )
                         }
 
-                        prevPoint.current = currentPoint
+                        prev = currentPoint
                         processedId = point.id
                     }
 
 
-                    const store = useActivityStatsStore.getState()
-                    const newDistance = store.stats.distance + addedDistance
+                    const newDistance = (activity.distance ?? 0) + addedDistance
 
+                    //saving in db first
                     await saveLastLoadedLocationIdAndDistance(activityId, { distance: newDistance, lastProcessedPointId: processedId })
 
-                    lastLoadedId.current = processedId
 
-                    store.setStats({
+                    //now only commiting in state
+                    lastLoadedId.current = processedId
+                    prevPoint.current = prev
+                    useActivityStatsStore.getState().setStats({
                         distance: newDistance
                     })
+
+                    useLocationStore.getState().addRouteCoordinates(
+                        newPoints.map((p) => ({
+                            id: p.id,
+                            latitude: p.latitude,
+                            longitude: p.longitude,
+                            accuracy: p.accuracy,
+                            altitude: p.altitude,
+                            speed: p.speed,
+                            heading: p.heading
+                        }))
+                    )
 
                     calculateMaxSpeed()
                     calculateAveragePace()
                     await fetchAndCalculateElevation()
 
-                    if (cancelled) return
 
                     calculateAverageSpeed()
                 }
@@ -304,7 +322,7 @@ export default function MapBoxNew() {
                             id="routeLine"
                             style={{
                                 lineColor: '#0B1F3A',
-                                lineWidth: 10,
+                                lineWidth: 8,
                                 lineCap: 'round',
                                 lineJoin: 'round',
                             }}
@@ -356,7 +374,7 @@ export default function MapBoxNew() {
                     <Button
                         backgroundColor={theme.background}
                         circular
-                        
+
                         onPress={() => setFollowing(true)}
                     >
                         <HugeiconsIcon

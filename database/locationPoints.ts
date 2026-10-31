@@ -71,7 +71,7 @@ export async function getLastLocationPoint(activityId: number): Promise<Location
             synced
             FROM location_points
             WHERE activity_id = ?
-            ORDER BY timestamp DESC
+            ORDER BY id DESC
             LIMIT 1
         `,
         activityId
@@ -174,7 +174,7 @@ export const getLocationPointsUpToId = async (activityId: number, cursor: number
     const result = await db.getAllAsync<LocationPoint>(`
         SELECT * FROM location_points
         WHERE activity_id = ?
-        AND  id BETWEEN 1 AND ?
+        AND  id <= 1
         ORDER BY id ASC
         `,activityId,cursor)
 

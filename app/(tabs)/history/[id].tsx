@@ -17,7 +17,7 @@ import Mapbox, { Camera, LineLayer, MapView, ShapeSource } from "@rnmapbox/maps"
 import Navigation from "@rnmapbox/navigation";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, Text, View } from "tamagui";
+import { ScrollView, Text, View, XStack } from "tamagui";
 
 
 export default function ActivityDetail() {
@@ -128,7 +128,7 @@ export default function ActivityDetail() {
                 Math.min(...latitudes),
             ],
             [60, 60, 60, 60],
-            800
+            100
         );
 
 
@@ -168,7 +168,7 @@ export default function ActivityDetail() {
 
                 <View height={400} overflow="hidden">
                     <BackButton url={"/history"} top={50} />
-                    <DeleteButton top={50} onPressDelete={() => { setOpenDeleteModal(true); }} />
+                    {/* <DeleteButton top={50} onPressDelete={() => { setOpenDeleteModal(true); }} /> */}
 
 
                     <MapView onDidFinishLoadingMap={() => setIsMapLoaded(true)} style={{ flex: 1 }} scaleBarEnabled={false} styleURL={Mapbox.StyleURL.Outdoors}>
@@ -191,8 +191,8 @@ export default function ActivityDetail() {
                                     />
                                     <ShapeSource id="rawroutesource" shape={routeGeoJSON}>
                                         <LineLayer id="raw-route-line" style={{
-                                            lineColor: theme.surface,
-                                            lineWidth: 6,
+                                            lineColor: theme.plot,
+                                            lineWidth: 8,
                                             lineCap: 'round',
                                             lineJoin: 'round',
                                         }} />
@@ -212,8 +212,8 @@ export default function ActivityDetail() {
                                     />
                                     <ShapeSource id="replay-route-source" shape={replayRouteGeoJSON}>
                                         <LineLayer id="replay-route-line" style={{
-                                            lineColor: theme.surface,
-                                            lineWidth: 6,
+                                            lineColor: theme.plot,
+                                            lineWidth: 8,
                                             lineCap: 'round',
                                             lineJoin: 'round',
                                         }} />
@@ -249,9 +249,12 @@ export default function ActivityDetail() {
 
 
                         <View paddingTop={14} paddingBottom={6} gap={2}>
-                            <Text color={theme.secondaryText} fontSize={14}>
-                                {formatDate(activity?.started_at)}
-                            </Text>
+                            <XStack justifyContent="space-between" alignItems="center">
+                                <Text color={theme.secondaryText} fontSize={14}>
+                                    {formatDate(activity?.started_at)}
+                                </Text>
+                                <DeleteButton  onPressDelete={() => { setOpenDeleteModal(true); }} />
+                            </XStack>
                             <View flexDirection="row" alignItems="flex-end" gap={8}>
                                 <Text
                                     color={theme.primary}

@@ -10,7 +10,6 @@ import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Accordion, Button, ScrollView, Separator, Spinner, Switch, Text, View, XStack, YStack } from "tamagui";
 
-
 export default function Profile() {
     const { user, logout } = useAuth();
     const { theme, toggleTheme, isDark } = useTheme()
@@ -197,8 +196,7 @@ export default function Profile() {
                                 <XStack alignItems="center" height="100%">
                                     <View>
                                         {
-                                            isDark ? <HugeiconsIcon size={20} icon={Moon02FreeIcons} color={theme.secondaryText} /> :
-                                                <HugeiconsIcon size={20} icon={Sun01FreeIcons} color={theme.secondaryText} />
+                                           <HugeiconsIcon size={20} icon={isDark ? Moon02FreeIcons: Sun01FreeIcons} color={theme.secondaryText} />
                                         }
                                     </View>
 

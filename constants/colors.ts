@@ -10,7 +10,7 @@ export const lightTheme = {
     success: '#15803D',
     separator: "rgba(39, 38, 38, 0.12)",
     error: '#DC2626',
-    tabBar: '#FFFFFF',
+    tabBar: '#F5F7FA',
     spinner: "#0B1F3A",
     buttonPrimary: '#B6F500',
     buttonPrimaryText: '#0B1F3A',
@@ -26,6 +26,7 @@ export const lightTheme = {
     sheetBg:"#F5F7FA",
     tileBg:"rgba(0,0,0,0.035)",
     tileBorder: "rgba(15,19,24,0.08)",
+    plot: "#222F40"
 };
 
 export const darkTheme = {
@@ -56,4 +57,5 @@ export const darkTheme = {
     sheetBg: "#0F1318",
     tileBg : "rgba(255,255,255,0.05)",
     tileBorder : "rgba(255,255,255,0.07)",
+    plot: "#222F40"
 };
