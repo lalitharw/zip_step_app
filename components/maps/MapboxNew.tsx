@@ -12,7 +12,7 @@ import { getCurrentActivityId } from "@/utils/activity"
 import { calculateAveragePace, calculateAverageSpeed, calculateMaxSpeed, fetchAndCalculateElevation } from "@/utils/calculateActivityStats"
 import { Gps01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react-native"
-import Mapbox, { Camera, LineLayer, LocationPuck, MapView, ShapeSource, UserLocation } from "@rnmapbox/maps"
+import Mapbox, { Camera, LineLayer, MapView, ShapeSource, UserLocation } from "@rnmapbox/maps"
 import Navigation from "@rnmapbox/navigation"
 import * as Location from "expo-location"
 import * as SQLite from "expo-sqlite"
@@ -68,7 +68,7 @@ export default function MapBoxNew() {
     const routeGeoJSON = {
         type: 'Feature' as const,
         properties: {},
-        geometry: {
+    geometry: {
             type: 'LineString' as const,
             coordinates: routePoints.map(point => [
                 point.longitude,
@@ -126,8 +126,8 @@ export default function MapBoxNew() {
                 clearCoordinates()
 
                 for (const point of points) {
-                    if (cancelled) return
                     addCoordinate({
+                        id: point.id,
                         longitude: point.longitude,
                         latitude: point.latitude,
                         accuracy: point.accuracy,
@@ -139,7 +139,12 @@ export default function MapBoxNew() {
 
                 lastLoadedId.current = cursor
 
-                prevPoint.current = null
+                const lastPoint = points[points.length - 1]
+
+                prevPoint.current = lastPoint ? {
+                    latitude: lastPoint.latitude,
+                    longitude: lastPoint.longitude
+                }: null
 
                 useActivityStatsStore.getState().setStats({
                     distance: activity?.distance ?? 0
@@ -187,10 +192,11 @@ export default function MapBoxNew() {
                     let addedDistance = 0
                     let processedId = lastLoadedId.current
 
+
                     for (const point of newPoints) {
-                        if (cancelled) return
 
                         addCoordinate({
+                            id: point.id,
                             latitude: point.latitude,
                             longitude: point.longitude,
                             accuracy: point.accuracy,
@@ -215,14 +221,11 @@ export default function MapBoxNew() {
                         processedId = point.id
                     }
 
-                    if (cancelled) return
 
                     const store = useActivityStatsStore.getState()
                     const newDistance = store.stats.distance + addedDistance
 
                     await saveLastLoadedLocationIdAndDistance(activityId, { distance: newDistance, lastProcessedPointId: processedId })
-
-                    if (cancelled) return
 
                     lastLoadedId.current = processedId
 
@@ -252,7 +255,6 @@ export default function MapBoxNew() {
         return () => {
             cancelled = true
             subscription.remove()
-            prevPoint.current = null
         }
 
 
@@ -310,12 +312,11 @@ export default function MapBoxNew() {
                     </ShapeSource>
                 )}
 
-                <LocationPuck visible={true} puckBearingEnabled={true} puckBearing="heading"/>
-                {/* <UserLocation
+                <UserLocation
                     visible
                     requestsAlwaysUse
                     showsUserHeadingIndicator
-                /> */}
+                />
             </MapView>
 
             <AnimatePresence>

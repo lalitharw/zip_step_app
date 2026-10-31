@@ -1,6 +1,7 @@
 import { create } from "zustand"
 
 type Coordinates = {
+    id?: number | null,
     longitude: number,
     latitude: number,
     accuracy?: number | null,
@@ -54,13 +55,30 @@ export const useLocationStore = create<LocationState>((set) => ({
     },
 
     routeCoordinates: [],
+    // addRouteCoordinate(coordinate) {
+    //     set((state) => ({
+    //         routeCoordinates: [
+    //             ...state.routeCoordinates,
+    //             coordinate
+    //         ]
+    //     }))
+    // },
+
     addRouteCoordinate(coordinate) {
-        set((state) => ({
-            routeCoordinates: [
-                ...state.routeCoordinates,
-                coordinate
-            ]
-        }))
+        set((state) => {
+            const alreadyExists = state.routeCoordinates.some(point => point.id === coordinate.id)
+
+            if(alreadyExists){
+                return state
+            }
+
+            return {
+                routeCoordinates: [
+                    ...state.routeCoordinates,
+                    coordinate
+                ]
+            }
+        })
     },
 
     clearRoute: () => {

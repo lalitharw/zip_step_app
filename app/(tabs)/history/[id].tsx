@@ -106,10 +106,33 @@ export default function ActivityDetail() {
         cameraRef.current?.fitBounds(
             routeBounds.northeast,
             routeBounds?.southwest,
-            [25, 35, 25, 35],
+            [45, 35, 45, 35],
             1000
         )
     }, [isMapLoaded, routeBounds, locationPoints.length])
+
+
+    useEffect(() => {
+        if (isReplaying || !locationPoints.length) return
+
+        const longitudes = locationPoints.map((p) => p.longitude)
+        const latitudes = locationPoints.map((p) => p.latitude)
+
+        cameraRef.current?.fitBounds(
+            [
+                Math.max(...longitudes),
+                Math.max(...latitudes),
+            ],
+            [
+                Math.min(...longitudes),
+                Math.min(...latitudes),
+            ],
+            [60, 60, 60, 60],
+            800
+        );
+
+
+    }, [isReplaying])
 
 
 
@@ -150,7 +173,7 @@ export default function ActivityDetail() {
 
                     <MapView onDidFinishLoadingMap={() => setIsMapLoaded(true)} style={{ flex: 1 }} scaleBarEnabled={false} styleURL={Mapbox.StyleURL.Outdoors}>
                         {
-                            !isReplaying && locationPoints.length >= 0 && (
+                            !isReplaying && locationPoints.length >= 2 && (
                                 <>
                                     <Camera
                                         ref={cameraRef}
@@ -183,7 +206,7 @@ export default function ActivityDetail() {
                                 <>
                                     <Camera
                                         ref={cameraRef}
-                                        zoomLevel={17}
+                                    // zoomLevel={17}
 
 
                                     />
