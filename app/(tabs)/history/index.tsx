@@ -21,8 +21,10 @@ export default function index() {
     const loadActivities = async () => {
         try {
             setLoading(true)
-            const data = await getAllActivitiesOnlyIfLocationPointIsPresent(user.id)
-            setActivities(data)
+            if(user){
+                const data = await getAllActivitiesOnlyIfLocationPointIsPresent(user.id)
+                setActivities(data)
+            }
         }
         catch (error) {
             console.error("Something went wrong: ", error)
