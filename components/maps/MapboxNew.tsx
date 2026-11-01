@@ -27,6 +27,7 @@ import StopButton from "../buttons/StopButton"
 import GpsOffModal from "../modals/GpsOffModal"
 import LessActivityModal from "../modals/LessActivityModal"
 import ResumeModal from "../modals/resumeModal"
+import useNetworkStatus from "@/hooks/useNetworkStatus"
 
 
 export default function MapBoxNew() {
@@ -63,6 +64,7 @@ export default function MapBoxNew() {
     useCheckIfActivityRunning()
     const cameraRef = useAnimateCamera(currentLocation)
     useIfGpsServiceIsDisabled()
+    useNetworkStatus()
 
 
     const routeGeoJSON = {

@@ -11,7 +11,7 @@ import { getCachedUser } from "@/utils/userStorage";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 
-export const LOCATION_TASK_NAME = "stride_flow_location_task";
+export const LOCATION_TASK_NAME = "zip_step_location_task";
 
 const gpsFilter = new kalmanFilter(3)
 let filterActivityId: number | null = null

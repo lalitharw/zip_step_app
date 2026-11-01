@@ -1,4 +1,3 @@
-import logger from "@/utils/logging/logger"
 import Mapbox from "@rnmapbox/maps"
 import { useEffect, useRef } from "react"
 

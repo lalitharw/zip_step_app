@@ -26,7 +26,7 @@ export type LocationPoint = {
     client_id: string | null,
     speed: number,
     timestamp: string,
-    synced: number,
+    sync_status: number,
     raw_latitude: number,
     raw_longitude: number,
     user_id: number,
@@ -34,12 +34,14 @@ export type LocationPoint = {
     elevation_loss: number
 }
 
+ // *insert points operation
+
 export async function saveLocationPoint(point: LocationPointInput): Promise<void> {
     await db.runAsync(
         `
         INSERT INTO location_points
-        (activity_id, client_id,latitude,longitude,accuracy,altitude,speed,timestamp,heading, raw_latitude, raw_longitude,user_id)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
+        (activity_id, client_id,latitude,longitude,accuracy,altitude,speed,timestamp,heading, raw_latitude, raw_longitude,user_id,created_at)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
         `,
         point.activityId,
         Crypto.randomUUID(),
@@ -52,7 +54,8 @@ export async function saveLocationPoint(point: LocationPointInput): Promise<void
         point.heading,
         point.raw_latitude,
         point.raw_longitude,
-        point.user_id
+        point.user_id,
+        new Date().toISOString()
     )
 }
 
@@ -68,7 +71,7 @@ export async function getLastLocationPoint(activityId: number): Promise<Location
             altitude,
             speed,
             timestamp,
-            synced
+            sync_status
             FROM location_points
             WHERE activity_id = ?
             ORDER BY id DESC
@@ -90,7 +93,7 @@ export async function getNewLocationPointsById(activityId: number, lastLoadedPoi
             altitude,
             speed,
             timestamp,
-            synced
+            sync_status
             FROM location_points
             WHERE activity_id = ?
             AND id > ?
@@ -112,7 +115,7 @@ export async function getLocationPoints(activityId: number | string): Promise<Lo
             timestamp,
             raw_latitude,
             raw_longitude,
-            synced
+            sync_status
             FROM location_points
             WHERE activity_id = ?
             ORDER BY timestamp ASC
@@ -129,7 +132,7 @@ export async function getAllLocationPoint() {
             altitude,
             speed,
             timestamp,
-            synced
+            sync_status,
             FROM location_points
             ORDER BY id ASC
         `)
@@ -146,10 +149,10 @@ export async function getUnsyncedLocationPoints(activityId: number): Promise<Loc
             altitude,
             speed,
             timestamp,
-            synced
+            sync_status
             FROM location_points
             WHERE activity_id = ?
-            AND synced = 0
+            AND sync_status = 'pending'
             ORDER BY id ASC
         `, activityId)
 }
@@ -162,7 +165,7 @@ export async function markLocationPointsAsSynced(pointIds: number[]) {
     const Ids = pointIds.join(",")
     await db.runAsync(`
             UPDATE location_points
-            SET synced = 1
+            SET sync_status = 'synced'
             WHERE id IN (${Ids})
         `)
 }
@@ -179,4 +182,15 @@ export const getLocationPointsUpToId = async (activityId: number, cursor: number
         `,activityId,cursor)
 
     return result
+}
+
+// * Delete operation
+export const softDeleteLocationPoints = async(activityId: string) => {
+    await db.runAsync(`
+        UPDATE location_points
+        SET is_deleted = 1,
+        deleted_at = ?,
+        updated_at = ?
+        WHERE activity_id = ?
+        `,new Date().toISOString(),new Date().toISOString(),activityId)
 }

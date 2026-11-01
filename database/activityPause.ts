@@ -60,7 +60,7 @@ export async function getUnSyncedActivityPause(activityId: number): Promise<acti
             SELECT id, activity_id, client_id, pause_at, resume_at
                 FROM activity_pauses 
                 WHERE activity_id = ?
-                AND synced = 0
+                AND sync_status = 'pending'
                 ORDER BY id ASC
         `, activityId)
 }
@@ -70,7 +70,7 @@ export async function markActivityPauseAsSynced(clientId: string) {
         await db.runAsync(
             `
             UPDATE activity_pauses 
-            SET synced = 1
+            SET sync_status = 'synced'
             WHERE client_id = ?
             `
             , clientId)

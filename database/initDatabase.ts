@@ -15,8 +15,8 @@ export async function initDatabase() {
             CHECK (status IN ('completed', 'paused', 'running','cancelled')),
             started_at TEXT NULL,
             stopped_at TEXT NULL,
-            distance INTEGER NULL DEFAULT 0,
-            last_loaded_location_id NULL DEFAULT 0,
+            distance REAL NOT NULL DEFAULT 0,
+            last_loaded_location_id NOT NULL DEFAULT 0,
             duration INTEGER NULL,
             average_speed INTEGER NULL,
             average_pace INTEGER NULL,
@@ -27,7 +27,12 @@ export async function initDatabase() {
             map_image_path TEXT NULL,
             map_image_url TEXT NULL,
             inactivity_notification_sent INTEGER DEFAULT 0,
-            synced INTEGER DEFAULT 0
+            is_deleted INTEGER NOT NULL DEFAULT 0,
+            sync_status TEXT NOT NULL DEFAULT 'pending'
+            CHECK(sync_status IN ('synced','pending','failed')),
+            created_at TEXT NULL,
+            updated_at TEXT NULL,
+            deleted_at TEXT NULL
         );
 
         CREATE INDEX IF NOT EXISTS idx_activities_user
@@ -52,7 +57,12 @@ export async function initDatabase() {
             relative_altitude REAL NULL, --this is barometer senser reading
             speed REAL,
             timestamp TEXT NOT NULL,
-            synced INTEGER DEFAULT 0,
+            is_deleted INTEGER NOT NULL DEFAULT 0,
+            sync_status TEXT NOT NULL DEFAULT 'pending'
+            CHECK(sync_status IN ('synced','pending','failed')),
+            created_at TEXT NULL,
+            updated_at TEXT NULL,
+            deleted_at TEXT NULL,
 
             UNIQUE (activity_id, timestamp),
 
@@ -73,8 +83,12 @@ export async function initDatabase() {
             client_id TEXT NOT NULL UNIQUE,
             pause_at TEXT NULL,
             resume_at TEXT NULL,
-            synced INTEGER DEFAULT 0,
-
+            sync_status TEXT NOT NULL DEFAULT 'pending'
+            CHECK(sync_status IN ('synced','pending','failed')),
+            is_deleted INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NULL,
+            updated_at TEXT NULL,
+            deleted_at TEXT NULL,
             FOREIGN KEY(activity_id)
             REFERENCES activities(id)
             ON DELETE CASCADE
@@ -98,7 +112,12 @@ export async function initDatabase() {
 
             source TEXT DEFAULT 'open_meteo',
 
-            synced INTEGER DEFAULT 0,
+            is_deleted INTEGER NOT NULL DEFAULT 0,
+            sync_status TEXT NOT NULL DEFAULT 'pending'
+            CHECK(sync_status IN ('synced','pending','failed')),
+            created_at TEXT NULL,
+            updated_at TEXT NULL,
+            deleted_at TEXT NULL,
 
             FOREIGN KEY (activity_id)
             REFERENCES activities(id)

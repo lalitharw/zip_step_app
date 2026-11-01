@@ -338,7 +338,7 @@ export default function ActivityDetail() {
 
 
             {
-                <DeleteModal visible={openDeleteModal} onClose={() => setOpenDeleteModal(false)} />
+                <DeleteModal activityId={id} visible={openDeleteModal} onClose={() => setOpenDeleteModal(false)} />
             }
 
 
