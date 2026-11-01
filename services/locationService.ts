@@ -1,6 +1,5 @@
 import { useLocationStore } from "@/store/locationStore"
 import { LOCATION_TASK_NAME } from "@/tasks/locationTasks"
-import logger from "@/utils/logging/logger"
 import * as Location from "expo-location"
 
 
@@ -126,7 +125,7 @@ export async function startLocationTracking() {
 
             accuracy: Location.Accuracy.BestForNavigation,
             timeInterval: 1000,
-            distanceInterval:1,
+            distanceInterval: 1,
             activityType: Location.ActivityType.Fitness,
             pausesUpdatesAutomatically: false,
             foregroundService: {

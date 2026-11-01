@@ -21,7 +21,7 @@ export default function index() {
     const loadActivities = async () => {
         try {
             setLoading(true)
-            if(user){
+            if (user) {
                 const data = await getAllActivitiesOnlyIfLocationPointIsPresent(user.id)
                 setActivities(data)
             }

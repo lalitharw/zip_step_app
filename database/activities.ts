@@ -15,7 +15,7 @@ export type Activity = {
     stopped_at: string | null,
     inactivity_notification_sent: number,
     client_id: string | null,
-    synced: number,
+    sync_status: string,
     map_image_path: string,
     distance: number | null,
     duration: number | null,
@@ -29,36 +29,34 @@ export type Activity = {
 }
 
 
+// *create operation
 export async function createActivity(userId: number | null) {
     const result = await db.runAsync(`
             INSERT INTO activities
-            (started_at,client_id,user_id)
-            VALUES (?,?,?)
+            (started_at,client_id,user_id, created_at)
+            VALUES (?,?,?,?)
         `, new Date().toISOString(),
-        Crypto.randomUUID(), userId
+        Crypto.randomUUID(), userId, new Date().toISOString()
     )
 
     return result.lastInsertRowId
 }
 
+// * get all activities as per userId
+export async function getAllActivities(userId: number | string) : Promise<Activity[] | null>{
+    const result= await db.getAllAsync<Activity>(`
+            SELECT * FROM activities
+            WHERE user_id = ?
+        `,userId)
 
-// export async function getAllActivity(): Promise<Activity[] | null> {
-//     return db.getAllAsync<Activity>(`
-//             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced,
-//             distance,
-//             duration,
-//             average_speed,
-//             average_pace,
-//             elevation_gain,
-//             current_elevation,
-//             max_speed
-//             FROM activities ORDER BY id DESC`)
-// }
+    return result
+}
+
 
 
 export async function getActivity(activityId: number | string): Promise<Activity | null> {
     return db.getFirstAsync<Activity>(`
-            SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, last_loaded_location_id, synced, 
+            SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, last_loaded_location_id, sync_status, 
             distance, duration, average_speed, average_pace, elevation_gain, max_speed
             FROM activities WHERE id = ?
         `, activityId)
@@ -66,16 +64,16 @@ export async function getActivity(activityId: number | string): Promise<Activity
 
 export async function getActiveActivity(activityId: number): Promise<Activity | null> {
     return db.getFirstAsync<Activity>(`
-        SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced
+        SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, sync_status
             FROM activities WHERE id = ? AND status = 'active'
         `, activityId)
 }
 
 export async function getUnsyncedActivities(): Promise<Activity[] | null> {
     return db.getAllAsync<Activity>(`
-            SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, synced, 
+            SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, sync_status, 
             client_id, distance, duration, average_speed, average_pace, elevation_gain, current_elevation, max_speed
-            FROM activities WHERE synced = 0 AND status = 'completed'
+            FROM activities WHERE sync_status = 'pending' AND status = 'completed'
             ORDER BY id ASC
         `)
 }
@@ -126,7 +124,7 @@ export async function updateActivityServerId(clientId: number, serverId: number)
 export async function markActivityAsSynced(clientId: number) {
     await db.runAsync(`
         UPDATE activities
-        SET synced = 1
+        SET sync_status = 'synced'
         WHERE client_id = ?
         `, clientId)
 }
@@ -140,7 +138,7 @@ export const getActivitiesWithUnSyncedPoints = async () => {
         INNER JOIN location_points lp
         on a.id = lp.activity_id
         WHERE a.server_id IS NOT NULL
-        AND lp.synced = 0
+        AND lp.sync_status = 'pending'
         ORDER BY a.id ASC
         `
     )
@@ -155,7 +153,7 @@ export const getActivitiesWithUnsyncedActivityPauses = async () => {
         INNER JOIN activity_pauses ap
         on a.id = ap.activity_id
         WHERE a.server_id IS NOT NULL AND a.status = 'completed'
-        AND ap.synced = 0
+        AND ap.sync_status = 'pending'
         ORDER BY a.id ASC
         `)
     return result
@@ -184,7 +182,7 @@ export const getAllActivitiesOnlyIfLocationPointIsPresent = async (userId: numbe
         `
         SELECT a.* FROM activities a
         WHERE (SELECT COUNT(*) FROM location_points lp WHERE lp.activity_id = a.id) >= 5
-        AND a.status = 'completed' AND a.user_id = ?
+        AND a.status = 'completed' AND a.user_id = ? AND a.is_deleted = 0
         ORDER BY a.id DESC
         `,
         userId
@@ -252,6 +250,18 @@ export const getLastLoadedLocationId = async (activityId: number) => {
     return res?.last_processed_location_id ?? 0
 }
 
+
+
+// *delete operation
+export const softDeleteActivity = async(activityId: string) => {
+    await db.runAsync(`
+            UPDATE activities
+            SET is_deleted = 1,
+            updated_at = ?,
+            deleted_at = ?
+            WHERE id = ?
+        `,new Date().toISOString(),new Date().toISOString(),activityId)
+}
 
 
 
