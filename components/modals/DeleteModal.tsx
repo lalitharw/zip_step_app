@@ -1,21 +1,36 @@
 import { colors } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
+import { softDeleteActivity } from '@/database/activities';
+import { softDeleteLocationPoints } from '@/database/locationPoints';
 import { Alert01Icon, Delete01FreeIcons } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { useEffect, useRef, useState } from "react";
+import { router } from 'expo-router';
+import {  useEffect, useRef, useState } from "react";
 import { Animated, Modal } from "react-native";
+import Toast from 'react-native-toast-message';
 import { View } from 'tamagui';
 
 import { Button, Spinner, Text, XStack, YStack } from "tamagui";
 
-export default function DeleteModal({ visible, onClose }: { visible: boolean, onClose: () => void }) {
+export default function DeleteModal({ visible, onClose, activityId }: { visible: boolean, onClose: () => void, activityId:  string }) {
     const { theme } = useTheme()
     const [loading, setLoading] = useState<boolean>(false)
-
-    const handleDelete = () => {
+    
+    const handleDelete = async() => {
+        setLoading(true)
         try {
-            setLoading(true)
-
+            
+            await softDeleteLocationPoints(activityId)
+            await softDeleteActivity(activityId)
+            Toast.show({
+                type: "success",
+                position: "top",
+                text1: "Activity Deleted Successfully"
+            })
+            router.replace("/(tabs)/history")
+        }
+        catch(error){
+            console.error("Failed to perform delete operations: ",error)
         }
         finally {
             setLoading(false)
@@ -106,7 +121,7 @@ export default function DeleteModal({ visible, onClose }: { visible: boolean, on
 
 
                     <XStack gap={"$3"} >
-                        <Button backgroundColor={theme.buttonDanger}  disabled={loading}>
+                        <Button onPress={handleDelete} backgroundColor={theme.buttonDanger}  disabled={loading}>
                             <XStack gap={"$2"} alignItems='center'>
                                 {
                                     loading ?

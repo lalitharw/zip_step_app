@@ -1,8 +1,10 @@
 import NetInfo from '@react-native-community/netinfo';
 import { syncData } from './syncService';
+import logger from '@/utils/logging/logger';
 
 export const networkStatus = () => {
 
+   
     return NetInfo.addEventListener(async (state) => {
         if (state.isInternetReachable !== true) return
         try {

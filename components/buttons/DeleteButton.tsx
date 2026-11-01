@@ -1,4 +1,3 @@
-import { colors } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { Delete01FreeIcons } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
@@ -9,18 +8,18 @@ type deleteButtonProps = {
     onPressDelete: () => void
 }
 
-export default function DeleteButton({onPressDelete} : deleteButtonProps) {
-    const {theme} = useTheme()
+export default function DeleteButton({ onPressDelete }: deleteButtonProps) {
+    const { theme } = useTheme()
 
     return (
 
         <View
             onPress={onPressDelete}
-           
+
             borderWidth={0.1}
-          
-           
-        
+
+
+
             alignItems="center"
             justifyContent="center"
         >

@@ -110,11 +110,12 @@ export const syncActivityPauses = async () => {
 
 
 export const syncData = async () => {
-    if (isSyncing) {
+    if (isSyncing || process.env.EXPO_PUBLIC_IS_SYNC_ENABLE != "true") {
         return
     }
     try {
         isSyncing = true
+
         await syncActivities()
         await syncLocationPoints()
         await syncActivityPauses()
