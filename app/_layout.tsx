@@ -32,13 +32,13 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <TamaguiProvider config={tamaguiConfig} defaultTheme="default">
         <ThemeProvider>
-        <AuthProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(tabs)" />
-          </Stack>
-          <Toast config={toastConfig} />
-        </AuthProvider>
+          <AuthProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(tabs)" />
+            </Stack>
+            <Toast config={toastConfig} />
+          </AuthProvider>
         </ThemeProvider>
       </TamaguiProvider>
     </SafeAreaProvider>

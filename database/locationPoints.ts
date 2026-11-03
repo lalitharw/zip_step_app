@@ -34,14 +34,31 @@ export type LocationPoint = {
     elevation_loss: number
 }
 
- // *insert points operation
+// *insert points operation
 
-export async function saveLocationPoint(point: LocationPointInput): Promise<void> {
-    await db.runAsync(
+export async function saveLocationPoint(
+    point: LocationPointInput
+): Promise<number | null> {
+    const result = await db.runAsync(
         `
         INSERT INTO location_points
-        (activity_id, client_id,latitude,longitude,accuracy,altitude,speed,timestamp,heading, raw_latitude, raw_longitude,user_id,created_at)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+        (
+            activity_id,
+            client_id,
+            latitude,
+            longitude,
+            accuracy,
+            altitude,
+            speed,
+            timestamp,
+            heading,
+            raw_latitude,
+            raw_longitude,
+            user_id,
+            created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(activity_id, timestamp) DO NOTHING
         `,
         point.activityId,
         Crypto.randomUUID(),
@@ -56,7 +73,14 @@ export async function saveLocationPoint(point: LocationPointInput): Promise<void
         point.raw_longitude,
         point.user_id,
         new Date().toISOString()
-    )
+    );
+
+    // No row was inserted (duplicate activity + timestamp).
+    if (result.changes === 0) {
+        return null;
+    }
+
+    return result.lastInsertRowId;
 }
 
 
@@ -74,6 +98,7 @@ export async function getLastLocationPoint(activityId: number): Promise<Location
             sync_status
             FROM location_points
             WHERE activity_id = ?
+            AND is_deleted = 0
             ORDER BY id DESC
             LIMIT 1
         `,
@@ -179,18 +204,18 @@ export const getLocationPointsUpToId = async (activityId: number, cursor: number
         WHERE activity_id = ?
         AND  id <= 1
         ORDER BY id ASC
-        `,activityId,cursor)
+        `, activityId, cursor)
 
     return result
 }
 
 // * Delete operation
-export const softDeleteLocationPoints = async(activityId: string) => {
+export const softDeleteLocationPoints = async (activityId: string) => {
     await db.runAsync(`
         UPDATE location_points
         SET is_deleted = 1,
         deleted_at = ?,
         updated_at = ?
         WHERE activity_id = ?
-        `,new Date().toISOString(),new Date().toISOString(),activityId)
+        `, new Date().toISOString(), new Date().toISOString(), activityId)
 }

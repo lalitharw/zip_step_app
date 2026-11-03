@@ -5,11 +5,13 @@ import { useAnimateCamera } from "@/hooks/useAnimateCamera"
 import { useCheckIfActivityRunning } from "@/hooks/useCheckIfActivityRunning"
 import { useCurrentLocation } from "@/hooks/useCurrentLocation"
 import { useIfGpsServiceIsDisabled } from "@/hooks/useIfGpsServiceIsEnabled"
+import useNetworkStatus from "@/hooks/useNetworkStatus"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { useActivityStatsStore } from "@/store/ActivityStatsStore"
 import { useLocationStore } from "@/store/locationStore"
 import { getCurrentActivityId } from "@/utils/activity"
 import { calculateAveragePace, calculateAverageSpeed, calculateMaxSpeed, fetchAndCalculateElevation } from "@/utils/calculateActivityStats"
+import logger from "@/utils/logging/logger"
 import { Gps01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react-native"
 import Mapbox, { Camera, LineLayer, MapView, ShapeSource, UserLocation } from "@rnmapbox/maps"
@@ -27,7 +29,6 @@ import StopButton from "../buttons/StopButton"
 import GpsOffModal from "../modals/GpsOffModal"
 import LessActivityModal from "../modals/LessActivityModal"
 import ResumeModal from "../modals/resumeModal"
-import useNetworkStatus from "@/hooks/useNetworkStatus"
 
 
 export default function MapBoxNew() {
@@ -41,6 +42,7 @@ export default function MapBoxNew() {
     const [following, setFollowing] = useState<boolean>(true)
     const [isRouteRestored, setIsRouteRestored] = useState<boolean>(false)
     const prevPoint = useRef<{ latitude: number, longitude: number } | null>(null)
+    const [locationReady, SetLocationReady] = useState<boolean>(false)
 
     // store
     const currentLocation = useLocationStore.getState().currentLocation
@@ -91,26 +93,40 @@ export default function MapBoxNew() {
             : null;
 
 
+    useEffect(() => {
+        const initialiseLocation = async () => {
+            const { status } = await Location.getForegroundPermissionsAsync()
+            logger.info("status", "", status)
+
+            if (status === "granted") {
+                SetLocationReady(true)
+            }
+        }
+
+        initialiseLocation()
+    }, [])
+
+    // useEffect(() => {
+    //     const check = async () => {
+    //         const enabled = await Location.hasServicesEnabledAsync();
+    //         setIsGpsOff(!enabled)
+    //     };
+    //     check()
+    //     const id = setInterval(check, 5000);
+    //     return () => clearInterval(id);
+    // }, []);
 
     useEffect(() => {
-        const check = async () => {
-            const enabled = await Location.hasServicesEnabledAsync();
-            setIsGpsOff(!enabled)
-        };
-        check()
-        const id = setInterval(check, 5000);
-        return () => clearInterval(id);
-    }, []);
-
-    useEffect(() => {
-        if (!isRecording){
+        if (!isRecording) {
             setIsRouteRestored(false)
+            lastLoadedId.current = 0
+            prevPoint.current = null
             return
         }
 
         let cancelled = false
 
-        const restore = async () => {
+        const restoreRoute = async () => {
             try {
                 setIsRouteRestored(false)
 
@@ -118,9 +134,15 @@ export default function MapBoxNew() {
 
                 if (cancelled) return
 
-                if(!activityId){
+                if (!activityId) {
                     lastLoadedId.current = 0
                     prevPoint.current = null
+
+                    useLocationStore.getState().setRouteCoordinate([])
+                    useActivityStatsStore.getState().setStats({
+                        distance: 0
+                    })
+
                     setIsRouteRestored(true)
                     return
                 }
@@ -129,48 +151,59 @@ export default function MapBoxNew() {
 
                 if (cancelled) return
 
-                const cursor = activity?.last_loaded_location_id ?? 0
+                if (!activity) {
+                    lastLoadedId.current = 0
+                    prevPoint.current = null
+                    setIsRouteRestored(true)
+                    return
+                }
 
-                const points = await getLocationPointsUpToId(activityId, cursor)
+                const cursor = activity.last_loaded_location_id ?? 0
+
+                // Restore only points that have already been processed.
+                const points = await getLocationPointsUpToId(
+                    activityId,
+                    cursor
+                )
 
                 if (cancelled) return
 
-            
-                useLocationStore.getState().setRouteCoordinate(
-                    points.map((p) => ({
-                    id: p.id,
-                    latitude: p.latitude,
-                    longitude: p.longitude,
-                    accuracy: p.accuracy,
-                    altitude: p.altitude,
-                    speed: p.speed,
-                    heading: p.heading,
+                const coordinates = points.map((point) => ({
+                    id: point.id,
+                    latitude: point.latitude,
+                    longitude: point.longitude,
+                    accuracy: point.accuracy,
+                    altitude: point.altitude,
+                    speed: point.speed,
+                    heading: point.heading
                 }))
-                )
-               
+
+                useLocationStore.getState().setRouteCoordinate(coordinates)
+
                 lastLoadedId.current = cursor
 
                 const lastPoint = points[points.length - 1]
 
-                prevPoint.current = lastPoint ? {
-                    latitude: lastPoint.latitude,
-                    longitude: lastPoint.longitude
-                } : null
+                prevPoint.current = lastPoint
+                    ? {
+                        latitude: lastPoint.latitude,
+                        longitude: lastPoint.longitude
+                    }
+                    : null
 
                 useActivityStatsStore.getState().setStats({
-                    distance: activity?.distance ?? 0
+                    distance: activity.distance ?? 0
                 })
 
                 setIsRouteRestored(true)
-
-            }
-            catch (error) {
-                console.error("Activity Restoration Failed: ", error)
+            } catch (error) {
+                console.error("Activity Restoration Failed:", error)
+                // Leave isRouteRestored false so the listener doesn't process
+                // points against an incomplete restoration.
             }
         }
 
-        restore()
-
+        void restoreRoute()
 
         return () => {
             cancelled = true
@@ -178,106 +211,174 @@ export default function MapBoxNew() {
     }, [isRecording])
 
     useEffect(() => {
-        if (!isRecording || isPaused || !isRouteRestored) return
+        if (!isRecording || isPaused || !isRouteRestored) {
+            return
+        }
 
         let cancelled = false
 
-        // const loadRoute = async () => {
-        const subscription = SQLite.addDatabaseChangeListener(async (event) => {
-            if (event.tableName === "location_points") {
-                if (isFetching.current) return
+        // These variables belong to this subscription instance.
+        let drainPromise: Promise<void> | null = null
+        let drainRequested = false
 
-                isFetching.current = true
+        /**
+         * Fetch and process all points that are newer than our saved cursor.
+         *
+         * This function keeps querying until SQLite has no more unprocessed
+         * points. It does not rely on receiving one event per inserted point.
+         */
+        const processPendingPoints = async () => {
+            while (!cancelled) {
+                const activityId = await getCurrentActivityId()
 
-                try {
-                    const activityId = await getCurrentActivityId()
+                if (!activityId || cancelled) return
 
-                    if (!activityId || cancelled) return
+                const activity = await getActivity(activityId)
 
-                    const activity = await getActivity(activityId)
+                if (!activity || cancelled) return
 
-                    if (!activity || cancelled) return
+                const cursor = lastLoadedId.current
 
+                const newPoints = await getNewLocationPointsById(
+                    activityId,
+                    cursor
+                )
 
-                    const newPoints = await getNewLocationPointsById(
-                        activityId, lastLoadedId.current ?? 0
-                    )
+                if (cancelled) return
 
-                    if (cancelled || !newPoints.length) return
+                // Nothing is waiting in SQLite right now.
+                if (!newPoints.length) return
 
-                    let prev = prevPoint.current
-                    let addedDistance = 0
-                    let processedId = lastLoadedId.current ?? 0
+                let previous = prevPoint.current
+                let addedDistance = 0
+                let processedId = cursor
 
-
-                    for (const point of newPoints) {
-
-                        const currentPoint = {
-                            latitude: point.latitude,
-                            longitude: point.longitude
-                        }
-
-                        if (prev) {
-                            addedDistance += haversineDistance(
-                                prev,
-                                currentPoint
-                            )
-                        }
-
-                        prev = currentPoint
-                        processedId = point.id
+                for (const point of newPoints) {
+                    const currentPoint = {
+                        latitude: point.latitude,
+                        longitude: point.longitude
                     }
 
+                    if (previous) {
+                        addedDistance += haversineDistance(
+                            previous,
+                            currentPoint
+                        )
+                    }
 
-                    const newDistance = (activity.distance ?? 0) + addedDistance
-
-                    //saving in db first
-                    await saveLastLoadedLocationIdAndDistance(activityId, { distance: newDistance, lastProcessedPointId: processedId })
-
-
-                    //now only commiting in state
-                    lastLoadedId.current = processedId
-                    prevPoint.current = prev
-                    useActivityStatsStore.getState().setStats({
-                        distance: newDistance
-                    })
-
-                    useLocationStore.getState().addRouteCoordinates(
-                        newPoints.map((p) => ({
-                            id: p.id,
-                            latitude: p.latitude,
-                            longitude: p.longitude,
-                            accuracy: p.accuracy,
-                            altitude: p.altitude,
-                            speed: p.speed,
-                            heading: p.heading
-                        }))
-                    )
-
-                    calculateMaxSpeed()
-                    calculateAveragePace()
-                    await fetchAndCalculateElevation()
-
-
-                    calculateAverageSpeed()
-                }
-                catch (error) {
-                    console.error('Route polling failed: ', error)
+                    previous = currentPoint
+                    processedId = point.id
                 }
 
-                finally {
-                    isFetching.current = false
-                }
+                const newDistance =
+                    (activity.distance ?? 0) + addedDistance
+
+                /*
+                 * Persist the distance and cursor together.
+                 *
+                 * Do this before updating Zustand. If the app closes after
+                 * this database write, restoration can use the saved cursor.
+                 */
+                await saveLastLoadedLocationIdAndDistance(activityId, {
+                    distance: newDistance,
+                    lastProcessedPointId: processedId
+                })
+
+                lastLoadedId.current = processedId
+                prevPoint.current = previous
+
+                if (cancelled) return
+
+                
+
+                useActivityStatsStore.getState().setStats({
+                    distance: newDistance
+                })
+
+                useLocationStore.getState().addRouteCoordinates(
+                    newPoints.map((point) => ({
+                        id: point.id,
+                        latitude: point.latitude,
+                        longitude: point.longitude,
+                        accuracy: point.accuracy,
+                        altitude: point.altitude,
+                        speed: point.speed,
+                        heading: point.heading
+                    }))
+                )
+
+                // Keep your existing activity-stat calculations.
+                calculateMaxSpeed()
+                calculateAveragePace()
+                await fetchAndCalculateElevation()
+                calculateAverageSpeed()
+
+                if (cancelled) return
+
+                /*
+                 * Don't stop after one batch. Query again using the updated
+                 * cursor in case more points were inserted while we worked.
+                 */
             }
+        }
 
+        /**
+         * Queue a drain request.
+         *
+         * Multiple SQLite events can arrive close together. Instead of
+         * starting multiple processors or dropping events, they all request
+         * another pass through the same processor.
+         */
+        const requestDrain = () => {
+            drainRequested = true
+
+            if (drainPromise) return
+
+            drainPromise = (async () => {
+                while (drainRequested && !cancelled) {
+                    drainRequested = false
+
+                    try {
+                        await processPendingPoints()
+                    } catch (error) {
+                        console.error("Route processing failed:", error)
+                        // The cursor hasn't advanced if persistence failed.
+                        // A later event or re-subscription can retry the points.
+                    }
+                }
+            })().finally(() => {
+                drainPromise = null
+
+                // Handle a request that arrived as the previous drain ended.
+                if (drainRequested && !cancelled) {
+                    requestDrain()
+                }
+            })
+        }
+
+        /*
+         * Subscribe first. This closes the gap where a point could be
+         * inserted after restoration but before the listener was registered.
+         */
+        const subscription = SQLite.addDatabaseChangeListener((event) => {
+            if (event.tableName === "location_points") {
+                requestDrain()
+            }   
         })
+
+        /*
+         * Immediately catch up after subscribing.
+         *
+         * This also handles points inserted while the app was paused,
+         * while the screen was restoring, or before this listener existed.
+         */
+        requestDrain()
 
         return () => {
             cancelled = true
+            drainRequested = false
             subscription.remove()
         }
-
-
     }, [isRecording, isPaused, isRouteRestored])
 
 
@@ -332,11 +433,14 @@ export default function MapBoxNew() {
                     </ShapeSource>
                 )}
 
-                <UserLocation
-                    visible
-                    requestsAlwaysUse
-                    showsUserHeadingIndicator
-                />
+                {
+                    locationReady && <UserLocation
+                        visible
+                        requestsAlwaysUse
+                        showsUserHeadingIndicator
+                    />
+                }
+
             </MapView>
 
             <AnimatePresence>
@@ -390,7 +494,7 @@ export default function MapBoxNew() {
             )}
 
             <ResumeModal isVisible={showResumeModal} />
-            <GpsOffModal isVisible={isGpsOff} />
+            <GpsOffModal isVisible={isGpsOff} onClose={() => setIsGpsOff(false)} />
             <LessActivityModal />
         </View>
     )

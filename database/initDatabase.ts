@@ -16,7 +16,7 @@ export async function initDatabase() {
             started_at TEXT NULL,
             stopped_at TEXT NULL,
             distance REAL NOT NULL DEFAULT 0,
-            last_loaded_location_id NOT NULL DEFAULT 0,
+            last_loaded_location_id INTEGER NOT NULL DEFAULT 0,
             duration INTEGER NULL,
             average_speed INTEGER NULL,
             average_pace INTEGER NULL,
@@ -72,7 +72,7 @@ export async function initDatabase() {
         );
 
         CREATE INDEX IF NOT EXISTS idx_location_points_user
-        ON location_points(user_id, activity_id);
+        ON location_points(user_id, activity_id, id);
     `)
 
     await db.execAsync(`

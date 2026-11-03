@@ -11,4 +11,4 @@ export type LocationPoint = {
 }
 
 
-export type lastLocationPointReference = Pick<LocationPoint,"latitude" | "longitude" | "accuracy" | "timestamp">
+export type lastLocationPointReference = Pick<LocationPoint,"id" | "latitude" | "longitude" | "accuracy" | "timestamp">
