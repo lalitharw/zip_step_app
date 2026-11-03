@@ -6,38 +6,49 @@ import * as Location from "expo-location"
 let locationSubscription: Location.LocationSubscription | null = null
 
 export async function requestLocationPermission() {
-    const gpsActivated = await Location.hasServicesEnabledAsync()
-    if (!gpsActivated) {
-        throw new Error("Please enabled GPS to continue")
-    }
+    // const gpsActivated = await Location.hasServicesEnabledAsync()
+    // if (!gpsActivated) {
+    //     throw new Error("Please enabled GPS to continue")
+    // }
     const foreground = await Location.requestForegroundPermissionsAsync()
     if (foreground.status !== "granted") {
         throw new Error("Foreground location permission denied")
     }
 
-    const background = await Location.requestBackgroundPermissionsAsync()
-    if (background.status !== "granted") {
-        throw new Error("Background location Permission Denied")
-    }
+    // const background = await Location.requestBackgroundPermissionsAsync()
+    // if (background.status !== "granted") {
+    //     throw new Error("Background location Permission Denied")
+    // }
 
     return true
 }
+
 
 export async function requestForegroundLocationPermission() {
-    const gpsActivated = await Location.hasServicesEnabledAsync()
-    if (!gpsActivated) {
-        throw new Error("Please enable GPS to continue")
-    }
-    const current = await Location.requestForegroundPermissionsAsync()
+    let permission = await Location.getForegroundPermissionsAsync();
 
-    const permission = current.granted ? current : await Location.requestForegroundPermissionsAsync()
+    if (!permission.granted && permission.canAskAgain) {
+        permission = await Location.requestForegroundPermissionsAsync();
+    }
 
     if (!permission.granted) {
-        throw new Error("Foreground Location Permission Denied")
+        return {
+            status: permission.canAskAgain
+                ? "denied"
+                : "permanently_denied",
+        };
     }
 
-    return true
+    const gpsEnabled = await Location.hasServicesEnabledAsync();
+
+    if (!gpsEnabled) {
+        return { status: "gps_disabled" };
+    }
+
+    return { status: "granted" };
 }
+
+
 
 export async function requestBackgroundLocationPermission() {
     const foreground = await Location.getForegroundPermissionsAsync()
@@ -70,16 +81,17 @@ export async function getCurrentLocation() {
         return true
     }
 
-    const serviceEnabled = await Location.hasServicesEnabledAsync()
-    if (!serviceEnabled) {
-        throw new Error("Please enable GPS to continue")
-    }
+    // const serviceEnabled = await Location.hasServicesEnabledAsync()
+    // if (!serviceEnabled) {
+    //     throw new Error("Please enable GPS to continue")
+    // }
 
     const permission = await Location.getForegroundPermissionsAsync()
     if (permission.status !== "granted") {
         const requested = await Location.requestForegroundPermissionsAsync()
         if (requested.status !== "granted") {
-            throw new Error("Location Permisson Denied")
+            // throw new Error("Location Permisson Denied")
+            return false
         }
     }
     locationSubscription = await Location.watchPositionAsync({

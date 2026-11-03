@@ -38,18 +38,13 @@ TaskManager.defineTask(
         const userId = cachedUser?.id ?? null
 
         const activity_id = await getCurrentActivityId()
-        if (activity_id === null) {
-            return
-        }
+
+        if (activity_id === null) return
 
         const activity = await getActivity(activity_id)
-        if (!activity) {
-            return
-        }
+        if (!activity || activity.status !== "running") return;
+        if (userId == null) return;
 
-        if (activity.status === 'paused') {
-            return
-        }
 
         await checkAndNotifyActivityInactivity()
 
@@ -60,11 +55,23 @@ TaskManager.defineTask(
 
         let lastLocationPoint: lastLocationPointReference | null = await getLastLocationPoint(activity_id)
 
+        const lastTs = lastLocationPoint
+            ? new Date(lastLocationPoint.timestamp).getTime()
+            : 0;
+
         // skip locations that were already saved, then process in time order
-        const lastTs = lastLocationPoint ? new Date(lastLocationPoint.timestamp).getTime() : 0
+        const seenTimestamps = new Set<number>();
+
         const sortedLocations = [...locations]
-            .filter(l => l.timestamp > lastTs)
-            .sort((a, b) => a.timestamp - b.timestamp)
+            .filter((location) => {
+                if (location.timestamp <= lastTs) return false;
+
+                if (seenTimestamps.has(location.timestamp)) return false;
+
+                seenTimestamps.add(location.timestamp);
+                return true;
+            })
+            .sort((a, b) => a.timestamp - b.timestamp);
 
         // NOTE: change `activity.type` if your field is named differently.
         // Falls back to walk (strictest), not the loose default.
@@ -90,7 +97,7 @@ TaskManager.defineTask(
             // first point
             if (!lastLocationPoint) {
                 const filtered = gpsFilter.update(latitude, longitude, accuracy, location.timestamp)
-                await saveLocationPoint({
+                const savedId = await saveLocationPoint({
                     activityId: activity_id,
                     latitude: filtered.latitude,
                     longitude: filtered.longitude,
@@ -102,16 +109,23 @@ TaskManager.defineTask(
                     raw_latitude: latitude,
                     raw_longitude: longitude,
                     user_id: userId
-                })
+                });
+
+                if (savedId === null) {
+                    lastLocationPoint = await getLastLocationPoint(activity_id);
+                    continue;
+                }
 
                 lastLocationPoint = {
+                    id: savedId,
                     latitude: filtered.latitude,
                     longitude: filtered.longitude,
                     accuracy,
                     timestamp: new Date(location.timestamp).toISOString()
-                }
-                await updateIsActiveNotificationSentStatus(false)
-                continue
+                };
+
+                await updateIsActiveNotificationSentStatus(false);
+                continue;
             }
 
             // if already some points available
@@ -128,29 +142,36 @@ TaskManager.defineTask(
             // kalman filtering
             const filtered = gpsFilter.update(latitude, longitude, accuracy, location.timestamp)
 
-            await saveLocationPoint({
+            const timestamp = new Date(location.timestamp).toISOString();
+
+            const savedId = await saveLocationPoint({
                 activityId: activity_id,
                 latitude: filtered.latitude,
                 longitude: filtered.longitude,
                 altitude: altitude ?? 0,
                 accuracy,
                 speed,
-                timestamp: new Date(location.timestamp).toISOString(),
+                timestamp,
                 heading: heading ?? 0,
                 raw_latitude: latitude,
                 raw_longitude: longitude,
                 user_id: userId
-            })
+            });
 
-            lastLocationPoint = {
-                ...lastLocationPoint,
-                accuracy,
-                latitude: filtered.latitude,
-                longitude: filtered.longitude,
-                timestamp: new Date(location.timestamp).toISOString()
+            if (savedId === null) {
+                lastLocationPoint = await getLastLocationPoint(activity_id);
+                continue;
             }
 
-            await updateIsActiveNotificationSentStatus(false)
+            lastLocationPoint = {
+                id: savedId,
+                latitude: filtered.latitude,
+                longitude: filtered.longitude,
+                accuracy,
+                timestamp
+            };
+
+            await updateIsActiveNotificationSentStatus(false);
         }
     }
 );

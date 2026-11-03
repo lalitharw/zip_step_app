@@ -11,8 +11,8 @@ type LocationPermissionModalProps = {
     permissionDeniedPermanently?: boolean
 }
 
-export default function LocationPermissionModal({ isVisible, onClose, onContinue, permissionDeniedPermanently = false }: LocationPermissionModalProps) {
-    const {theme} = useTheme()
+export default function ForegroundLocationPermission({ isVisible, onClose, onContinue, permissionDeniedPermanently = false }: LocationPermissionModalProps) {
+    const { theme } = useTheme()
     return (
         <Modal
             visible={
@@ -21,7 +21,7 @@ export default function LocationPermissionModal({ isVisible, onClose, onContinue
             transparent
             animationType="slide"
         >
-            <View flex={1} alignItems="center" backgroundColor={theme.background} justifyContent="center" paddingHorizontal={"$5"}>
+            <View flex={1} alignItems="center" backgroundColor={colors.lessOpacityBlack} justifyContent="center" paddingHorizontal={"$5"}>
                 <View alignItems="center" justifyContent="center" backgroundColor={colors.primaryBlack} borderRadius={"$6"} padding={"$6"} borderWidth={1} borderColor={colors.primaryWhite}>
                     <View
                         width={56}
@@ -39,7 +39,7 @@ export default function LocationPermissionModal({ isVisible, onClose, onContinue
                         color={colors.primaryWhite}
                         fontSize={20}
                         fontWeight="700"
-                        textAlign="center">Location Access
+                        textAlign="center">ZipSteps needs to access your location while using the app
                     </Text>
                     {permissionDeniedPermanently ? (
                         <Text
@@ -49,34 +49,33 @@ export default function LocationPermissionModal({ isVisible, onClose, onContinue
                             marginTop="$2"
                             lineHeight={22}
                         >
-                            To track workouts in the background:
+                            To start tracking your workout:
                             {"\n\n"}1. Tap Go to Settings below.
                             {"\n"}2. Open Permissions → Location.
-                            {"\n"}3. Select Allow all the time.
-                            {"\n"}4. Return to StrideFlow and start your workout again.
+                            {"\n"}3. Select Allow while using the app.
+                            {"\n"}4. Return to StrideFlow and tap Start again.
                         </Text>
                     ) : (
                         <>
-                        
-                        <Text
-                            color="$color11"
-                            fontSize={14}
-                            textAlign="center"
-                            marginTop="$2"
-                            lineHeight={20}
-                        >
-                            StrideFlow needs location access to track your route,
-                            distance, and pace, even when your phone is locked.
-                        </Text>
-                        <Text
-                            color="$color11"
-                            fontSize={14}
-                            textAlign="center"
-                            marginTop="$2"
-                            lineHeight={20}
-                        >
-                            You must select "Always Allow" on the next screen for strideFlow to work.
-                        </Text>
+
+                            <Text
+                                color="$color11"
+                                fontSize={14}
+                                textAlign="center"
+                                marginTop="$2"
+                                lineHeight={20}
+                            >
+                                StrideFlow needs location access to record your route, measure the distance you travel, and calculate your pace during workouts.
+                            </Text>
+                            <Text
+                                color="$color11"
+                                fontSize={14}
+                                textAlign="center"
+                                marginTop="$2"
+                                lineHeight={20}
+                            >
+                                Please allow location access to start tracking your workout.
+                            </Text>
                         </>
                     )}
                     <XStack alignItems="center" marginTop={"$3"} gap={"$5"}>
