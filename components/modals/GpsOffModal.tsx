@@ -1,13 +1,13 @@
 import { colors } from "@/constants/theme";
-import { HugeiconsIcon } from '@hugeicons/react-native';
-import { LocationOffline01Icon } from '@hugeicons/core-free-icons';
-import { Modal } from "react-native";
-import { Button, Text, View } from "tamagui";
-import { openAppDetailsSettings } from "../Linking/openAppDetailsSettings";
 import { useTheme } from "@/context/ThemeContext";
+import { LocationOffline01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { Modal } from "react-native";
+import { Button, Text, View, XStack } from "tamagui";
+import { openAppDetailsSettings } from "../Linking/openAppDetailsSettings";
 
-export default function GpsOffModal({ isVisible }: { isVisible: boolean }) {
-    const {theme} = useTheme()
+export default function GpsOffModal({ isVisible, onClose }: { isVisible: boolean, onClose: () => void }) {
+    const { theme } = useTheme()
     return (
         <Modal
             visible={
@@ -38,7 +38,7 @@ export default function GpsOffModal({ isVisible }: { isVisible: boolean }) {
                         color={theme.text}
                         fontSize={20}
                         fontWeight="700"
-                        textAlign="center">Location is off
+                        textAlign="center">GPS is disabled
                     </Text>
                     <Text
                         color="$color11"
@@ -46,10 +46,19 @@ export default function GpsOffModal({ isVisible }: { isVisible: boolean }) {
                         textAlign="center"
                         marginTop="$2"
                         lineHeight={20}>
-                        Please turn on Location to continue
+                        GPS access is disabled. Would you like to adjust settings to allow GPS access
                     </Text>
 
-                    <Button backgroundColor={theme.buttonPrimary} color={theme.buttonPrimaryText} onPress={openAppDetailsSettings} marginTop={"$3"} size={"$4"}>Okay</Button>
+                    <XStack gap={"$2"}>
+                        <Button backgroundColor={theme.buttonPrimary} color={theme.buttonPrimaryText} onPress={() => {
+                            onClose()
+                            openAppDetailsSettings()
+                        }} marginTop={"$3"} size={"$4"}>Okay</Button>
+                        <Button  onPress={() => {
+                            onClose()
+                        }} marginTop={"$3"} size={"$4"}>Cancel</Button>
+                    </XStack>
+
                 </View>
 
             </View>
