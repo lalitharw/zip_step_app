@@ -106,6 +106,15 @@ export default function MapBoxNew() {
         initialiseLocation()
     }, [])
 
+    // useEffect(() => {
+    //     const check = async () => {
+    //         const enabled = await Location.hasServicesEnabledAsync();
+    //         setIsGpsOff(!enabled)
+    //     };
+    //     check()
+    //     const id = setInterval(check, 5000);
+    //     return () => clearInterval(id);
+    // }, []);
 
     useEffect(() => {
         if (!isRecording) {
@@ -117,40 +126,46 @@ export default function MapBoxNew() {
 
         let cancelled = false
 
-        const resetEmpty = () => {
-            lastLoadedId.current = 0
-            prevPoint.current = null
-
-            useLocationStore.getState().setRouteCoordinate([])
-            useActivityStatsStore.getState().setStats({ distance: 0 })
-
-            setIsRouteRestored(true)
-        }
-
         const restoreRoute = async () => {
             try {
                 setIsRouteRestored(false)
 
                 const activityId = await getCurrentActivityId()
+
                 if (cancelled) return
 
                 if (!activityId) {
-                    resetEmpty()
+                    lastLoadedId.current = 0
+                    prevPoint.current = null
+
+                    useLocationStore.getState().setRouteCoordinate([])
+                    useActivityStatsStore.getState().setStats({
+                        distance: 0
+                    })
+
+                    setIsRouteRestored(true)
                     return
                 }
 
                 const activity = await getActivity(activityId)
+
                 if (cancelled) return
 
                 if (!activity) {
-                    resetEmpty()
+                    lastLoadedId.current = 0
+                    prevPoint.current = null
+                    setIsRouteRestored(true)
                     return
                 }
 
                 const cursor = activity.last_loaded_location_id ?? 0
 
                 // Restore only points that have already been processed.
-                const points = await getLocationPointsUpToId(activityId, cursor)
+                const points = await getLocationPointsUpToId(
+                    activityId,
+                    cursor
+                )
+
                 if (cancelled) return
 
                 const coordinates = points.map((point) => ({
@@ -183,6 +198,8 @@ export default function MapBoxNew() {
                 setIsRouteRestored(true)
             } catch (error) {
                 console.error("Activity Restoration Failed:", error)
+                // Leave isRouteRestored false so the listener doesn't process
+                // points against an incomplete restoration.
             }
         }
 
@@ -199,22 +216,37 @@ export default function MapBoxNew() {
         }
 
         let cancelled = false
-        let running = false
-        let again = false
 
+        // These variables belong to this subscription instance.
+        let drainPromise: Promise<void> | null = null
+        let drainRequested = false
 
+        /**
+         * Fetch and process all points that are newer than our saved cursor.
+         *
+         * This function keeps querying until SQLite has no more unprocessed
+         * points. It does not rely on receiving one event per inserted point.
+         */
         const processPendingPoints = async () => {
             while (!cancelled) {
                 const activityId = await getCurrentActivityId()
+
                 if (!activityId || cancelled) return
 
                 const activity = await getActivity(activityId)
+
                 if (!activity || cancelled) return
 
                 const cursor = lastLoadedId.current
 
-                const newPoints = await getNewLocationPointsById(activityId, cursor)
+                const newPoints = await getNewLocationPointsById(
+                    activityId,
+                    cursor
+                )
+
                 if (cancelled) return
+
+                // Nothing is waiting in SQLite right now.
                 if (!newPoints.length) return
 
                 let previous = prevPoint.current
@@ -228,15 +260,25 @@ export default function MapBoxNew() {
                     }
 
                     if (previous) {
-                        addedDistance += haversineDistance(previous, currentPoint)
+                        addedDistance += haversineDistance(
+                            previous,
+                            currentPoint
+                        )
                     }
 
                     previous = currentPoint
                     processedId = point.id
                 }
 
-                const newDistance = (activity.distance ?? 0) + addedDistance
+                const newDistance =
+                    (activity.distance ?? 0) + addedDistance
 
+                /*
+                 * Persist the distance and cursor together.
+                 *
+                 * Do this before updating Zustand. If the app closes after
+                 * this database write, restoration can use the saved cursor.
+                 */
                 await saveLastLoadedLocationIdAndDistance(activityId, {
                     distance: newDistance,
                     lastProcessedPointId: processedId
@@ -244,6 +286,10 @@ export default function MapBoxNew() {
 
                 lastLoadedId.current = processedId
                 prevPoint.current = previous
+
+                if (cancelled) return
+
+                
 
                 useActivityStatsStore.getState().setStats({
                     distance: newDistance
@@ -261,47 +307,76 @@ export default function MapBoxNew() {
                     }))
                 )
 
-                if (cancelled) return
-
+                // Keep your existing activity-stat calculations.
                 calculateMaxSpeed()
                 calculateAveragePace()
                 await fetchAndCalculateElevation()
                 calculateAverageSpeed()
+
+                if (cancelled) return
+
+                /*
+                 * Don't stop after one batch. Query again using the updated
+                 * cursor in case more points were inserted while we worked.
+                 */
             }
         }
 
+        /**
+         * Queue a drain request.
+         *
+         * Multiple SQLite events can arrive close together. Instead of
+         * starting multiple processors or dropping events, they all request
+         * another pass through the same processor.
+         */
+        const requestDrain = () => {
+            drainRequested = true
 
-        const requestDrain = async () => {
-            if (running) {
-                again = true
-                return
-            }
-            running = true
-            try {
-                do {
-                    again = false
-                    await processPendingPoints()
+            if (drainPromise) return
+
+            drainPromise = (async () => {
+                while (drainRequested && !cancelled) {
+                    drainRequested = false
+
+                    try {
+                        await processPendingPoints()
+                    } catch (error) {
+                        console.error("Route processing failed:", error)
+                        // The cursor hasn't advanced if persistence failed.
+                        // A later event or re-subscription can retry the points.
+                    }
                 }
-                while (again && !cancelled)
-            }
-            catch (error) {
-                console.error("Route Processing failed: ", error)
-            }
-            finally {
-                running = false
-            }
+            })().finally(() => {
+                drainPromise = null
+
+                // Handle a request that arrived as the previous drain ended.
+                if (drainRequested && !cancelled) {
+                    requestDrain()
+                }
+            })
         }
 
+        /*
+         * Subscribe first. This closes the gap where a point could be
+         * inserted after restoration but before the listener was registered.
+         */
         const subscription = SQLite.addDatabaseChangeListener((event) => {
             if (event.tableName === "location_points") {
                 requestDrain()
-            }
+            }   
         })
 
+        /*
+         * Immediately catch up after subscribing.
+         *
+         * This also handles points inserted while the app was paused,
+         * while the screen was restoring, or before this listener existed.
+         */
         requestDrain()
 
         return () => {
             cancelled = true
+            drainRequested = false
             subscription.remove()
         }
     }, [isRecording, isPaused, isRouteRestored])
