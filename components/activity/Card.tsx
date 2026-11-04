@@ -22,7 +22,7 @@ export default function Card({ id, map_image_path, started_at, distance, duratio
     const { theme } = useTheme()
 
     return (
-        <Pressable onPress={() => router.push(`/(tabs)/history/${id}`)}>
+        <Pressable onPress={() => router.push(`/${id}`)}>
             <View
                 marginBottom={16}
                 backgroundColor={theme.tileBg}

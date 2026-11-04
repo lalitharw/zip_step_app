@@ -9,7 +9,7 @@ import { saveMapSnapShot } from '@/utils/maps/saveMapSnapShot';
 import { mapSnapShot } from '@/utils/mapSnapShot';
 import { StopIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import {  MapView } from '@rnmapbox/maps';
+import { MapView } from '@rnmapbox/maps';
 import { router } from 'expo-router';
 import { useState, type RefObject } from 'react';
 import { Button, Spinner, Text, XStack } from "tamagui";
@@ -17,10 +17,10 @@ import { Button, Spinner, Text, XStack } from "tamagui";
 
 
 
-export default function StopButton({ mapRef,cameraRef }: { mapRef: RefObject<MapView>,cameraRef: ReturnType<typeof useAnimateCamera> }) {
+export default function StopButton({ mapRef, cameraRef }: { mapRef: RefObject<MapView>, cameraRef: ReturnType<typeof useAnimateCamera> }) {
     const [isLoading, setLoading] = useState<boolean>(false)
     const locationStore = useLocationStore()
-    const {theme} = useTheme()
+    const { theme } = useTheme()
     const handleStopTracking = async () => {
 
         if (locationStore.routeCoordinates.length < 5) {
@@ -33,7 +33,7 @@ export default function StopButton({ mapRef,cameraRef }: { mapRef: RefObject<Map
         try {
             const activityId = await getCurrentActivityId();
             await stopLocationTracking()
-            await mapSnapShot(mapRef,cameraRef)
+            await mapSnapShot(mapRef, cameraRef)
             await saveMapSnapShot()
             await stopActivity()
             await resetActivity()
@@ -41,7 +41,7 @@ export default function StopButton({ mapRef,cameraRef }: { mapRef: RefObject<Map
 
 
             if (activityId) {
-                router.push(`/(tabs)/history/${activityId}`)
+                router.push(`/${activityId}`)
             }
 
         }
@@ -53,7 +53,7 @@ export default function StopButton({ mapRef,cameraRef }: { mapRef: RefObject<Map
         }
     }
     return (
-        <Button width={"60%"}  onPress={handleStopTracking} size={"$6"} disabled={isLoading}>
+        <Button width={"60%"} onPress={handleStopTracking} size={"$6"} disabled={isLoading}>
 
             {
                 isLoading ?
