@@ -6,23 +6,12 @@ import * as Location from "expo-location"
 let locationSubscription: Location.LocationSubscription | null = null
 
 export async function requestLocationPermission() {
-    // const gpsActivated = await Location.hasServicesEnabledAsync()
-    // if (!gpsActivated) {
-    //     throw new Error("Please enabled GPS to continue")
-    // }
     const foreground = await Location.requestForegroundPermissionsAsync()
     if (foreground.status !== "granted") {
         throw new Error("Foreground location permission denied")
     }
-
-    // const background = await Location.requestBackgroundPermissionsAsync()
-    // if (background.status !== "granted") {
-    //     throw new Error("Background location Permission Denied")
-    // }
-
-    return true
+    return "granted"
 }
-
 
 export async function requestForegroundLocationPermission() {
     let permission = await Location.getForegroundPermissionsAsync();
@@ -48,52 +37,42 @@ export async function requestForegroundLocationPermission() {
     return { status: "granted" };
 }
 
+// export async function requestBackgroundLocationPermission() {
+//     const foreground = await Location.getForegroundPermissionsAsync()
 
+//     if (!foreground.granted) {
+//         throw new Error("Foreground location permission is required first")
+//     }
 
-export async function requestBackgroundLocationPermission() {
-    const foreground = await Location.getForegroundPermissionsAsync()
+//     const current = await Location.getBackgroundPermissionsAsync()
 
-    if (!foreground.granted) {
-        throw new Error("Foreground location permission is required first")
-    }
+//     if (current.granted) {
+//         return true
+//     }
 
-    const current = await Location.getBackgroundPermissionsAsync()
+//     const background = await Location.requestBackgroundPermissionsAsync()
 
-    if (current.granted) {
-        return true
-    }
+//     if (!background.granted) {
+//         throw new Error("Background location permission denied. Enable it in Settings to track runs in the background")
+//     }
 
-    const background = await Location.requestBackgroundPermissionsAsync()
-
-    if (!background.granted) {
-        throw new Error("Background location permission denied. Enable it in Settings to track runs in the background")
-        // throw new Error(
-        //     `Background location denied: ${background.status}. ` +
-        //     `Can ask again: ${background.canAskAgain}`
-        // );
-    }
-
-    return true
-}
+//     return true
+// }
 
 export async function getCurrentLocation() {
-    if (locationSubscription) {
-        return true
-    }
-
-    // const serviceEnabled = await Location.hasServicesEnabledAsync()
-    // if (!serviceEnabled) {
-    //     throw new Error("Please enable GPS to continue")
-    // }
+    if (locationSubscription) return "granted"
 
     const permission = await Location.getForegroundPermissionsAsync()
     if (permission.status !== "granted") {
         const requested = await Location.requestForegroundPermissionsAsync()
         if (requested.status !== "granted") {
-            // throw new Error("Location Permisson Denied")
-            return false
+            return "denied"
         }
     }
+
+    const gpsEnabled = await Location.hasServicesEnabledAsync();
+    if (!gpsEnabled) return "gps_disabled"
+
     locationSubscription = await Location.watchPositionAsync({
         accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: 1000,
@@ -110,9 +89,40 @@ export async function getCurrentLocation() {
         }
     )
 
-    return true
 
+    return "granted"
 }
+
+
+// export async function startWatchingLocation() {
+//     if (locationSubscription) return true
+
+//     const permission = await Location.getForegroundPermissionsAsync()
+//     if (!permission.granted && permission.canAskAgain) {
+//         const request = await Location.requestForegroundPermissionsAsync()
+//         if (!request.granted) {
+//             return false
+//         }
+//     }
+
+//     const 
+
+//     locationSubscription = await Location.watchPositionAsync({
+//         accuracy: Location.Accuracy.BestForNavigation,
+//         timeInterval: 1000,
+//         distanceInterval: 1
+//     },
+//         (location) => {
+//             useLocationStore.getState().setCurrentLocation({
+//                 latitude: location.coords.latitude,
+//                 longitude: location.coords.longitude,
+//                 accuracy: location.coords.accuracy,
+//                 speed: location.coords.speed,
+//                 heading: location.coords.heading
+//             })
+//         }
+//     )
+// }
 
 
 export function stopWatchingLocation() {
@@ -141,7 +151,7 @@ export async function startLocationTracking() {
             activityType: Location.ActivityType.Fitness,
             pausesUpdatesAutomatically: false,
             foregroundService: {
-                notificationTitle: "StrideFlow is recording",
+                notificationTitle: "Zipstep is recording",
                 notificationBody: "Your workout is being Recorded"
             },
             showsBackgroundLocationIndicator: true

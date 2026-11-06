@@ -1,19 +1,16 @@
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { startActivity } from '@/services/activity/activityService';
-import { requestBackgroundLocationPermission, requestForegroundLocationPermission } from '@/services/locationService';
+import { requestForegroundLocationPermission } from '@/services/locationService';
 import { useActivityStatsStore } from '@/store/ActivityStatsStore';
-import { ensureBatteryOptimizationIgnored } from '@/utils/battery/batteryOptimization';
 import { stopAccelerometer, subscribeAccelerometer } from '@/utils/sensors/accelerometer';
 import { PlayIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import * as Location from "expo-location";
 import { useState } from 'react';
 import { Linking } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { Button, Spinner } from "tamagui";
 import GpsOffModal from '../modals/GpsOffModal';
-import LocationPermissionModal from '../permissions/BackgroundLocationPermissionModal';
 import ForegroundLocationPermission from '../permissions/ForegroundLocationPermission';
 
 

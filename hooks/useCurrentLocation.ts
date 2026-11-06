@@ -2,18 +2,22 @@ import { getCurrentLocation, stopWatchingLocation } from "@/services/locationSer
 import { useEffect } from "react"
 
 export const useCurrentLocation = () => {
-        useEffect(() => {
-            const startLocationWatcher = async() => {
-                try{
-                    const res = await getCurrentLocation()
-                }
-                catch(error){
-                    console.error("Location Watching error: ",error)
+    useEffect(() => {
+        const startLocationWatcher = async () => {
+            try {
+                const res = await getCurrentLocation()
+
+                if (!res) {
+                    console.warn("Unable to start foreground location watcher")
                 }
             }
-            startLocationWatcher()
-            return () => {
-                stopWatchingLocation()
+            catch (error) {
+                console.error("FOREGROUND LOCATION FAILED: ", error)
             }
-        },[])
+        }
+        startLocationWatcher()
+        return () => {
+            stopWatchingLocation()
+        }
+    }, [])
 }

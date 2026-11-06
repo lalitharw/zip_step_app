@@ -4,22 +4,20 @@ import { getLocationPointsUpToId, getNewLocationPointsById } from "@/database/lo
 import { useAnimateCamera } from "@/hooks/useAnimateCamera"
 import { useCheckIfActivityRunning } from "@/hooks/useCheckIfActivityRunning"
 import { useCurrentLocation } from "@/hooks/useCurrentLocation"
-import { useIfGpsServiceIsDisabled } from "@/hooks/useIfGpsServiceIsEnabled"
 import useNetworkStatus from "@/hooks/useNetworkStatus"
+import { getCurrentLocation, requestLocationPermission } from "@/services/locationService"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { useActivityStatsStore } from "@/store/ActivityStatsStore"
 import { useLocationStore } from "@/store/locationStore"
 import { getCurrentActivityId } from "@/utils/activity"
 import { calculateAveragePace, calculateAverageSpeed, calculateMaxSpeed, fetchAndCalculateElevation } from "@/utils/calculateActivityStats"
-import logger from "@/utils/logging/logger"
 import { Gps01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react-native"
 import Mapbox, { Camera, LineLayer, MapView, ShapeSource, UserLocation } from "@rnmapbox/maps"
 import Navigation from "@rnmapbox/navigation"
-import * as Location from "expo-location"
 import * as SQLite from "expo-sqlite"
 import haversineDistance from "haversine-distance"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { AnimatePresence, Button, View, XStack } from "tamagui"
 import ActivityStats from "../ActivityStats"
 import PauseButton from "../buttons/PauseButton"
@@ -41,8 +39,8 @@ export default function MapBoxNew() {
     //state
     const [following, setFollowing] = useState<boolean>(true)
     const [isRouteRestored, setIsRouteRestored] = useState<boolean>(false)
+    const [hasLocationPermission, setHasLocationPermission] = useState<boolean>(false)
     const prevPoint = useRef<{ latitude: number, longitude: number } | null>(null)
-    const [locationReady, SetLocationReady] = useState<boolean>(false)
 
     // store
     const currentLocation = useLocationStore.getState().currentLocation
@@ -50,7 +48,7 @@ export default function MapBoxNew() {
     const isPaused = useActivityPauseStore.getState().isActivityPaused
     const showResumeModal = useLocationStore.getState().showResumeModal
     const isGpsOff = useLocationStore((state) => state.isGpsOff)
-    const setIsGpsOff = useLocationStore.getState().setIsGpsOff
+    const setIsGpsOff = useLocationStore((state) => state.setIsGpsOff)
     const routePoints = useLocationStore.getState().routeCoordinates
     const clearCoordinates = useLocationStore.getState().clearRoute
     const addCoordinate = useLocationStore.getState().addRouteCoordinate
@@ -65,7 +63,7 @@ export default function MapBoxNew() {
     useCurrentLocation()
     useCheckIfActivityRunning()
     const cameraRef = useAnimateCamera(currentLocation)
-    useIfGpsServiceIsDisabled()
+    // useIfGpsServiceIsDisabled()
     useNetworkStatus()
 
 
@@ -92,29 +90,31 @@ export default function MapBoxNew() {
             ? routePoints[routePoints.length - 1]
             : null;
 
+    const checkGpsStatus = useCallback(async () => {
+        const status = await getCurrentLocation()
+        console.log("status: ", status)
 
-    useEffect(() => {
-        const initialiseLocation = async () => {
-            const { status } = await Location.getForegroundPermissionsAsync()
-            logger.info("status", "", status)
-
-            if (status === "granted") {
-                SetLocationReady(true)
-            }
+        if (status === "gps_disabled") {
+            setIsGpsOff(true)
         }
 
-        initialiseLocation()
     }, [])
 
-    // useEffect(() => {
-    //     const check = async () => {
-    //         const enabled = await Location.hasServicesEnabledAsync();
-    //         setIsGpsOff(!enabled)
-    //     };
-    //     check()
-    //     const id = setInterval(check, 5000);
-    //     return () => clearInterval(id);
-    // }, []);
+    useEffect(() => {
+        checkGpsStatus()
+    }, [checkGpsStatus])
+
+
+    useEffect(() => {
+        const initializeLocation = async () => {
+            const granted = await requestLocationPermission()
+            console.log("granted: ", granted)
+            if (granted === "granted") {
+                setHasLocationPermission(true)
+            }
+        }
+        initializeLocation()
+    }, [])
 
     useEffect(() => {
         if (!isRecording) {
@@ -289,7 +289,7 @@ export default function MapBoxNew() {
 
                 if (cancelled) return
 
-                
+
 
                 useActivityStatsStore.getState().setStats({
                     distance: newDistance
@@ -363,7 +363,7 @@ export default function MapBoxNew() {
         const subscription = SQLite.addDatabaseChangeListener((event) => {
             if (event.tableName === "location_points") {
                 requestDrain()
-            }   
+            }
         })
 
         /*
@@ -433,13 +433,17 @@ export default function MapBoxNew() {
                     </ShapeSource>
                 )}
 
+
                 {
-                    locationReady && <UserLocation
-                        visible
-                        requestsAlwaysUse
-                        showsUserHeadingIndicator
-                    />
+                    hasLocationPermission && (
+                        <UserLocation
+                            visible
+                            showsUserHeadingIndicator
+                        />
+                    )
                 }
+
+
 
             </MapView>
 
