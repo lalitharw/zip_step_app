@@ -14,7 +14,7 @@ export const lightTheme = {
     spinner: "#0B1F3A",
     buttonPrimary: '#B6F500',
     buttonPrimaryText: '#0B1F3A',
-    buttonSecondary: '#F3F6FA',
+    buttonSecondary: '#DCE5E0',
     buttonSecondaryText: '#0B1F3A',
     buttonDisabled: '#D1D5DB',
     buttonDisabledText: '#64748B',
@@ -26,7 +26,8 @@ export const lightTheme = {
     sheetBg:"#F5F7FA",
     tileBg:"rgba(0,0,0,0.035)",
     tileBorder: "rgba(15,19,24,0.08)",
-    plot: "#222F40"
+    plot: "#222F40",
+    inputBorder: "#3F3C39"
 };
 
 export const darkTheme = {
@@ -45,8 +46,8 @@ export const darkTheme = {
     spinner: "#0B1F3A",
     buttonPrimary: '#B6F500',
     buttonPrimaryText: '#0B1F3A',
-    buttonSecondary: '#142B49',
-    buttonSecondaryText: '#FFFFFF',
+    buttonSecondary: '#F5F7FA',
+    buttonSecondaryText: '#0B1F3A',
     buttonDisabled: '#29415F',
     buttonDisabledText: '#A9B8CC',
     buttonDanger: '#7F1D1D',
@@ -57,5 +58,6 @@ export const darkTheme = {
     sheetBg: "#0F1318",
     tileBg : "rgba(255,255,255,0.05)",
     tileBorder : "rgba(255,255,255,0.07)",
-    plot: "#222F40"
+    plot: "#222F40",
+    inputBorder: "#3c3f42"
 };

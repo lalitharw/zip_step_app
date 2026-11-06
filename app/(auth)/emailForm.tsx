@@ -4,6 +4,7 @@ import InputComponent from "@/components/Input";
 import GoogleLoginModal from "@/components/modals/GoogleLoginModal";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Keyboard } from "react-native";
@@ -17,6 +18,7 @@ const emailSchema = yup.object({
 
 export default function emailForm() {
     const { checkEmail } = useAuth()
+    const {theme} = useTheme()
     const [email, setEmail] = useState<string>("");
     const [error, setError] = useState<string>("")
     const [loading, setLoading] = useState<boolean>(false)
@@ -102,7 +104,8 @@ export default function emailForm() {
                     <Text
                         fontSize="$8"
                         textAlign="center"
-                        color={colors.primaryWhite}
+                        color={theme.text}
+                        fontWeight={500}
                     >
                         Sign up or log in to start exploring
                     </Text>
@@ -127,7 +130,7 @@ export default function emailForm() {
                     height={"$4"}
                     disabled={loading}
                     onPress={handleEmail}
-                    backgroundColor="#edede9"
+                    backgroundColor={theme.buttonSecondary}
                     opacity={1}
                     pressStyle={{
                         scale: 0.98,
@@ -135,7 +138,7 @@ export default function emailForm() {
                     }}
                 >
                     <Text
-                        color="#111"
+                        color={theme.buttonSecondaryText}
                         fontWeight="bold"
                     >
                         {loading ? (

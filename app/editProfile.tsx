@@ -2,12 +2,14 @@ import BackButton from "@/components/buttons/BackButton";
 import GradientBackground from "@/components/GradientBackground";
 import InputComponent from "@/components/Input";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { Avatar, Button, Spinner, XStack, YStack } from "tamagui";
 
 export default function editProfile() {
+    const {theme} = useTheme()
     const { user, updateProfile } = useAuth()
     const [username, setUsername] = useState(user?.name || "")
     const [email, setEmail] = useState(user?.email || "")
@@ -21,11 +23,6 @@ export default function editProfile() {
         try {
             setIsLoading(true)
             await updateProfile(username)
-            // AlertDialog({
-            //     title: "Success",
-            //     description: "Profile Updated Successfully",
-            //     type: "success"
-            // })
         }
         catch (error) {
             // AlertDialog({
@@ -62,9 +59,9 @@ export default function editProfile() {
                         </XStack>
                         <InputComponent name="Name" value={username} setValue={setUsername} />
 
-                        <InputComponent name="Email" value={email} setValue={setEmail} />
-                        <Button disabled={isLoading} onPress={handleProfileUpdate} borderRadius={"$10"}>
-                            {isLoading ? <Spinner size="small" color="$green10" /> : "Update"}
+                        <InputComponent name="Email" value={email} setValue={setEmail} isDisabled={true}  />
+                        <Button disabled={isLoading} onPress={handleProfileUpdate} borderRadius={"$5"}>
+                            {isLoading ? <Spinner size="small" color={theme.spinner} /> : "Update"}
                         </Button>
                     </YStack>
                 </YStack>

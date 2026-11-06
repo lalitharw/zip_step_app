@@ -63,6 +63,9 @@ export default function Login() {
                     width="100%"
                     alignItems="center"
                 >
+                    <View>
+                    
+                    </View>
                     <XStack paddingHorizontal={8} paddingVertical={4}>
                         <Text fontSize={"$8"} textAlign="center" fontWeight={500} color={theme.text}>Sign Up or log in to start exploring</Text>
                     </XStack>
@@ -139,7 +142,7 @@ export default function Login() {
                         width="100%"
                         height={52}
                         onPress={() => router.push("/(auth)/emailForm")}
-                        backgroundColor={"#edede9"}
+                        backgroundColor={theme.buttonSecondary}
                         opacity={1}
                         pressStyle={{
                             scale: 0.98,

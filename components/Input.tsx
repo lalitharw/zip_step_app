@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import { Keyboard } from "react-native";
 import { Input, Text, View } from "tamagui";
 
@@ -7,15 +8,19 @@ type Props = {
     value?: string;
     setValue?: (text: string) => void;
     error?: string;
-    isDisabled?:boolean
+    isDisabled?: boolean
     extraOptions?: any
 }
 
 export default function InputComponent({ name, placeholder, isDisabled = false, error, value, setValue, extraOptions }: Props) {
+    const { theme } = useTheme()
     return (
         <View width={"100%"}>
-            {name && <Text marginBottom={5} color={"white"}>{name}</Text>}
-            <Input value={value} onFocus={() => ((isDisabled:boolean) => { isDisabled && Keyboard.dismiss()})} color={"white"} caretHidden={isDisabled} selectTextOnFocus={isDisabled} borderWidth={1} borderColor={error ? "$red10" : "rgb(197, 176, 176)"} onChangeText={setValue} width={"100%"} backgroundColor={"transparent"} placeholderTextColor="#edede918" placeholder={placeholder} size={"$5"}  {...extraOptions} />
+            {name && <Text marginBottom={5} color={theme.text}>{name}</Text>}
+            <Input disabled={isDisabled} value={value} onFocus={() => ((isDisabled: boolean) => { isDisabled && Keyboard.dismiss() })} focusStyle={{
+                borderColor: error ? "$red10" : theme.inputBorder,
+                borderWidth: 1,
+            }} color={theme.text} caretHidden={isDisabled} selectTextOnFocus={isDisabled} borderWidth={1} borderColor={error ? "$red10" : theme.inputBorder} onChangeText={setValue} width={"100%"} backgroundColor={"transparent"} placeholderTextColor="#edede918" placeholder={placeholder} size={"$5"}  {...extraOptions} />
             {error && (
                 <Text
                     color="$red10"

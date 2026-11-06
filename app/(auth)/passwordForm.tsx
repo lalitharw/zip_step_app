@@ -3,6 +3,7 @@ import GradientBackground from "@/components/GradientBackground";
 import InputComponent from "@/components/Input";
 import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Keyboard } from "react-native";
@@ -16,6 +17,7 @@ const passwordSchema = yup.object({
 
 export default function passwordForm() {
     const { login } = useAuth()
+    const {theme} = useTheme()
 
     const { email, exists } = useLocalSearchParams<{
         email: string,
@@ -97,7 +99,8 @@ export default function passwordForm() {
                     <Text
                         fontSize="$8"
                         textAlign="center"
-                        color={colors.primaryWhite}
+                        color={theme.text}
+                        fontWeight={500}
                     >
                         Create a password
                     </Text>
@@ -123,7 +126,7 @@ export default function passwordForm() {
                     height={"$4"}
                     disabled={loading}
                     onPress={handleEmail}
-                    backgroundColor="#edede9"
+                    backgroundColor={theme.buttonSecondary}
                     opacity={1}
                     pressStyle={{
                         scale: 0.98,
@@ -131,7 +134,7 @@ export default function passwordForm() {
                     }}
                 >
                     <Text
-                        color="#111"
+                        color={theme.buttonSecondaryText}
                         fontWeight="bold"
                     >
                         {loading ? (
@@ -154,7 +157,7 @@ export default function passwordForm() {
                             pathname:"/(auth)/forgoutPassword",params:{
                                 email
                             }
-                        })} color={colors.primaryWhite}>Forgot Password?</Text>
+                        })} color={theme.secondaryText}>Forgot Password?</Text>
                     </View>
                 }
                 {/* <Text color={colors.primaryWhite}>Forgot Password?</Text> */}

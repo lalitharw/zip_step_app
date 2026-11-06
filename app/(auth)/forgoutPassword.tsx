@@ -5,6 +5,7 @@ import InputComponent from "@/components/Input";
 import BackButton from "@/components/buttons/BackButton";
 import SuccessModal from "@/components/modals/SuccessModal";
 import { colors } from "@/constants/theme";
+import { useTheme } from "@/context/ThemeContext";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 
@@ -14,6 +15,7 @@ import { Button, Spinner, Text, YStack } from "tamagui";
 
 
 export default function ForgotPassword() {
+    const {theme} = useTheme()
     const { email } = useLocalSearchParams<{ email: string }>()
     const [loading, setLoading] = useState<boolean>(false)
     const [successMessage, setSuccessMessage] = useState<string>("")
@@ -60,14 +62,15 @@ export default function ForgotPassword() {
                         fontSize="$8"
                         marginBottom={"$2"}
                         textAlign="center"
-                        color={colors.primaryWhite}
+                        color={theme.text}
+                        fontWeight={500}
                     >
                         Forgot password?
                     </Text>
                     <Text
 
                         textAlign="center"
-                        color={"#edede996"}
+                        color={theme.secondaryText}
                     >
                         Enter your email and we'll send you a
                         link to reset your password.
@@ -89,7 +92,7 @@ export default function ForgotPassword() {
                     size={"$4"}
                     disabled={loading}
                     onPress={handleForgotPassword}
-                    backgroundColor="#edede9"
+                    backgroundColor={theme.buttonSecondary}
                     opacity={1}
                     pressStyle={{
                         scale: 0.98,
@@ -97,7 +100,7 @@ export default function ForgotPassword() {
                     }}
                 >
                     <Text
-                        color="#111"
+                        color={theme.buttonSecondaryText}
                         fontWeight="bold"
                     >
                         {loading ? (
