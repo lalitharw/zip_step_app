@@ -10,7 +10,8 @@ type User = {
     id: number;
     name: string;
     email: string;
-    provider: string
+    provider: string;
+    created_at: string
 }
 
 type AuthContextType = {

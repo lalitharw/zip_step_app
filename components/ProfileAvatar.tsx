@@ -6,8 +6,8 @@ import Svg, {
 } from "react-native-svg";
 import { Avatar, YStack } from "tamagui";
 
-export default function ProfileAvatar({date}: {
-  date: string
+export default function ProfileAvatar({ date }: {
+  date?: string | null
 }) {
   return (
     <YStack
@@ -37,7 +37,16 @@ export default function ProfileAvatar({date}: {
           letterSpacing="2"
         >
           <TextPath href="#memberCircle" startOffset="6%">
-            MEMBER SINCE • 4 OCT 2026
+            {/* MEMBER SINCE • 4 OCT 2026 */}
+
+            MEMBER SINCE • {
+              date &&
+              new Date(date).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              }).toUpperCase()
+            }
           </TextPath>
         </SvgText>
       </Svg>

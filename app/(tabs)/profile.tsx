@@ -36,7 +36,7 @@ export default function Profile() {
             <SafeAreaView style={{ flex: 1 }}>
                 <YStack paddingHorizontal={20} paddingTop={40} flex={1}>
                     <YStack alignItems="center" gap={"$3"}>
-                        <ProfileAvatar date="12" />
+                        <ProfileAvatar date={user?.created_at} />
                         <Text fontSize={20} fontWeight={500} color={theme.text}>{user?.name}</Text>
                         <Button backgroundColor={theme.buttonPrimary} color={theme.buttonPrimaryText} onPress={() => router.push("/editProfile")} borderRadius={"$10"} paddingHorizontal={30}><HugeiconsIcon icon={Edit04Icon} />Edit Profile</Button>
                         <Separator my={14} borderColor={theme.separator} width={"100%"} borderWidth={.5} />
