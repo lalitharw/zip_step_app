@@ -1,5 +1,6 @@
 import { colors } from "@/constants/theme";
 import { useTheme } from "@/context/ThemeContext";
+import { useLocationStore } from "@/store/locationStore";
 import { LocationOffline01Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { Modal } from "react-native";
@@ -8,6 +9,7 @@ import { enableDeviceLocation } from "../Linking/openAppDetailsSettings";
 
 export default function GpsOffModal({ isVisible, onClose }: { isVisible: boolean, onClose: () => void }) {
     const { theme } = useTheme()
+    const isRecording = useLocationStore((state) => state.isRecording)
     return (
         <Modal
             visible={
@@ -54,9 +56,15 @@ export default function GpsOffModal({ isVisible, onClose }: { isVisible: boolean
                             onClose()
                             enableDeviceLocation()
                         }} marginTop={"$3"} size={"$4"}>Okay</Button>
-                        <Button onPress={() => {
-                            onClose()
-                        }} marginTop={"$3"} size={"$4"}>Maybe Later</Button>
+
+                        {
+
+                            !isRecording && <Button onPress={() => {
+                                onClose()
+                            }} marginTop={"$3"} size={"$4"}>Maybe Later</Button>
+                        }
+
+
                     </XStack>
 
                 </View>

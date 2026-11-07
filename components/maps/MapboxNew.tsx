@@ -4,6 +4,7 @@ import { getLocationPointsUpToId, getNewLocationPointsById } from "@/database/lo
 import { useAnimateCamera } from "@/hooks/useAnimateCamera"
 import { useCheckIfActivityRunning } from "@/hooks/useCheckIfActivityRunning"
 import { useCurrentLocation } from "@/hooks/useCurrentLocation"
+import { useIfGpsServiceIsDisabled } from "@/hooks/useIfGpsServiceIsEnabled"
 import useNetworkStatus from "@/hooks/useNetworkStatus"
 import { getCurrentLocation, requestLocationPermission } from "@/services/locationService"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
@@ -63,7 +64,7 @@ export default function MapBoxNew() {
     useCurrentLocation()
     useCheckIfActivityRunning()
     const cameraRef = useAnimateCamera(currentLocation)
-    // useIfGpsServiceIsDisabled()
+    useIfGpsServiceIsDisabled()
     useNetworkStatus()
 
 
@@ -80,24 +81,21 @@ export default function MapBoxNew() {
     };
 
     // start points and end points
-    const startPoint =
-        routePoints.length > 0
-            ? routePoints[0]
-            : null;
+    // const startPoint =
+    //     routePoints.length > 0
+    //         ? routePoints[0]
+    //         : null;
 
-    const endPoint =
-        routePoints.length > 1
-            ? routePoints[routePoints.length - 1]
-            : null;
+    // const endPoint =
+    //     routePoints.length > 1
+    //         ? routePoints[routePoints.length - 1]
+    //         : null;
 
     const checkGpsStatus = useCallback(async () => {
         const status = await getCurrentLocation()
-        console.log("status: ", status)
-
         if (status === "gps_disabled") {
             setIsGpsOff(true)
         }
-
     }, [])
 
     useEffect(() => {
@@ -435,12 +433,12 @@ export default function MapBoxNew() {
 
 
                 {
-                    hasLocationPermission && (
-                        <UserLocation
-                            visible
-                            showsUserHeadingIndicator
-                        />
-                    )
+
+                    <UserLocation
+                        visible
+                        showsUserHeadingIndicator
+                    />
+
                 }
 
 

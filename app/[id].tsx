@@ -13,7 +13,6 @@ import { useReplayRouteStore } from "@/store/ReplayRouteStore";
 import { metersToKilometers } from "@/utils/dataConversion";
 import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
 import { formatDate, formatPace } from "@/utils/formatUnits";
-import logger from "@/utils/logging/logger";
 import Mapbox, { Camera, LineLayer, MapView, ShapeSource } from "@rnmapbox/maps";
 import Navigation from "@rnmapbox/navigation";
 import { useLocalSearchParams } from "expo-router";
@@ -51,7 +50,6 @@ export default function ActivityDetail() {
                 if (activity) {
                     setActivity(activity)
                     const locationPoints = await getLocationPoints(id)
-                    logger.info("Location Points","",locationPoints)
                     setLocationPoints(locationPoints)
                 }
             }
@@ -255,7 +253,7 @@ export default function ActivityDetail() {
                                 <Text color={theme.secondaryText} fontSize={14}>
                                     {formatDate(activity?.started_at)}
                                 </Text>
-                                <DeleteButton  onPressDelete={() => { setOpenDeleteModal(true); }} />
+                                <DeleteButton onPressDelete={() => { setOpenDeleteModal(true); }} />
                             </XStack>
                             <View flexDirection="row" alignItems="flex-end" gap={8}>
                                 <Text
