@@ -28,6 +28,7 @@ import StopButton from "../buttons/StopButton"
 import GpsOffModal from "../modals/GpsOffModal"
 import LessActivityModal from "../modals/LessActivityModal"
 import ResumeModal from "../modals/resumeModal"
+import { useCheckMagnetometer } from "@/hooks/useCheckMagnetometer"
 
 
 export default function MapBoxNew() {
@@ -66,6 +67,7 @@ export default function MapBoxNew() {
     const cameraRef = useAnimateCamera(currentLocation)
     useIfGpsServiceIsDisabled()
     useNetworkStatus()
+    const isMagnetometerAvailable = useCheckMagnetometer()
 
 
     const routeGeoJSON = {
@@ -436,7 +438,8 @@ export default function MapBoxNew() {
 
                     <UserLocation
                         visible
-                        showsUserHeadingIndicator
+                        
+                        showsUserHeadingIndicator={isMagnetometerAvailable}
                     />
 
                 }

@@ -156,10 +156,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     async function checkEmail(email: string) {
-        const { data } = await api.post("/auth/check-email", {
-            email
-        })
-        return data
+        try{
+            const { data } = await api.post("/auth/check-email", {
+                email
+            })
+            console.log(data)
+            return data
+        }
+        catch(error){
+            throw error
+        }
     }
 
     async function getUserData() {
