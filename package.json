@@ -11,6 +11,8 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@datadog/mobile-react-native": "^3.11.0",
+    "@datadog/mobile-react-navigation": "^3.11.0",
     "@expo/vector-icons": "^15.0.3",
     "@hugeicons/core-free-icons": "^4.2.2",
     "@hugeicons/react-native": "^1.0.15",

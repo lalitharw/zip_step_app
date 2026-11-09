@@ -4,6 +4,7 @@ import { initDatabase } from "@/database/initDatabase";
 import { setUpNotificationChannel } from "@/services/notificationService";
 import tamaguiConfig from "@/tamagui.config";
 import { toastConfig } from "@/utils/toast";
+import { DatadogProvider } from "@datadog/mobile-react-native";
 import '@tamagui/native/setup-expo-linear-gradient';
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -13,6 +14,7 @@ import 'react-native-reanimated';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 import { TamaguiProvider } from "tamagui";
+import {dataDogConfig} from "../datadogRUM-init"
 
 export default function RootLayout() {
 
@@ -30,15 +32,18 @@ export default function RootLayout() {
   return (
 
     <SafeAreaProvider>
+
       <TamaguiProvider config={tamaguiConfig} defaultTheme="default">
         <ThemeProvider>
-          <AuthProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(auth)" />
-              <Stack.Screen name="(tabs)" />
-            </Stack>
-            <Toast config={toastConfig} />
-          </AuthProvider>
+          <DatadogProvider configuration={dataDogConfig}>
+            <AuthProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="(tabs)" />
+              </Stack>
+              <Toast config={toastConfig} />
+            </AuthProvider>
+          </DatadogProvider>
         </ThemeProvider>
       </TamaguiProvider>
     </SafeAreaProvider>
