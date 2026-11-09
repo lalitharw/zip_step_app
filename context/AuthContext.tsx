@@ -86,14 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return data.data.user
 
         } catch (error) {
-            logger.error("Google Login Error","",error.response.data.message)
-            logger.error(
-                "Google Auth",
-                "Something went wrong",
-                error.response.data.message
-            )
-
-            throw error.response.data.message
+            throw error
         }
     }
 

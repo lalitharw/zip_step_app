@@ -36,7 +36,6 @@ export default function Login() {
             Toast.show({
                 type: "error",
                 position: "bottom",
-                text2: error
             })
 
         } finally {

@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "in.zipstep.app.dev"
+      "bundleIdentifier": "in.zipstep.app.development"
     },
     "android": {
       "googleServicesFile": "./google-services.json",
@@ -31,7 +31,7 @@
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION"
       ],
-      "package": "in.zipstep.app.dev"
+      "package": "in.zipstep.app.development"
     },
     "web": {
       "bundler": "metro",
