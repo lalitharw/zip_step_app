@@ -5,8 +5,9 @@ import { setUpNotificationChannel } from "@/services/notificationService";
 import tamaguiConfig from "@/tamagui.config";
 import { toastConfig } from "@/utils/toast";
 import { DatadogProvider } from "@datadog/mobile-react-native";
+import {DdRumReactNavigationTracking } from "@datadog/mobile-react-navigation"
 import '@tamagui/native/setup-expo-linear-gradient';
-import { Stack } from "expo-router";
+import { Stack, useNavigationContainerRef } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import 'react-native-gesture-handler';
@@ -14,19 +15,28 @@ import 'react-native-reanimated';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 import { TamaguiProvider } from "tamagui";
-import {dataDogConfig} from "../datadogRUM-init"
+import { dataDogConfig } from "../datadogRUM-init";
+
+SplashScreen.setOptions({
+  duration: 500,
+  fade: true
+});
 
 export default function RootLayout() {
 
-  SplashScreen.setOptions({
-    duration: 500,
-    fade: true
-  });
+  const navigationRef = useNavigationContainerRef()
 
   useEffect(() => {
     initDatabase()
     setUpNotificationChannel()
   }, [])
+
+
+  useEffect(() => {
+    if(navigationRef){
+      DdRumReactNavigationTracking.startTrackingViews(navigationRef)
+    }
+  },[navigationRef])
 
 
   return (

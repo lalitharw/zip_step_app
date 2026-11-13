@@ -1,17 +1,15 @@
 import {
-    BatchSize,
-    DatadogProvider,
     DatadogProviderConfiguration,
     SdkVerbosity,
-    UploadFrequency,
-    TrackingConsent,
+    TrackingConsent
 } from "@datadog/mobile-react-native";
 
 export const dataDogConfig = new DatadogProviderConfiguration(
     "pub604ef2da12cd1340a68c5162796a032b",
-    "<ENV_NAME>",
+    "dev",
     TrackingConsent.GRANTED,
     {
+        site: "US1",
         rumConfiguration: {
             applicationId: "ede87bce-61d0-4c0b-a52e-4e2d1be5776c",
             trackInteractions: true, // Track user interactions (use the 'accessibilityLabel' prop to give tap actions a custom name)
@@ -26,5 +24,5 @@ export const dataDogConfig = new DatadogProviderConfiguration(
     }
 )
 
-dataDogConfig.site = "US1"
+dataDogConfig.verbosity = SdkVerbosity.DEBUG
 
