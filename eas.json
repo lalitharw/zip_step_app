@@ -7,6 +7,7 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "environment":"development",
       "env":{
         "APP_VARIANT":"development"
       }
@@ -14,12 +15,14 @@
    
     "staging": {
       "distribution":"internal",
+      "environment":"preview",
       "env": {
         "APP_VARIANT":"staging"
       }
     },
     "production": {
       "autoIncrement": true,
+      "environment":"production",
       "env":{
         "APP_VARIANT":"production"
       }
