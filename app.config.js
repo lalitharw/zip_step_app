@@ -23,7 +23,7 @@ const ENV = {
 export default {
     expo: {
         name: ENV.name,
-        slug: "zip_step",
+        slug: "stride_flow_app",
         version: "1.0.0",
         orientation: "portrait",
         icon: "./assets/images/android-icon-foreground.png",
@@ -36,7 +36,7 @@ export default {
         },
         android: {
             package: ENV.id,
-            googleServicesFile: `./firebase/${ENV.firebaseDir}/google-services.json`,
+            googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? `./firebase/${ENV.firebaseDir}/google-services.json`,
             adaptiveIcon: {
                 backgroundColor: "#E6F4FE",
                 foregroundImage: "./assets/images/android-icon-foreground.png"
@@ -123,7 +123,7 @@ export default {
 
         extra: {
             variant: VARIANT,
-            router:{},
+            router: {},
             eas: {
                 projectId: "9d4f1146-f458-4f42-a823-1935ef106b4f"
             }
