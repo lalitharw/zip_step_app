@@ -1,4 +1,3 @@
-import { colors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { Home03Icon, Task01Icon, User03Icon } from '@hugeicons/core-free-icons';
@@ -8,16 +7,14 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function TabLayout() {
     const { user, isLoading } = useAuth()
-    const {theme} = useTheme()
+    const { theme } = useTheme()
     if (isLoading) return null
 
     if (!user) {
         return <Redirect href={"/(auth)/login"} />
     }
 
-    if(!user.name) {
-        
-    }
+
 
 
 

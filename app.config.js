@@ -24,7 +24,7 @@ export default {
     expo: {
         name: ENV.name,
         slug: "stride_flow_app",
-        version: "1.0.0",
+        version: "1.0.0",_
         orientation: "portrait",
         icon: "./assets/images/android-icon-foreground.png",
         scheme: ENV.schema,

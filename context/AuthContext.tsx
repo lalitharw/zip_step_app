@@ -5,6 +5,7 @@ import { getAuth, GoogleAuthProvider, signInWithCredential } from "@react-native
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as SecureStore from "expo-secure-store";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import * as SplashScreen from "expo-splash-screen"
 
 type User = {
     id: number;
@@ -35,13 +36,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [isLoading, setLoading] = useState(true)
 
-    useEffect(() => {
 
+    useEffect(() => {
+        if(!isLoading) {
+            SplashScreen.hideAsync()
+        }
+    },[isLoading])
+
+    useEffect(() => {
         GoogleSignin.configure({
             webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEBCLIENT_ID
         })
-
-
         getUserData()
     }, [])
 
@@ -70,7 +75,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const firebaseIdToken =
                 await userCredentials.user.getIdToken()
 
-            logger.info("Token","",firebaseIdToken)
 
             const { data } = await api.post("/auth/login/google", {
                 id_token: firebaseIdToken,

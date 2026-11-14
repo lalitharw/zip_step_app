@@ -5,7 +5,7 @@ import { setUpNotificationChannel } from "@/services/notificationService";
 import tamaguiConfig from "@/tamagui.config";
 import { toastConfig } from "@/utils/toast";
 import { DatadogProvider } from "@datadog/mobile-react-native";
-import {DdRumReactNavigationTracking } from "@datadog/mobile-react-navigation"
+import { DdRumReactNavigationTracking } from "@datadog/mobile-react-navigation";
 import '@tamagui/native/setup-expo-linear-gradient';
 import { Stack, useNavigationContainerRef } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -17,13 +17,14 @@ import Toast from 'react-native-toast-message';
 import { TamaguiProvider } from "tamagui";
 import { dataDogConfig } from "../datadogRUM-init";
 
+SplashScreen.preventAutoHideAsync()
+
 SplashScreen.setOptions({
   duration: 500,
   fade: true
 });
 
 export default function RootLayout() {
-
   const navigationRef = useNavigationContainerRef()
 
   useEffect(() => {
@@ -33,16 +34,15 @@ export default function RootLayout() {
 
 
   useEffect(() => {
-    if(navigationRef){
+    if (navigationRef) {
       DdRumReactNavigationTracking.startTrackingViews(navigationRef)
     }
-  },[navigationRef])
+  }, [navigationRef])
 
 
   return (
 
     <SafeAreaProvider>
-
       <TamaguiProvider config={tamaguiConfig} defaultTheme="default">
         <ThemeProvider>
           <DatadogProvider configuration={dataDogConfig}>
