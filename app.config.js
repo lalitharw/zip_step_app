@@ -24,10 +24,10 @@ export default {
     expo: {
         name: ENV.name,
         slug: "stride_flow_app",
-        version: "1.0.0",_
+        version: "1.0.0",
         orientation: "portrait",
         icon: "./assets/images/android-icon-foreground.png",
-        scheme: ENV.schema,
+        scheme: ENV.scheme,
         userInterfaceStyle: "automatic",
         newArchEnabled: true,
         ios: {
