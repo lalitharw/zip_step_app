@@ -202,7 +202,7 @@ export const getLocationPointsUpToId = async (activityId: number, cursor: number
     const result = await db.getAllAsync<LocationPoint>(`
         SELECT * FROM location_points
         WHERE activity_id = ?
-        AND  id <= 1
+        AND  id <= ?
         ORDER BY id ASC
         `, activityId, cursor)
 

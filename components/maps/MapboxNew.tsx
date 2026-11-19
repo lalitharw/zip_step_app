@@ -29,6 +29,8 @@ import GpsOffModal from "../modals/GpsOffModal"
 import LessActivityModal from "../modals/LessActivityModal"
 import ResumeModal from "../modals/resumeModal"
 import { useCheckMagnetometer } from "@/hooks/useCheckMagnetometer"
+import { checkIfActivityIsRunning } from "@/services/activity/activityService"
+import logger from "@/utils/logging/logger"
 
 
 export default function MapBoxNew() {
@@ -43,6 +45,7 @@ export default function MapBoxNew() {
     const [isRouteRestored, setIsRouteRestored] = useState<boolean>(false)
     const [hasLocationPermission, setHasLocationPermission] = useState<boolean>(false)
     const prevPoint = useRef<{ latitude: number, longitude: number } | null>(null)
+    const [isActivitySetRestored,setIsActivityStateRestored] = useState<boolean>(false)
 
     // store
     const currentLocation = useLocationStore.getState().currentLocation
@@ -63,7 +66,7 @@ export default function MapBoxNew() {
 
     // hooks
     useCurrentLocation()
-    useCheckIfActivityRunning()
+    // useCheckIfActivityRunning()
     const cameraRef = useAnimateCamera(currentLocation)
     useIfGpsServiceIsDisabled()
     useNetworkStatus()
@@ -93,6 +96,20 @@ export default function MapBoxNew() {
     //         ? routePoints[routePoints.length - 1]
     //         : null;
 
+    // use effect to check is activity is already running
+    useEffect(() => {
+        const initialize = async() => {
+            try{
+                await checkIfActivityIsRunning()
+            }
+            finally{
+                setIsActivityStateRestored(true)
+            }
+        }
+
+        initialize()
+    },[])
+
     const checkGpsStatus = useCallback(async () => {
         const status = await getCurrentLocation()
         if (status === "gps_disabled") {
@@ -108,7 +125,6 @@ export default function MapBoxNew() {
     useEffect(() => {
         const initializeLocation = async () => {
             const granted = await requestLocationPermission()
-            console.log("granted: ", granted)
             if (granted === "granted") {
                 setHasLocationPermission(true)
             }
@@ -117,7 +133,7 @@ export default function MapBoxNew() {
     }, [])
 
     useEffect(() => {
-        if (!isRecording) {
+        if (!isRecording || !isActivitySetRestored) {
             setIsRouteRestored(false)
             lastLoadedId.current = 0
             prevPoint.current = null
@@ -160,11 +176,12 @@ export default function MapBoxNew() {
 
                 const cursor = activity.last_loaded_location_id ?? 0
 
-                // Restore only points that have already been processed.
                 const points = await getLocationPointsUpToId(
                     activityId,
                     cursor
                 )
+
+               
 
                 if (cancelled) return
 
@@ -197,6 +214,7 @@ export default function MapBoxNew() {
 
                 setIsRouteRestored(true)
             } catch (error) {
+                setIsRouteRestored(false)
                 console.error("Activity Restoration Failed:", error)
                 // Leave isRouteRestored false so the listener doesn't process
                 // points against an incomplete restoration.
@@ -208,7 +226,7 @@ export default function MapBoxNew() {
         return () => {
             cancelled = true
         }
-    }, [isRecording])
+    }, [isRecording,isActivitySetRestored])
 
     useEffect(() => {
         if (!isRecording || isPaused || !isRouteRestored) {
@@ -438,7 +456,6 @@ export default function MapBoxNew() {
 
                     <UserLocation
                         visible
-                        
                         showsUserHeadingIndicator={isMagnetometerAvailable}
                     />
 

@@ -245,6 +245,9 @@ export const checkIfActivityIsRunning = async () => {
 
 
         if (!activityId) {
+            useLocationStore.getState().setIsRecording(false);
+            useActivityPauseStore.getState().setIsActivityPaused(false);
+            useLocationStore.getState().setShowResumeModal(false);
             return
         }
 
@@ -273,7 +276,6 @@ export const checkIfActivityIsRunning = async () => {
                 .getState()
                 .setIsActivityPaused(true)
         }
-
     } catch (error) {
         console.error(
             "Check Activity Error: ",

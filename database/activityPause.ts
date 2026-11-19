@@ -94,3 +94,20 @@ export async function updateActivityPauseServerId(clientId: string, serverId: nu
         throw error
     }
 }
+
+
+export async function getLastActivityPause(activityId: number | string) {
+    try{
+        return await db.getFirstAsync(`
+                SELECT id, activity_id, client_id, pause_at, resume_at
+                FROM activity_pauses
+                WHERE activity_id = ?
+                ORDER BY id DESC
+                LIMIT 1
+            `,activityId)
+    }
+    catch(error){
+        console.error("DB Error: ",error)
+        throw error
+    }
+}

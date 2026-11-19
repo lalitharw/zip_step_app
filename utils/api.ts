@@ -3,7 +3,7 @@ import { router } from "expo-router"
 import * as SecureStorage from "expo-secure-store"
 
 const api = axios.create({
-    baseURL: `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1`
+    baseURL: `${process.env.EXPO_PUBLIC_SERVER_URL}/v1`
 })
 
 api.interceptors.request.use(async (config) => {
