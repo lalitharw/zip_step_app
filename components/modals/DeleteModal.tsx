@@ -1,6 +1,7 @@
 import { colors } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
 import { softDeleteActivity } from '@/database/activities';
+import { softDeleteActivityPause } from '@/database/activityPause';
 import { softDeleteLocationPoints } from '@/database/locationPoints';
 import { Alert01Icon, Delete01FreeIcons } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
@@ -22,6 +23,7 @@ export default function DeleteModal({ visible, onClose, activityId }: { visible:
             
             await softDeleteLocationPoints(activityId)
             await softDeleteActivity(activityId)
+            await softDeleteActivityPause(activityId)
             Toast.show({
                 type: "success",
                 position: "top",

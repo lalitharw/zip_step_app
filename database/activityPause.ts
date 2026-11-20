@@ -111,3 +111,21 @@ export async function getLastActivityPause(activityId: number | string) {
         throw error
     }
 }
+
+
+// delete
+export async function softDeleteActivityPause(activityId: number | string) {
+    try{
+        return await db.runAsync(`
+            UPDATE activity_pauses
+            SET updated_at = ?,
+            deleted_at = ?,
+            is_deleted = 1
+            WHERE activity_id = ?
+            `,new Date().toISOString(), new Date().toISOString(),activityId)
+    }
+    catch(error){
+        console.error("DB Error: ",error)
+        throw error
+    }
+}
