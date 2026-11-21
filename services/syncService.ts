@@ -1,7 +1,7 @@
-import { createActivityOnServer } from "@/api/activityApi"
+import { createActivityOnServer, deleteActivity } from "@/api/activityApi"
 import { createActivityPauses } from "@/api/activityPausesApi"
 import { uploadLocationPoint } from "@/api/locationPointApi"
-import { getActivitiesWithUnsyncedActivityPauses, getActivitiesWithUnSyncedPoints, getUnsyncedActivities, markActivityAsSynced, updateActivityServerId } from "@/database/activities"
+import { getActivitiesWithUnsyncedActivityPauses, getActivitiesWithUnSyncedPoints, getUnsyncedActivities, getUnSyncedDeletedActivities, hardDeleteActivity, markActivityAsSynced, updateActivityServerId } from "@/database/activities"
 import { getUnSyncedActivityPause, markActivityPauseAsSynced } from "@/database/activityPause"
 import { getUnsyncedLocationPoints, markLocationPointsAsSynced } from "@/database/locationPoints"
 
@@ -68,17 +68,6 @@ export const syncLocationPoints = async () => {
 
 export const syncActivityPauses = async () => {
     try {
-        // const activityPauses = await getUnsyncedActivityPauses()
-
-        // if (activityPauses && activityPauses?.length > 0) {
-        //     for (const activityPause of activityPauses) {
-        //         const res = await createActivityPauses(activityPause)
-        //         if (res && res.id) {
-        //             await markActivityPauseAsSynced(res.client_id)
-        //         }
-        //     }
-        // }
-
         const activityPauses = await getActivitiesWithUnsyncedActivityPauses()
         if (activityPauses && activityPauses.length > 0) {
             for (const activityPause of activityPauses) {
@@ -92,12 +81,12 @@ export const syncActivityPauses = async () => {
                     continue
                 }
 
-                for (const activityPausePoint of activityPausePoints) {
-                    const res = await createActivityPauses(activityPausePoint)
-                    if (res && res.id) {
-                        await markActivityPauseAsSynced(res.client_id)
-                    }
+                const res = await createActivityPauses(activityPausePoints, activityPause.server_id)
+
+                if (res && res?.data?.success) {
+                    await markActivityPauseAsSynced(activityPausePoints.map((point) => point.id))
                 }
+
 
             }
         }
@@ -109,8 +98,31 @@ export const syncActivityPauses = async () => {
 }
 
 
+export const syncDeletedActivities = async () => {
+    try {
+        const activities = await getUnSyncedDeletedActivities()
+        if (activities && activities.length > 0) {
+            for (const activity of activities) {
+                if (!activity.server_id) {
+                    continue
+                }
+                const result = await deleteActivity(activity.server_id)
+                if (result.client_id) {
+                    await hardDeleteActivity(result.client_id)
+                }
+            }
+        }
+
+    }
+    catch (error) {
+        console.error("Something went wrong: ", error)
+        throw error
+    }
+}
+
+
 export const syncData = async () => {
-    if (isSyncing || process.env.EXPO_PUBLIC_IS_SYNC_ENABLE != "true") {
+    if (isSyncing) {
         return
     }
     try {
@@ -119,6 +131,7 @@ export const syncData = async () => {
         await syncActivities()
         await syncLocationPoints()
         await syncActivityPauses()
+        await syncDeletedActivities()
     }
     catch (error) {
 
@@ -128,5 +141,8 @@ export const syncData = async () => {
     }
 
 }
+
+
+
 
 

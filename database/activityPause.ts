@@ -27,7 +27,9 @@ export async function getActivityPause(activityId: number): Promise<activityPaus
 }
 
 
-export async function storePauseAt({activityId,userId}:{activityId: number,userId:number}): Promise<number> {
+
+
+export async function storePauseAt({ activityId, userId }: { activityId: number, userId: number }): Promise<number> {
     try {
         const result = await db.runAsync(`
                 INSERT INTO activity_pauses (client_id, pause_at,activity_id,user_id)
@@ -61,19 +63,22 @@ export async function getUnSyncedActivityPause(activityId: number): Promise<acti
                 FROM activity_pauses 
                 WHERE activity_id = ?
                 AND sync_status = 'pending'
+                AND is_deleted = 0
                 ORDER BY id ASC
         `, activityId)
 }
 
-export async function markActivityPauseAsSynced(clientId: string) {
+export async function markActivityPauseAsSynced(pauseIds: number[]) {
+    if (pauseIds.length == 0) return
+
     try {
+        const Ids = pauseIds.join(",")
         await db.runAsync(
             `
             UPDATE activity_pauses 
             SET sync_status = 'synced'
-            WHERE client_id = ?
-            `
-            , clientId)
+            WHERE id IN (${Ids})
+            `)
     }
     catch (error) {
         console.error("DB Error:", error)
@@ -97,17 +102,17 @@ export async function updateActivityPauseServerId(clientId: string, serverId: nu
 
 
 export async function getLastActivityPause(activityId: number | string) {
-    try{
+    try {
         return await db.getFirstAsync(`
                 SELECT id, activity_id, client_id, pause_at, resume_at
                 FROM activity_pauses
                 WHERE activity_id = ?
                 ORDER BY id DESC
                 LIMIT 1
-            `,activityId)
+            `, activityId)
     }
-    catch(error){
-        console.error("DB Error: ",error)
+    catch (error) {
+        console.error("DB Error: ", error)
         throw error
     }
 }
@@ -115,17 +120,18 @@ export async function getLastActivityPause(activityId: number | string) {
 
 // delete
 export async function softDeleteActivityPause(activityId: number | string) {
-    try{
+    try {
         return await db.runAsync(`
             UPDATE activity_pauses
             SET updated_at = ?,
             deleted_at = ?,
-            is_deleted = 1
+            is_deleted = 1,
+            sync_status = "pending"
             WHERE activity_id = ?
-            `,new Date().toISOString(), new Date().toISOString(),activityId)
+            `, new Date().toISOString(), new Date().toISOString(), activityId)
     }
-    catch(error){
-        console.error("DB Error: ",error)
+    catch (error) {
+        console.error("DB Error: ", error)
         throw error
     }
 }

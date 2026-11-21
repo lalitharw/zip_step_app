@@ -1,8 +1,9 @@
 import { colors } from '@/constants/theme';
 import { useTheme } from '@/context/ThemeContext';
-import { softDeleteActivity } from '@/database/activities';
+import { getAllActivities, softDeleteActivity } from '@/database/activities';
 import { softDeleteActivityPause } from '@/database/activityPause';
 import { softDeleteLocationPoints } from '@/database/locationPoints';
+import logger from '@/utils/logging/logger';
 import { Alert01Icon, Delete01FreeIcons } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { router } from 'expo-router';
@@ -21,8 +22,8 @@ export default function DeleteModal({ visible, onClose, activityId }: { visible:
         setLoading(true)
         try {
             
-            await softDeleteLocationPoints(activityId)
             await softDeleteActivity(activityId)
+            await softDeleteLocationPoints(activityId)
             await softDeleteActivityPause(activityId)
             Toast.show({
                 type: "success",
@@ -30,6 +31,8 @@ export default function DeleteModal({ visible, onClose, activityId }: { visible:
                 text1: "Activity Deleted Successfully"
             })
             router.replace("/(tabs)/history")
+
+            
         }
         catch(error){
             console.error("Failed to perform delete operations: ",error)

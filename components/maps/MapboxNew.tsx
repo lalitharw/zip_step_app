@@ -2,10 +2,11 @@ import { useTheme } from "@/context/ThemeContext"
 import { getActivity, saveLastLoadedLocationIdAndDistance } from "@/database/activities"
 import { getLocationPointsUpToId, getNewLocationPointsById } from "@/database/locationPoints"
 import { useAnimateCamera } from "@/hooks/useAnimateCamera"
-import { useCheckIfActivityRunning } from "@/hooks/useCheckIfActivityRunning"
+import { useCheckMagnetometer } from "@/hooks/useCheckMagnetometer"
 import { useCurrentLocation } from "@/hooks/useCurrentLocation"
 import { useIfGpsServiceIsDisabled } from "@/hooks/useIfGpsServiceIsEnabled"
-import useNetworkStatus from "@/hooks/useNetworkStatus"
+import useSync from "@/hooks/useSync"
+import { checkIfActivityIsRunning } from "@/services/activity/activityService"
 import { getCurrentLocation, requestLocationPermission } from "@/services/locationService"
 import { useActivityPauseStore } from "@/store/ActivityPauseStore"
 import { useActivityStatsStore } from "@/store/ActivityStatsStore"
@@ -28,9 +29,6 @@ import StopButton from "../buttons/StopButton"
 import GpsOffModal from "../modals/GpsOffModal"
 import LessActivityModal from "../modals/LessActivityModal"
 import ResumeModal from "../modals/resumeModal"
-import { useCheckMagnetometer } from "@/hooks/useCheckMagnetometer"
-import { checkIfActivityIsRunning } from "@/services/activity/activityService"
-import logger from "@/utils/logging/logger"
 
 
 export default function MapBoxNew() {
@@ -45,7 +43,7 @@ export default function MapBoxNew() {
     const [isRouteRestored, setIsRouteRestored] = useState<boolean>(false)
     const [hasLocationPermission, setHasLocationPermission] = useState<boolean>(false)
     const prevPoint = useRef<{ latitude: number, longitude: number } | null>(null)
-    const [isActivitySetRestored,setIsActivityStateRestored] = useState<boolean>(false)
+    const [isActivitySetRestored, setIsActivityStateRestored] = useState<boolean>(false)
 
     // store
     const currentLocation = useLocationStore.getState().currentLocation
@@ -66,10 +64,9 @@ export default function MapBoxNew() {
 
     // hooks
     useCurrentLocation()
-    // useCheckIfActivityRunning()
     const cameraRef = useAnimateCamera(currentLocation)
     useIfGpsServiceIsDisabled()
-    useNetworkStatus()
+    useSync()
     const isMagnetometerAvailable = useCheckMagnetometer()
 
 
@@ -98,17 +95,17 @@ export default function MapBoxNew() {
 
     // use effect to check is activity is already running
     useEffect(() => {
-        const initialize = async() => {
-            try{
+        const initialize = async () => {
+            try {
                 await checkIfActivityIsRunning()
             }
-            finally{
+            finally {
                 setIsActivityStateRestored(true)
             }
         }
 
         initialize()
-    },[])
+    }, [])
 
     const checkGpsStatus = useCallback(async () => {
         const status = await getCurrentLocation()
@@ -181,7 +178,7 @@ export default function MapBoxNew() {
                     cursor
                 )
 
-               
+
 
                 if (cancelled) return
 
@@ -226,7 +223,7 @@ export default function MapBoxNew() {
         return () => {
             cancelled = true
         }
-    }, [isRecording,isActivitySetRestored])
+    }, [isRecording, isActivitySetRestored])
 
     useEffect(() => {
         if (!isRecording || isPaused || !isRouteRestored) {

@@ -43,11 +43,11 @@ export async function createActivity(userId: number | null) {
 }
 
 // * get all activities as per userId
-export async function getAllActivities(userId: number | string) : Promise<Activity[] | null>{
-    const result= await db.getAllAsync<Activity>(`
+export async function getAllActivities(userId: number | string): Promise<Activity[] | null> {
+    const result = await db.getAllAsync<Activity>(`
             SELECT * FROM activities
             WHERE user_id = ?
-        `,userId)
+        `, userId)
 
     return result
 }
@@ -73,7 +73,16 @@ export async function getUnsyncedActivities(): Promise<Activity[] | null> {
     return db.getAllAsync<Activity>(`
             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, sync_status, 
             client_id, distance, duration, average_speed, average_pace, elevation_gain, current_elevation, max_speed
-            FROM activities WHERE sync_status = 'pending' AND status = 'completed'
+            FROM activities WHERE sync_status = 'pending' AND status = 'completed' AND is_deleted = 0
+            ORDER BY id ASC
+        `)
+}
+
+export async function getUnSyncedDeletedActivities(): Promise<Activity[] | null> {
+    return db.getAllAsync<Activity>(`
+            SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, sync_status, 
+            client_id, distance, duration, average_speed, average_pace, elevation_gain, current_elevation, max_speed
+            FROM activities WHERE sync_status = 'pending' AND status = 'completed' AND is_deleted = 1
             ORDER BY id ASC
         `)
 }
@@ -92,13 +101,13 @@ export async function completeActivity(activityId: number) {
     return result.changes > 0
 }
 
-export async function cancelledActivity(activityId: number){
+export async function cancelledActivity(activityId: number) {
     const result = await db.runAsync(`
         UPDATE activities
         SET status = 'cancelled',
         stopped_at = ?
         WHERE id = ?
-        `,new Date().toISOString(),activityId)
+        `, new Date().toISOString(), activityId)
     return result.changes > 0
 }
 
@@ -231,13 +240,13 @@ export const updateActivityStats = async (activityId: number, stats: {
 
 // ------
 
-export const saveLastLoadedLocationIdAndDistance = async (activityId: number, data:{distance: number, lastProcessedPointId: number}) => {
+export const saveLastLoadedLocationIdAndDistance = async (activityId: number, data: { distance: number, lastProcessedPointId: number }) => {
     await db.runAsync(`
             UPDATE activities
             SET last_loaded_location_id = ?,
             distance = ?
             WHERE id = ?
-        `, data.lastProcessedPointId,data.distance,activityId)
+        `, data.lastProcessedPointId, data.distance, activityId)
 }
 
 export const getLastLoadedLocationId = async (activityId: number) => {
@@ -253,14 +262,22 @@ export const getLastLoadedLocationId = async (activityId: number) => {
 
 
 // *delete operation
-export const softDeleteActivity = async(activityId: string) => {
+export const softDeleteActivity = async (activityId: string) => {
     await db.runAsync(`
             UPDATE activities
             SET is_deleted = 1,
             updated_at = ?,
-            deleted_at = ?
+            deleted_at = ?,
+            sync_status = "pending"
             WHERE id = ?
-        `,new Date().toISOString(),new Date().toISOString(),activityId)
+        `, new Date().toISOString(), new Date().toISOString(), activityId)
+}
+
+export const hardDeleteActivity = async (clientId: string) => {
+    await db.runAsync(`
+            DELETE FROM activities
+            WHERE client_id = ?
+            `, clientId)
 }
 
 

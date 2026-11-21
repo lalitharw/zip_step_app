@@ -13,6 +13,7 @@ import { useReplayRouteStore } from "@/store/ReplayRouteStore";
 import { metersToKilometers } from "@/utils/dataConversion";
 import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
 import { formatDate, formatPace } from "@/utils/formatUnits";
+import logger from "@/utils/logging/logger";
 import Mapbox, { Camera, LineLayer, MapView, ShapeSource } from "@rnmapbox/maps";
 import Navigation from "@rnmapbox/navigation";
 import { useLocalSearchParams } from "expo-router";

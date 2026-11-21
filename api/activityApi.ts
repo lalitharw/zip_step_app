@@ -20,3 +20,17 @@ export const createActivityOnServer = async (data: createActivityInput) => {
         throw error
     }
 }
+
+export const deleteActivity = async (activityId: number | string) => {
+    try {
+        const response = await api.delete(`/activities/${activityId}`)
+
+        if (response && response.data.data.activity) {
+            return response.data.data.activity
+        }
+    }
+    catch (error) {
+        console.error("Something went wrong: ", error)
+        throw error
+    }
+}
