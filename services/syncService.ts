@@ -1,9 +1,12 @@
 import { createActivityOnServer, deleteActivity } from "@/api/activityApi"
 import { createActivityPauses } from "@/api/activityPausesApi"
 import { uploadLocationPoint } from "@/api/locationPointApi"
-import { getActivitiesWithUnsyncedActivityPauses, getActivitiesWithUnSyncedPoints, getUnsyncedActivities, getUnSyncedDeletedActivities, hardDeleteActivity, markActivityAsSynced, updateActivityServerId } from "@/database/activities"
+import { ServerActivity } from "@/common/types/server"
+import { getActivitiesWithUnsyncedActivityPauses, getActivitiesWithUnSyncedPoints, getUnsyncedActivities, getUnSyncedDeletedActivities, hardDeleteActivity, markActivityAsSynced, saveServerActivity, updateActivityServerId } from "@/database/activities"
 import { getUnSyncedActivityPause, markActivityPauseAsSynced } from "@/database/activityPause"
 import { getUnsyncedLocationPoints, markLocationPointsAsSynced } from "@/database/locationPoints"
+import logger from "@/utils/logging/logger"
+import { getServerActivities } from "./activityDownload"
 
 let isSyncing = false
 
@@ -16,9 +19,7 @@ export const syncActivities = async () => {
             for (const activity of activities) {
                 const result = await createActivityOnServer(activity)
                 if (result && result.id) {
-                    //update the local db activity with server_id
                     await updateActivityServerId(result.client_id, result.id)
-                    // mark the activity as synced
                     await markActivityAsSynced(result.client_id)
                 }
             }
@@ -59,7 +60,8 @@ export const syncLocationPoints = async () => {
         }
     }
     catch (error: any) {
-        console.log("STATUS:", error.response?.status)
+        console.error(error)
+        console.log("STATUS:", error.response)
         console.log("DATA:", error.response?.data)
         console.log("ERROR:", error.response?.data?.errors)
         throw error
@@ -81,11 +83,9 @@ export const syncActivityPauses = async () => {
                     continue
                 }
 
-                const res = await createActivityPauses(activityPausePoints, activityPause.server_id)
+                await createActivityPauses(activityPausePoints, activityPause.server_id)
+                await markActivityPauseAsSynced(activityPausePoints.map((point) => point.id))
 
-                if (res && res?.data?.success) {
-                    await markActivityPauseAsSynced(activityPausePoints.map((point) => point.id))
-                }
 
 
             }
@@ -121,6 +121,34 @@ export const syncDeletedActivities = async () => {
 }
 
 
+export const downloadActivities = async () => {
+    try {
+        let page = 1;
+
+        while (true) {
+            const response = await getServerActivities()
+
+            const activities: ServerActivity[] = response.data.activities.data
+            for (const activity of activities) {
+                await saveServerActivity(activity)
+
+                // await
+            }
+
+            if (!response.next_page_url) break;
+
+            page++;
+        }
+
+    }
+    catch (error) {
+        console.error("Something went wrong: ", error)
+    }
+}
+
+
+
+
 export const syncData = async () => {
     if (isSyncing) {
         return
@@ -140,6 +168,16 @@ export const syncData = async () => {
         isSyncing = false
     }
 
+}
+
+export const syncFromServer = async () => {
+    try {
+        await downloadActivities()
+    }
+    catch (error) {
+        console.error("Error Downloding data from server: ", error)
+        throw error
+    }
 }
 
 

@@ -169,6 +169,8 @@ export async function getUnsyncedLocationPoints(activityId: number): Promise<Loc
             activity_id AS activityId,
             latitude,
             longitude,
+            raw_latitude,
+            raw_longitude,
             client_id,
             accuracy,
             altitude,
@@ -177,7 +179,7 @@ export async function getUnsyncedLocationPoints(activityId: number): Promise<Loc
             sync_status
             FROM location_points
             WHERE activity_id = ?
-            AND sync_status = 'pending'
+            
             AND is_deleted = 0
             ORDER BY id ASC
         `, activityId)

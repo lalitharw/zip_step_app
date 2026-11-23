@@ -23,7 +23,7 @@ const ENV = {
 export default {
     expo: {
         name: ENV.name,
-        slug: "stride_flow_app",
+        slug: "zip_step_app",
         version: "1.0.0",
         orientation: "portrait",
         icon: "./assets/images/android-icon-foreground.png",

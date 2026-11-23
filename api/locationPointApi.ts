@@ -1,5 +1,6 @@
 import { LocationPoint } from "@/database/locationPoints"
 import api from "@/utils/api"
+import logger from "@/utils/logging/logger"
 
 
 
@@ -14,9 +15,13 @@ export const uploadLocationPoint = async (points: LocationPoint[], activityServe
                 client_id: point.client_id,
                 accuracy: point.accuracy,
                 altitude: point.altitude,
-                speed: point.speed
+                speed: point.speed,
+                raw_latitude: point.raw_latitude,
+                raw_longitude: point.raw_longitude
             }))
         })
+
+        return response.data
     }
     catch (error) {
         console.error("Something went wrong: ", error)

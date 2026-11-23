@@ -1,3 +1,4 @@
+import { ServerActivity } from "@/common/types/server"
 import * as Crypto from "expo-crypto"
 import { db } from "./initDatabase"
 
@@ -53,6 +54,15 @@ export async function getAllActivities(userId: number | string): Promise<Activit
 }
 
 
+export async function getActivities() {
+    const result = await db.getAllAsync<Activity>(`
+            SELECT * FROM activities
+        `)
+
+    return result
+}
+
+
 
 export async function getActivity(activityId: number | string): Promise<Activity | null> {
     return db.getFirstAsync<Activity>(`
@@ -72,8 +82,8 @@ export async function getActiveActivity(activityId: number): Promise<Activity | 
 export async function getUnsyncedActivities(): Promise<Activity[] | null> {
     return db.getAllAsync<Activity>(`
             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, sync_status, 
-            client_id, distance, duration, average_speed, average_pace, elevation_gain, current_elevation, max_speed
-            FROM activities WHERE sync_status = 'pending' AND status = 'completed' AND is_deleted = 0
+            client_id, distance, duration, average_speed, average_pace, elevation_gain, current_elevation, max_speed, map_image_path
+            FROM activities WHERE  status = 'completed' AND is_deleted = 0
             ORDER BY id ASC
         `)
 }
@@ -147,7 +157,7 @@ export const getActivitiesWithUnSyncedPoints = async () => {
         INNER JOIN location_points lp
         on a.id = lp.activity_id
         WHERE a.server_id IS NOT NULL
-        AND lp.sync_status = 'pending'
+        
         ORDER BY a.id ASC
         `
     )
@@ -280,6 +290,111 @@ export const hardDeleteActivity = async (clientId: string) => {
             `, clientId)
 }
 
+
+// *save data from server
+export const saveServerActivity = async (activity: ServerActivity): Promise<void> => {
+    const existing = await db.getFirstAsync<{ id: number, sync_status: string }>(`
+            SELECT id, sync_status
+            FROM activities
+            WHERE client_id = ?
+        `, activity.client_id)
+
+    if (!existing) {
+        await db.runAsync(`
+                INSERT INTO activities (
+                    user_id,
+                    server_id,
+                    client_id,
+                    status,
+                    started_at,
+                    stopped_at,
+                    distance,
+                    duration,
+                    average_speed,
+                    average_pace,
+                    elevation_gain,
+                    current_elevation,
+                    max_speed,
+                    map_image_path,
+                    is_deleted,
+                    sync_status,
+                    created_at,
+                    deleted_at,
+                    updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'synced', ?, ?, ?)`
+            ,
+            activity.user_id,
+            activity.id,
+            activity.client_id,
+            "completed",
+            activity.start_time,
+            activity.end_time,
+            activity.distance,
+            activity.duration,
+            activity.average_speed,
+            activity.average_pace,
+            activity.elevation_gain,
+            activity.current_elevation,
+            activity.max_speed,
+            activity.map_image_path,
+            activity.deleted_at ? 1 : 0,
+            activity.created_at,
+            activity.deleted_at,
+            activity.updated_at
+        );
+
+        return;
+    }
+
+    if (existing.sync_status !== "synced") {
+        await db.runAsync(`
+                UPDATE activities
+                SET server_id = ?
+                WHERE id = ?
+            `, activity.id, existing.id)
+
+        return
+    }
+
+
+    await db.runAsync(`
+            UPDATE activities SET
+            server_id = ?,
+            status = ?,
+            started_at = ?,
+            stopped_at = ?,
+            distance = ?,
+            duration = ?,
+            average_speed = ?,
+            average_pace = ?,
+            elevation_gain = ?,
+            current_elevation = ?,
+            max_speed = ?,
+            map_image_path = ?,
+            is_deleted = ?,
+            updated_at = ?,
+            deleted_at = ?
+         WHERE id = ?`
+        ,
+        activity.id,
+        "completed",
+        activity.start_time,
+        activity.end_time,
+        activity.distance,
+        activity.duration,
+        activity.average_speed,
+        activity.average_pace,
+        activity.elevation_gain,
+        activity.current_elevation,
+        activity.max_speed,
+        activity.map_image_path,
+        activity.deleted_at ? 1 : 0,
+        activity.updated_at,
+        activity.deleted_at,
+        existing.id
+    )
+}
 
 
 

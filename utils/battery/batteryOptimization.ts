@@ -1,7 +1,6 @@
 import * as Battery from "expo-battery";
 import * as IntentLauncher from "expo-intent-launcher";
 import { Platform } from "react-native";
-import logger from "../logging/logger";
 
 
 export async function ensureBatteryOptimizationIgnored() {
@@ -13,7 +12,7 @@ export async function ensureBatteryOptimizationIgnored() {
         if (!isBatteryOptimizationEnabled) return
 
         await IntentLauncher.startActivityAsync(IntentLauncher.ActivityAction.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, {
-            data: 'package:com.anonymous.stride_flow_app'
+            data: 'package:com.anonymous.zip_step_app'
         })
     }
     catch (error) {

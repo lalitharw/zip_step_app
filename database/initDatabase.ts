@@ -1,10 +1,15 @@
 import * as SQLite from "expo-sqlite";
 
-export const db = SQLite.openDatabaseSync("stride_flow.db",{
-    enableChangeListener:true
+export const db = SQLite.openDatabaseSync("zip_step.db", {
+    enableChangeListener: true
 })
 
+
+
 export async function initDatabase() {
+
+    await db.execAsync(`PRAGMA foreign_keys = ON;`)
+
     await db.execAsync(`
         CREATE TABLE IF NOT EXISTS activities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,14 +23,13 @@ export async function initDatabase() {
             distance REAL NOT NULL DEFAULT 0,
             last_loaded_location_id INTEGER NOT NULL DEFAULT 0,
             duration INTEGER NULL,
-            average_speed INTEGER NULL,
-            average_pace INTEGER NULL,
-            elevation_gain INTEGER NULL,
-            elevation_loss INTEGER NULL,
-            current_elevation INTEGER NULL,
-            max_speed INTEGER NULL,
+            average_speed REAL NULL,
+            average_pace REAL NULL,
+            elevation_gain REAL NULL,
+            elevation_loss REAL NULL,
+            current_elevation REAL NULL,
+            max_speed REAL NULL,
             map_image_path TEXT NULL,
-            map_image_url TEXT NULL,
             inactivity_notification_sent INTEGER DEFAULT 0,
             is_deleted INTEGER NOT NULL DEFAULT 0,
             sync_status TEXT NOT NULL DEFAULT 'pending'

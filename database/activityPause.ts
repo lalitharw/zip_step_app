@@ -62,7 +62,6 @@ export async function getUnSyncedActivityPause(activityId: number): Promise<acti
             SELECT id, activity_id, client_id, pause_at, resume_at
                 FROM activity_pauses 
                 WHERE activity_id = ?
-                AND sync_status = 'pending'
                 AND is_deleted = 0
                 ORDER BY id ASC
         `, activityId)
