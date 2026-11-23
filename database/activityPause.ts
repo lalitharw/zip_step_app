@@ -1,3 +1,4 @@
+import { pauses } from "@/common/types/server"
 import * as Crypto from "expo-crypto"
 import { db } from "./initDatabase"
 
@@ -125,7 +126,7 @@ export async function softDeleteActivityPause(activityId: number | string) {
             SET updated_at = ?,
             deleted_at = ?,
             is_deleted = 1,
-            sync_status = "pending"
+            sync_status = 'pending'
             WHERE activity_id = ?
             `, new Date().toISOString(), new Date().toISOString(), activityId)
     }
@@ -133,4 +134,66 @@ export async function softDeleteActivityPause(activityId: number | string) {
         console.error("DB Error: ", error)
         throw error
     }
+}
+
+// * save data from server to local db
+export async function saveServerActivityPause(activity: pauses, activity_id: number | string) {
+    const existing = await db.getFirstAsync<{ id: number, sync_status: string }>(`
+            SELECT id, sync_status
+            FROM activity_pauses
+            WHERE client_id = ?
+        `, activity.client_id)
+
+
+    if (!existing) {
+        await db.runAsync(`
+            INSERT INTO activity_pauses
+            (activity_id,user_id,client_id,pause_at,resume_at,sync_status,created_at,deleted_at,updated_at,is_deleted)
+            VALUES(?,?,?,?,?,?,?,?,?,?)`,
+            activity_id,
+            activity.user_id,
+            activity.client_id,
+            activity.pause_at,
+            activity.resume_at,
+            "synced",
+            activity.created_at,
+            activity.deleted_at,
+            activity.updated_at,
+            activity.deleted_at ? 1 : 0
+        )
+        return
+    }
+
+    if (existing.sync_status !== "synced") {
+        await db.runAsync(`
+                UPDATE activity_pauses
+                SET server_id = ?
+                WHERE id = ?
+            `, activity.id, existing.id)
+        return
+    }
+
+    await db.runAsync(`
+            UPDATE activity_pauses SET
+            user_id = ?,
+            activity_id = ?,
+            pause_at = ?,
+            resume_at = ?,
+            is_deleted = ?,
+            created_at = ?,
+            updated_at = ?,
+            deleted_at = ?
+            WHERE
+            id = ?
+        `,
+        activity.user_id,
+        activity_id,
+        activity.pause_at,
+        activity.resume_at,
+        activity.deleted_at ? 1 : 0,
+        activity.created_at,
+        activity.updated_at,
+        activity.deleted_at,
+        existing.id
+    )
 }

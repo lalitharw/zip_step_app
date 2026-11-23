@@ -179,7 +179,7 @@ export async function getUnsyncedLocationPoints(activityId: number): Promise<Loc
             sync_status
             FROM location_points
             WHERE activity_id = ?
-            
+            AND sync_status = 'pending'
             AND is_deleted = 0
             ORDER BY id ASC
         `, activityId)
@@ -219,7 +219,7 @@ export const softDeleteLocationPoints = async (activityId: string) => {
         SET is_deleted = 1,
         deleted_at = ?,
         updated_at = ?,
-        sync_status = "pending"
+        sync_status = 'pending'
         WHERE activity_id = ?
         `, new Date().toISOString(), new Date().toISOString(), activityId)
 }

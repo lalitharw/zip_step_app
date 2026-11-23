@@ -1,9 +1,9 @@
 import { createActivityOnServer, deleteActivity } from "@/api/activityApi"
 import { createActivityPauses } from "@/api/activityPausesApi"
 import { uploadLocationPoint } from "@/api/locationPointApi"
-import { ServerActivity } from "@/common/types/server"
+import { pauses, ServerActivity } from "@/common/types/server"
 import { getActivitiesWithUnsyncedActivityPauses, getActivitiesWithUnSyncedPoints, getUnsyncedActivities, getUnSyncedDeletedActivities, hardDeleteActivity, markActivityAsSynced, saveServerActivity, updateActivityServerId } from "@/database/activities"
-import { getUnSyncedActivityPause, markActivityPauseAsSynced } from "@/database/activityPause"
+import { getUnSyncedActivityPause, markActivityPauseAsSynced, saveServerActivityPause } from "@/database/activityPause"
 import { getUnsyncedLocationPoints, markLocationPointsAsSynced } from "@/database/locationPoints"
 import logger from "@/utils/logging/logger"
 import { getServerActivities } from "./activityDownload"
@@ -47,7 +47,7 @@ export const syncLocationPoints = async () => {
                     continue
                 }
 
-                const batchSize = 20
+                const batchSize = process.env.EXPO_PUBLIC_BATCH_SIZE
 
                 for (let i = 0; i < points.length; i += batchSize) {
                     const batchPoints = points.slice(i, i + batchSize)
@@ -61,9 +61,6 @@ export const syncLocationPoints = async () => {
     }
     catch (error: any) {
         console.error(error)
-        console.log("STATUS:", error.response)
-        console.log("DATA:", error.response?.data)
-        console.log("ERROR:", error.response?.data?.errors)
         throw error
     }
 }
@@ -129,10 +126,10 @@ export const downloadActivities = async () => {
             const response = await getServerActivities()
 
             const activities: ServerActivity[] = response.data.activities.data
-            for (const activity of activities) {
-                await saveServerActivity(activity)
 
-                // await
+            for (const activity of activities) {
+                const activity_id = await saveServerActivity(activity)
+                await downloadActivityPauses(activity.pauses ?? [], activity_id)
             }
 
             if (!response.next_page_url) break;
@@ -140,6 +137,20 @@ export const downloadActivities = async () => {
             page++;
         }
 
+    }
+    catch (error) {
+        console.error("Something went wrong: ", error)
+    }
+}
+
+export const downloadActivityPauses = async (activityPauses: pauses[], activity_id: string | number) => {
+    try {
+        if (activityPauses && activityPauses.length > 0) {
+            for (const activityPause of activityPauses) {
+
+                await saveServerActivityPause(activityPause, activity_id)
+            }
+        }
     }
     catch (error) {
         console.error("Something went wrong: ", error)

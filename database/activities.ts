@@ -54,14 +54,6 @@ export async function getAllActivities(userId: number | string): Promise<Activit
 }
 
 
-export async function getActivities() {
-    const result = await db.getAllAsync<Activity>(`
-            SELECT * FROM activities
-        `)
-
-    return result
-}
-
 
 
 export async function getActivity(activityId: number | string): Promise<Activity | null> {
@@ -92,7 +84,7 @@ export async function getUnSyncedDeletedActivities(): Promise<Activity[] | null>
     return db.getAllAsync<Activity>(`
             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, sync_status, 
             client_id, distance, duration, average_speed, average_pace, elevation_gain, current_elevation, max_speed
-            FROM activities WHERE sync_status = 'pending' AND status = 'completed' AND is_deleted = 1
+            FROM activities WHERE sync_status = 'pending' AND status = 'completed' AND is_deleted = 0
             ORDER BY id ASC
         `)
 }
@@ -157,6 +149,7 @@ export const getActivitiesWithUnSyncedPoints = async () => {
         INNER JOIN location_points lp
         on a.id = lp.activity_id
         WHERE a.server_id IS NOT NULL
+        AND lp.sync_status = 'pending'
         
         ORDER BY a.id ASC
         `
@@ -291,8 +284,8 @@ export const hardDeleteActivity = async (clientId: string) => {
 }
 
 
-// *save data from server
-export const saveServerActivity = async (activity: ServerActivity): Promise<void> => {
+// *save data from server to local db
+export const saveServerActivity = async (activity: ServerActivity): Promise<number> => {
     const existing = await db.getFirstAsync<{ id: number, sync_status: string }>(`
             SELECT id, sync_status
             FROM activities
@@ -300,7 +293,7 @@ export const saveServerActivity = async (activity: ServerActivity): Promise<void
         `, activity.client_id)
 
     if (!existing) {
-        await db.runAsync(`
+        const result = await db.runAsync(`
                 INSERT INTO activities (
                     user_id,
                     server_id,
@@ -322,7 +315,7 @@ export const saveServerActivity = async (activity: ServerActivity): Promise<void
                     deleted_at,
                     updated_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'synced', ?, ?, ?)`
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
             ,
             activity.user_id,
             activity.id,
@@ -339,12 +332,13 @@ export const saveServerActivity = async (activity: ServerActivity): Promise<void
             activity.max_speed,
             activity.map_image_path,
             activity.deleted_at ? 1 : 0,
+            "synced",
             activity.created_at,
             activity.deleted_at,
             activity.updated_at
         );
 
-        return;
+        return result.lastInsertRowId;
     }
 
     if (existing.sync_status !== "synced") {
@@ -354,14 +348,12 @@ export const saveServerActivity = async (activity: ServerActivity): Promise<void
                 WHERE id = ?
             `, activity.id, existing.id)
 
-        return
+        return existing.id
     }
-
 
     await db.runAsync(`
             UPDATE activities SET
             server_id = ?,
-            status = ?,
             started_at = ?,
             stopped_at = ?,
             distance = ?,
@@ -378,7 +370,6 @@ export const saveServerActivity = async (activity: ServerActivity): Promise<void
          WHERE id = ?`
         ,
         activity.id,
-        "completed",
         activity.start_time,
         activity.end_time,
         activity.distance,
@@ -394,6 +385,8 @@ export const saveServerActivity = async (activity: ServerActivity): Promise<void
         activity.deleted_at,
         existing.id
     )
+
+    return existing.id
 }
 
 
