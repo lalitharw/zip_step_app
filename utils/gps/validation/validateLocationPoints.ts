@@ -98,7 +98,6 @@ export function validateLocationPoint(location: LocationPointType, previousLocat
         }
 
         const moving = motionDectector.isMoving()
-        logger.info("Moving", "IS User Moving", moving)
 
         if (!moving) {
             if (!validateMeaningfulMovement(distance, previousLocation.accuracy ?? 0, accuracy ?? 0)) {

@@ -31,3 +31,22 @@ export type pauses = {
     updated_at: string | null;
     deleted_at: string | null
 }
+
+export interface LocationPoints {
+    id: number;
+    activity_id: number;
+    client_id: string;
+    latitude: number;
+    longitude: number;
+    speed: number;
+    altitude: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    user_id: number;
+    raw_latitude: string;
+    raw_longitude: string;
+    point_added: string;
+    heading: string | null;
+    accuracy: string | null
+}

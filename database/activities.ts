@@ -75,7 +75,7 @@ export async function getUnsyncedActivities(): Promise<Activity[] | null> {
     return db.getAllAsync<Activity>(`
             SELECT id, server_id, status, started_at, stopped_at, inactivity_notification_sent, sync_status, 
             client_id, distance, duration, average_speed, average_pace, elevation_gain, current_elevation, max_speed, map_image_path
-            FROM activities WHERE  status = 'completed' AND is_deleted = 0
+            FROM activities WHERE  status = 'completed' AND is_deleted = 0 AND sync_status = 'pending'
             ORDER BY id ASC
         `)
 }
@@ -149,7 +149,6 @@ export const getActivitiesWithUnSyncedPoints = async () => {
         INNER JOIN location_points lp
         on a.id = lp.activity_id
         WHERE a.server_id IS NOT NULL
-        AND lp.sync_status = 'pending'
         
         ORDER BY a.id ASC
         `

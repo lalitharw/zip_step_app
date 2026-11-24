@@ -17,7 +17,9 @@ export const uploadLocationPoint = async (points: LocationPoint[], activityServe
                 altitude: point.altitude,
                 speed: point.speed,
                 raw_latitude: point.raw_latitude,
-                raw_longitude: point.raw_longitude
+                raw_longitude: point.raw_longitude,
+                point_added: point.timestamp,
+                heading: point.heading
             }))
         })
 

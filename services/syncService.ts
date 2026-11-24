@@ -1,12 +1,11 @@
 import { createActivityOnServer, deleteActivity } from "@/api/activityApi"
 import { createActivityPauses } from "@/api/activityPausesApi"
 import { uploadLocationPoint } from "@/api/locationPointApi"
-import { pauses, ServerActivity } from "@/common/types/server"
+import { LocationPoints, pauses, ServerActivity } from "@/common/types/server"
 import { getActivitiesWithUnsyncedActivityPauses, getActivitiesWithUnSyncedPoints, getUnsyncedActivities, getUnSyncedDeletedActivities, hardDeleteActivity, markActivityAsSynced, saveServerActivity, updateActivityServerId } from "@/database/activities"
 import { getUnSyncedActivityPause, markActivityPauseAsSynced, saveServerActivityPause } from "@/database/activityPause"
-import { getUnsyncedLocationPoints, markLocationPointsAsSynced } from "@/database/locationPoints"
-import logger from "@/utils/logging/logger"
-import { getServerActivities } from "./activityDownload"
+import { getUnsyncedLocationPoints, markLocationPointsAsSynced, saveServerLocationPoint } from "@/database/locationPoints"
+import { getServerActivities, getServerActivityPoints } from "./activityDownload"
 
 let isSyncing = false
 
@@ -130,6 +129,7 @@ export const downloadActivities = async () => {
             for (const activity of activities) {
                 const activity_id = await saveServerActivity(activity)
                 await downloadActivityPauses(activity.pauses ?? [], activity_id)
+                await downloadLocationPoints(activity, activity_id)
             }
 
             if (!response.next_page_url) break;
@@ -154,6 +154,33 @@ export const downloadActivityPauses = async (activityPauses: pauses[], activity_
     }
     catch (error) {
         console.error("Something went wrong: ", error)
+    }
+}
+
+export const downloadLocationPoints = async (activity: ServerActivity,activity_id: number | string) => {
+    try {
+        let cursor = ""
+
+        while (true) {
+            if (activity) {
+                const response = await getServerActivityPoints(activity.id, cursor)
+
+                const locationPoints: LocationPoints[] = response.points.data
+
+                for (const locationPoint of locationPoints) {
+                    await saveServerLocationPoint(locationPoint,activity.user_id,activity_id)
+                }
+
+                if (!response.next_cursor) break
+
+                cursor = response.next_cursor
+            }
+        }
+
+    }
+    catch (error) {
+        console.error("Something went wrong!: ", error)
+        throw error
     }
 }
 

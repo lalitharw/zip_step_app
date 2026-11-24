@@ -1,3 +1,4 @@
+import { LocationPoints } from "@/common/types/server";
 import * as Crypto from "expo-crypto";
 import { db } from "./initDatabase";
 
@@ -176,6 +177,7 @@ export async function getUnsyncedLocationPoints(activityId: number): Promise<Loc
             altitude,
             speed,
             timestamp,
+            heading,
             sync_status
             FROM location_points
             WHERE activity_id = ?
@@ -223,3 +225,105 @@ export const softDeleteLocationPoints = async (activityId: string) => {
         WHERE activity_id = ?
         `, new Date().toISOString(), new Date().toISOString(), activityId)
 }
+
+// *download and save data from server to local db
+export const saveServerLocationPoint = async (locationPoint: LocationPoints, user_id: number, activity_id: number | string) => {
+    const existing = await db.getFirstAsync<{ id: number, sync_status: string }>(`
+        SELECT id, sync_status 
+        FROM location_points
+        WHERE client_id = ?
+        `, locationPoint.client_id)
+
+
+    if (!existing) {
+        await db.runAsync(`
+                INSERT INTO location_points
+                (
+                    user_id,
+                    activity_id,
+                    client_id,
+                    latitude,
+                    longitude,
+                    raw_latitude,
+                    raw_longitude,
+                    heading,
+                    accuracy,
+                    altitude,
+                    speed,
+                    timestamp,
+                    is_deleted,
+                    sync_status,
+                    created_at,
+                    updated_at,
+                    deleted_at
+                    
+                )
+
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            `,
+
+            user_id,
+            activity_id,
+            locationPoint.client_id,
+            locationPoint.latitude,
+            locationPoint.longitude,
+            locationPoint.raw_latitude,
+            locationPoint.raw_longitude,
+            locationPoint.heading,
+            locationPoint.accuracy,
+            locationPoint.altitude,
+            locationPoint.speed,
+            locationPoint.point_added,
+            locationPoint.deleted_at ? 1 : 0,
+            "synced",
+            locationPoint.created_at,
+            locationPoint.updated_at,
+            locationPoint.deleted_at
+        )
+        return
+    }
+
+    if (existing.sync_status !== "synced") {
+        return
+    }
+
+
+    await db.runAsync(`
+        UPDATE location_points SET
+        user_id = ?,
+        client_id = ?,
+        latitude = ?,
+        longitude = ?,
+        raw_latitude = ?,
+        raw_longitude = ?,
+        timestamp = ?,
+        heading = ?,
+        accuracy = ?,
+        altitude = ?,
+        speed = ?,
+        is_deleted = ?,
+        sync_status = ?,
+        created_at = ?,
+        updated_at = ?,
+        deleted_at = ?
+        WHERE id = ?
+    `,
+        user_id,
+        locationPoint.client_id,
+        locationPoint.latitude,
+        locationPoint.longitude,
+        locationPoint.raw_latitude,
+        locationPoint.raw_longitude,
+        locationPoint.point_added,
+        locationPoint.heading,
+        locationPoint.accuracy,
+        locationPoint.altitude,
+        locationPoint.speed,
+        locationPoint.deleted_at ? 1 : 0,
+        "synced",
+        locationPoint.created_at,
+        locationPoint.updated_at,
+        locationPoint.deleted_at,
+        existing.id
+    )
+} 

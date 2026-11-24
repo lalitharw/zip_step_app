@@ -4,8 +4,8 @@ import { clearCachedUser, getCachedUser, saveCachedUser } from "@/utils/userStor
 import { getAuth, GoogleAuthProvider, signInWithCredential } from "@react-native-firebase/auth";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as SecureStore from "expo-secure-store";
+import * as SplashScreen from "expo-splash-screen";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import * as SplashScreen from "expo-splash-screen"
 
 type User = {
     id: number;
@@ -38,10 +38,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
     useEffect(() => {
-        if(!isLoading) {
+        if (!isLoading) {
             SplashScreen.hideAsync()
         }
-    },[isLoading])
+    }, [isLoading])
 
     useEffect(() => {
         GoogleSignin.configure({
@@ -153,14 +153,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     async function checkEmail(email: string) {
-        try{
+        try {
             const { data } = await api.post("/auth/check-email", {
                 email
             })
             console.log(data)
             return data
         }
-        catch(error){
+        catch (error) {
             throw error
         }
     }
@@ -180,6 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             try {
                 const { data } = await api.get("/users")
                 const freshUser = data.data.user
+                console.log(freshUser)
                 setUser(freshUser)
                 await saveCachedUser(freshUser)
             }

@@ -39,14 +39,6 @@ export function calculateDistance() {
         store.setStats({
             distance: currentDistance + distance
         })
-
-        logger.info(
-            "Distance",
-            "Activity Stats Distance (metres)",
-            distance,
-        );
-
-
     }
     catch (error) {
         console.error("Something went wrong: ", error)
@@ -71,9 +63,6 @@ export function calculateAverageSpeed() {
 export function calculateAveragePace() {
 
     const { distance, duration } = useActivityStatsStore.getState().stats;
-
-    logger.info("Distance", "", distance)
-    logger.info("Duration", "", duration)
     if (distance <= 50 || duration <= 0) {
         useActivityStatsStore.getState().setStats({
             averagePace: 0

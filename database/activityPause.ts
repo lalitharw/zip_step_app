@@ -137,12 +137,12 @@ export async function softDeleteActivityPause(activityId: number | string) {
 }
 
 // * save data from server to local db
-export async function saveServerActivityPause(activity: pauses, activity_id: number | string) {
+export async function saveServerActivityPause(activityPause: pauses, activity_id: number | string) {
     const existing = await db.getFirstAsync<{ id: number, sync_status: string }>(`
             SELECT id, sync_status
             FROM activity_pauses
             WHERE client_id = ?
-        `, activity.client_id)
+        `, activityPause.client_id)
 
 
     if (!existing) {
@@ -151,15 +151,15 @@ export async function saveServerActivityPause(activity: pauses, activity_id: num
             (activity_id,user_id,client_id,pause_at,resume_at,sync_status,created_at,deleted_at,updated_at,is_deleted)
             VALUES(?,?,?,?,?,?,?,?,?,?)`,
             activity_id,
-            activity.user_id,
-            activity.client_id,
-            activity.pause_at,
-            activity.resume_at,
+            activityPause.user_id,
+            activityPause.client_id,
+            activityPause.pause_at,
+            activityPause.resume_at,
             "synced",
-            activity.created_at,
-            activity.deleted_at,
-            activity.updated_at,
-            activity.deleted_at ? 1 : 0
+            activityPause.created_at,
+            activityPause.deleted_at,
+            activityPause.updated_at,
+            activityPause.deleted_at ? 1 : 0
         )
         return
     }
@@ -169,14 +169,13 @@ export async function saveServerActivityPause(activity: pauses, activity_id: num
                 UPDATE activity_pauses
                 SET server_id = ?
                 WHERE id = ?
-            `, activity.id, existing.id)
+            `, activityPause.id, existing.id)
         return
     }
 
     await db.runAsync(`
             UPDATE activity_pauses SET
             user_id = ?,
-            activity_id = ?,
             pause_at = ?,
             resume_at = ?,
             is_deleted = ?,
@@ -186,14 +185,13 @@ export async function saveServerActivityPause(activity: pauses, activity_id: num
             WHERE
             id = ?
         `,
-        activity.user_id,
-        activity_id,
-        activity.pause_at,
-        activity.resume_at,
-        activity.deleted_at ? 1 : 0,
-        activity.created_at,
-        activity.updated_at,
-        activity.deleted_at,
+        activityPause.user_id,
+        activityPause.pause_at,
+        activityPause.resume_at,
+        activityPause.deleted_at ? 1 : 0,
+        activityPause.created_at,
+        activityPause.updated_at,
+        activityPause.deleted_at,
         existing.id
     )
 }

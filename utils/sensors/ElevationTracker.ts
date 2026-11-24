@@ -33,7 +33,6 @@ class ElevationTracker {
             this.previousAltitude = relativeAltitude
         }
 
-        logger.info("Barometer",`Loss: ${this.loss}, Gain:${this.gain}`)
     }
 
     getStats() {
