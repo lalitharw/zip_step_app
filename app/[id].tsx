@@ -13,7 +13,6 @@ import { useReplayRouteStore } from "@/store/ReplayRouteStore";
 import { metersToKilometers } from "@/utils/dataConversion";
 import { milliSecondsToMinutes } from "@/utils/formatTimeUtills";
 import { formatDate, formatPace } from "@/utils/formatUnits";
-import logger from "@/utils/logging/logger";
 import Mapbox, { Camera, LineLayer, MapView, ShapeSource } from "@rnmapbox/maps";
 import Navigation from "@rnmapbox/navigation";
 import { useLocalSearchParams } from "expo-router";
@@ -49,6 +48,7 @@ export default function ActivityDetail() {
             try {
                 const activity = await getActivity(id)
                 if (activity) {
+                    console.log(activity)
                     setActivity(activity)
                     const locationPoints = await getLocationPoints(id)
                     setLocationPoints(locationPoints)
@@ -281,7 +281,7 @@ export default function ActivityDetail() {
                             />
                             <Metric
                                 label="Avg speed"
-                                value={activity?.average_speed?.toFixed(1) ?? "--"}
+                                value={((activity?.average_speed ?? 0) * 3.6).toFixed(1)}
                                 unit="km/h"
                             />
                         </View>
